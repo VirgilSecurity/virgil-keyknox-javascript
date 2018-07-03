@@ -8,3 +8,11 @@ interface KeyknoxValue {
 export interface DecryptedKeyknoxValue extends KeyknoxValue {}
 
 export interface EncryptedKeyknoxValue extends KeyknoxValue {}
+
+export interface CloudEntry {
+  name: string;
+  data: Buffer;
+  creationDate: Date;
+  modificationDate: Date;
+  meta?: { [key: string]: string };
+}
