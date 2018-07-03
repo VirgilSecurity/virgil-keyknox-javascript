@@ -38,7 +38,8 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
-    "virgil-crypto": "VirgilSecurity/virgil-crypto-javascript#feat/keyknox-crypto"
+    "virgil-crypto": "VirgilSecurity/virgil-crypto-javascript#feat/keyknox-crypto",
+    "virgil-sdk": "^5.0.0-alpha.5"
   },
   "devDependencies": {
     "@types/jest": "^23.1.2",

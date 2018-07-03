@@ -55,8 +55,8 @@ export default class KeyknoxClient implements IKeyknoxClient {
   ): EncryptedKeyknoxValue {
     const { data, headers } = response;
     return {
-      meta: new Buffer(data.meta),
-      value: new Buffer(data.value),
+      meta: new Buffer(data.meta, 'base64'),
+      value: new Buffer(data.value, 'base64'),
       version: data.version,
       keyknoxHash: new Buffer(headers['virgil-keyknox-hash'], 'base64'),
     };

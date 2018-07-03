@@ -3956,6 +3956,15 @@ virgil-crypto@VirgilSecurity/virgil-crypto-javascript#feat/keyknox-crypto:
     tempy "^0.2.1"
     yauzl "^2.9.1"
 
+virgil-sdk@^5.0.0-alpha.5:
+  version "5.0.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/virgil-sdk/-/virgil-sdk-5.0.0-alpha.5.tgz#22930d40ea2e7f120b8a1b9f1350da14f7f31c84"
+  dependencies:
+    mkdirp "^0.5.1"
+    node-fetch "^2.1.2"
+    rimraf "^2.6.2"
+    whatwg-fetch "^2.0.4"
+
 w3c-hr-time@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/w3c-hr-time/-/w3c-hr-time-1.0.1.tgz#82ac2bff63d950ea9e3189a58a65625fedf19045"
@@ -3984,6 +3993,10 @@ whatwg-encoding@^1.0.1, whatwg-encoding@^1.0.3:
   resolved "https://registry.yarnpkg.com/whatwg-encoding/-/whatwg-encoding-1.0.3.tgz#57c235bc8657e914d24e1a397d3c82daee0a6ba3"
   dependencies:
     iconv-lite "0.4.19"
+
+whatwg-fetch@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/whatwg-fetch/-/whatwg-fetch-2.0.4.tgz#dde6a5df315f9d39991aa17621853d720b85566f"
 
 whatwg-mimetype@^2.0.0, whatwg-mimetype@^2.1.0:
   version "2.1.0"
