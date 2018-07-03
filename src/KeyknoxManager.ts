@@ -89,7 +89,7 @@ export default class KeyknoxManager {
       this.privateKey,
       this.publicKey,
     );
-    const token = await this.accessTokenProvider.getToken({ operation: 'get' });
+    const token = await this.accessTokenProvider.getToken({ operation: 'put' });
     const encryptedKeyknoxValue = await this.keyknoxClient.pushValue(
       dataAndMetadata.metadata,
       dataAndMetadata.encryptedData,
@@ -115,7 +115,7 @@ export default class KeyknoxManager {
       this.privateKey,
       this.publicKey,
     );
-    const token = await this.accessTokenProvider.getToken({ operation: 'get' });
+    const token = await this.accessTokenProvider.getToken({ operation: 'put' });
     const encryptedKeyknoxValue = await this.keyknoxClient.pushValue(
       dataAndMetadata.metadata,
       dataAndMetadata.encryptedData,

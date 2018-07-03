@@ -16,3 +16,9 @@ export interface CloudEntry {
   modificationDate: Date;
   meta?: { [key: string]: string };
 }
+
+export interface KeyEntry {
+  name: string;
+  data: Buffer;
+  meta?: { [key: string]: string };
+}
