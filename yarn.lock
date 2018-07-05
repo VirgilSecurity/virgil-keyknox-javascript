@@ -3947,9 +3947,9 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-virgil-crypto@VirgilSecurity/virgil-crypto-javascript#feat/keyknox-crypto:
-  version "3.0.0-alpha.13"
-  resolved "https://codeload.github.com/VirgilSecurity/virgil-crypto-javascript/tar.gz/6f7ad715e54100a3594d21288bdae0fc6104d0e1"
+virgil-crypto@^3.0.0-alpha.14:
+  version "3.0.0-alpha.14"
+  resolved "https://registry.yarnpkg.com/virgil-crypto/-/virgil-crypto-3.0.0-alpha.14.tgz#b2ea09c9cf68f08d3a0b71a935764c50e1ae3c41"
   dependencies:
     node-fetch "^2.1.2"
     tar "^4.4.2"
