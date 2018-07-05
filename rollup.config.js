@@ -7,6 +7,7 @@ const env = process.env.NODE_ENV;
 
 module.exports = {
   input: path.join(__dirname, 'src', 'index.ts'),
+  external: Object.keys(packageJson.dependencies),
   output: {
     file: `${packageJson.name}.${env}.js`,
     format: env,
