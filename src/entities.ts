@@ -22,3 +22,5 @@ export interface KeyEntry {
   data: Buffer;
   meta?: { [key: string]: string };
 }
+
+export interface KeychainEntry {}
