@@ -1,11 +1,12 @@
 import { CloudEntry } from './entities';
+import { Meta } from './types';
 
 interface SerializedCloudEntry {
   name: string;
   data: string;
   creation_date: number;
   modification_date: number;
-  meta?: { [key: string]: string };
+  meta?: Meta;
 }
 
 export function serialize(cloudEntries: { [key: string]: CloudEntry }): Buffer {

@@ -3,6 +3,7 @@ import { VirgilPrivateKey, VirgilPublicKey } from 'virgil-crypto/dist/types/inte
 import { CloudEntry, DecryptedKeyknoxValue, KeyEntry } from './entities';
 import KeyknoxManager from './KeyknoxManager';
 import { serialize, deserialize } from './CloudEntrySerializer';
+import { Data, Meta } from './types';
 
 export default class CloudKeyStorage {
   private readonly keyknoxManager: KeyknoxManager;
@@ -25,20 +26,12 @@ export default class CloudKeyStorage {
     return keyEntries.map(keyEntry => this.cache[keyEntry.name]);
   }
 
-  async storeEntry(
-    name: string,
-    data: Buffer,
-    meta?: { [key: string]: string },
-  ): Promise<CloudEntry> {
+  async storeEntry(name: string, data: Data, meta?: Meta): Promise<CloudEntry> {
     const [cloudEntry] = await this.storeEntries([{ name, data, meta }]);
     return cloudEntry;
   }
 
-  async updateEntry(
-    name: string,
-    data: Buffer,
-    meta?: { [key: string]: string },
-  ): Promise<CloudEntry> {
+  async updateEntry(name: string, data: Data, meta?: Meta): Promise<CloudEntry> {
     this.checkSyncCall();
     this.checkIfCloudEntryExists(name);
     this.cache[name] = CloudKeyStorage.createCloudEntry(
@@ -85,8 +78,8 @@ export default class CloudKeyStorage {
   }
 
   async updateRecipients(
-    newPublicKey?: VirgilPublicKey | VirgilPublicKey[],
     newPrivateKey?: VirgilPrivateKey,
+    newPublicKey?: VirgilPublicKey | VirgilPublicKey[],
   ): Promise<void> {
     this.checkSyncCall();
     this.decryptedKeyknoxValue = await this.keyknoxManager.updateRecipients({

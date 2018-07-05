@@ -1,9 +1,10 @@
 import { KeychainEntry } from '../entities';
+import { Data, Meta } from '../types';
 
 export default interface IKeyStorage {
-  store(name: string, data: Buffer, meta?: { [key: string]: string }): Promise<KeychainEntry>;
+  store(name: string, data: Data, meta?: Meta): Promise<KeychainEntry>;
 
-  updateEntry(name: string, data: Buffer, meta?: { [key: string]: string }): Promise<void>;
+  updateEntry(name: string, data: Data, meta?: Meta): Promise<void>;
 
   retrieveEntry(name: string): Promise<KeychainEntry>;
 
