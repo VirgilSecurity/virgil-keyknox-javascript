@@ -9,6 +9,7 @@
   "author": "Virgil Security Inc. <support@virgilsecurity.com>",
   "license": "BSD-3-Clause",
   "scripts": {
+    "test": "jest",
     "clean": "rimraf .rpt2_cache dist",
     "build:cjs": "cross-env NODE_ENV=cjs rollup -c",
     "build:es": "cross-env NODE_ENV=es rollup -c",
