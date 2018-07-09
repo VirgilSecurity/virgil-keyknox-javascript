@@ -10,7 +10,7 @@
   "license": "BSD-3-Clause",
   "scripts": {
     "test": "jest",
-    "clean": "rimraf .rpt2_cache dist",
+    "clean": "rimraf .rpt2_cache coverage dist",
     "build:cjs": "cross-env NODE_ENV=cjs rollup -c",
     "build:es": "cross-env NODE_ENV=es rollup -c",
     "build": "npm run build:cjs && npm run build:es",
@@ -26,16 +26,20 @@
     ]
   },
   "jest": {
-    "transform": {
-      "^.+\\.ts$": "ts-jest"
-    },
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.ts$",
     "moduleFileExtensions": [
       "ts",
       "js",
       "json",
       "node"
-    ]
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ],
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.ts$",
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    }
   },
   "dependencies": {
     "axios": "^0.18.0",
