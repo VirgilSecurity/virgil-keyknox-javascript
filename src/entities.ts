@@ -24,9 +24,3 @@ export interface KeyEntry {
   data: Data;
   meta?: Meta;
 }
-
-export interface KeychainEntry {
-  name: string;
-  data: Data;
-  meta: Meta;
-}

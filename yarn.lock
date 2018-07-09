@@ -3956,9 +3956,9 @@ virgil-crypto@^3.0.0-alpha.14:
     tempy "^0.2.1"
     yauzl "^2.9.1"
 
-virgil-sdk@^5.0.0-alpha.5:
+virgil-sdk@VirgilSecurity/virgil-sdk-javascript#private-key-storage:
   version "5.0.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/virgil-sdk/-/virgil-sdk-5.0.0-alpha.5.tgz#22930d40ea2e7f120b8a1b9f1350da14f7f31c84"
+  resolved "https://codeload.github.com/VirgilSecurity/virgil-sdk-javascript/tar.gz/7aefc383d091e166b6165de3d79d14d864e4076c"
   dependencies:
     mkdirp "^0.5.1"
     node-fetch "^2.1.2"
