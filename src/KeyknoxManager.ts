@@ -48,6 +48,11 @@ export default class KeyknoxManager {
     return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.privateKey, this.publicKey);
   }
 
+  async resetValue(): Promise<DecryptedKeyknoxValue> {
+    const token = await this.accessTokenProvider.getToken({ operation: 'delete' });
+    return this.keyknoxClient.resetValue(token.toString());
+  }
+
   async updateRecipients(options: {
     newPrivateKey?: VirgilPrivateKey;
     newPublicKey?: VirgilPublicKey | VirgilPublicKey[];
