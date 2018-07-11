@@ -127,7 +127,7 @@ export default class CloudKeyStorage {
     return {
       name: keyEntry.name,
       data: keyEntry.data,
-      meta: keyEntry.meta,
+      meta: typeof keyEntry.meta === 'undefined' ? null : keyEntry.meta,
       creationDate: creationDate || now,
       modificationDate: now,
     };

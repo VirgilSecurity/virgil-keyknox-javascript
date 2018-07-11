@@ -16,7 +16,7 @@ export interface CloudEntry {
   data: Data;
   creationDate: Date;
   modificationDate: Date;
-  meta?: Meta;
+  meta: Meta;
 }
 
 export interface KeyEntry {

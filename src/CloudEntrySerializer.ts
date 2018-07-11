@@ -6,7 +6,7 @@ interface SerializedCloudEntry {
   data: string;
   creation_date: number;
   modification_date: number;
-  meta?: Meta;
+  meta?: Meta | null;
 }
 
 export function serialize(cloudEntries: { [key: string]: CloudEntry }): Buffer {
@@ -14,12 +14,15 @@ export function serialize(cloudEntries: { [key: string]: CloudEntry }): Buffer {
     (result, key) => {
       const cloudEntry = cloudEntries[key];
       result[key] = {
-        name: cloudEntry.name,
         data: cloudEntry.data.toString('base64'),
-        creation_date: Number(cloudEntry.creationDate),
-        modification_date: Number(cloudEntry.modificationDate),
         meta: cloudEntry.meta,
+        creation_date: Number(cloudEntry.creationDate),
+        name: cloudEntry.name,
+        modification_date: Number(cloudEntry.modificationDate),
       };
+      if (result[key].meta === null) {
+        delete result[key].meta;
+      }
       return result;
     },
     {},
@@ -28,6 +31,9 @@ export function serialize(cloudEntries: { [key: string]: CloudEntry }): Buffer {
 }
 
 export function deserialize(data: Buffer): { [key: string]: CloudEntry } {
+  if (!data.byteLength) {
+    return {};
+  }
   const serializedEntries: { [key: string]: SerializedCloudEntry } = JSON.parse(data.toString());
   return Object.keys(serializedEntries).reduce<{ [key: string]: CloudEntry }>((result, key) => {
     const serializedEntry = serializedEntries[key];
@@ -36,7 +42,7 @@ export function deserialize(data: Buffer): { [key: string]: CloudEntry } {
       data: Buffer.from(serializedEntry.data, 'base64'),
       creationDate: new Date(serializedEntry.creation_date),
       modificationDate: new Date(serializedEntry.modification_date),
-      meta: serializedEntry.meta,
+      meta: typeof serializedEntry.meta === 'undefined' ? null : serializedEntry.meta,
     };
     return result;
   }, {});
