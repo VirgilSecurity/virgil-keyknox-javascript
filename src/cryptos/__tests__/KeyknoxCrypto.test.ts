@@ -69,7 +69,7 @@ describe('KeyknoxCrypto', () => {
   describe('encrypt', () => {
     it("should call 'virgilCrypto.signThenEncryptDetached'", () => {
       const spy = jest.spyOn(virgilCrypto, 'signThenEncryptDetached');
-      const data = new Buffer('data');
+      const data = Buffer.from('data');
       const { privateKey, publicKey } = virgilCrypto.generateKeys();
       keyknoxCrypto.encrypt(data, privateKey, publicKey);
       expect(spy).toBeCalledWith(data, privateKey, publicKey);
@@ -77,7 +77,7 @@ describe('KeyknoxCrypto', () => {
     });
 
     it("should return 'entrypedData' and 'metadata'", () => {
-      const data = new Buffer('data');
+      const data = Buffer.from('data');
       const { privateKey, publicKey } = virgilCrypto.generateKeys();
       const { encryptedData, metadata } = keyknoxCrypto.encrypt(data, privateKey, publicKey);
       expect(encryptedData).toBeDefined();

@@ -24,7 +24,7 @@ export function serialize(cloudEntries: { [key: string]: CloudEntry }): Buffer {
     },
     {},
   );
-  return new Buffer(JSON.stringify(entries));
+  return Buffer.from(JSON.stringify(entries));
 }
 
 export function deserialize(data: Buffer): { [key: string]: CloudEntry } {
@@ -33,7 +33,7 @@ export function deserialize(data: Buffer): { [key: string]: CloudEntry } {
     const serializedEntry = serializedEntries[key];
     result[key] = {
       name: serializedEntry.name,
-      data: new Buffer(serializedEntry.data, 'base64'),
+      data: Buffer.from(serializedEntry.data, 'base64'),
       creationDate: new Date(serializedEntry.creation_date),
       modificationDate: new Date(serializedEntry.modification_date),
       meta: serializedEntry.meta,
