@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
-import { EncryptedKeyknoxValue } from '../entities';
+import { DecryptedKeyknoxValue, EncryptedKeyknoxValue } from '../entities';
 import IKeyknoxClient from './IKeyknoxClient';
 
 interface KeyknoxData {
@@ -10,6 +10,7 @@ interface KeyknoxData {
 }
 
 export default class KeyknoxClient implements IKeyknoxClient {
+  private static readonly AUTHORIZATION_PREFIX = 'Virgil';
   static readonly defaultBaseURL: string = 'https://api.virgilsecurity.com';
 
   private readonly axios: AxiosInstance;
@@ -30,7 +31,7 @@ export default class KeyknoxClient implements IKeyknoxClient {
     };
     const config: AxiosRequestConfig = {
       headers: {
-        Authorization: `Virgil ${token}`,
+        Authorization: KeyknoxClient.getAuthorizationHeader(token),
       },
     };
     if (previousHash) {
@@ -43,10 +44,20 @@ export default class KeyknoxClient implements IKeyknoxClient {
   async pullValue(token: string): Promise<EncryptedKeyknoxValue> {
     const config = {
       headers: {
-        Authorization: `Virgil ${token}`,
+        Authorization: KeyknoxClient.getAuthorizationHeader(token),
       },
     };
     const response = await this.axios.get<KeyknoxData>('/keyknox/v1', config);
+    return KeyknoxClient.getEncryptedKeyknoxValue(response);
+  }
+
+  async resetValue(token: string): Promise<DecryptedKeyknoxValue> {
+    const config: AxiosRequestConfig = {
+      headers: {
+        Authorization: KeyknoxClient.getAuthorizationHeader(token),
+      },
+    };
+    const response = await this.axios.post<KeyknoxData>('/keyknox/v1/reset', null, config);
     return KeyknoxClient.getEncryptedKeyknoxValue(response);
   }
 
@@ -60,5 +71,9 @@ export default class KeyknoxClient implements IKeyknoxClient {
       version: data.version,
       keyknoxHash: Buffer.from(headers['virgil-keyknox-hash'], 'base64'),
     };
+  }
+
+  private static getAuthorizationHeader(token: string) {
+    return `${KeyknoxClient.AUTHORIZATION_PREFIX} ${token}`;
   }
 }

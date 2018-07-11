@@ -1,4 +1,4 @@
-import { EncryptedKeyknoxValue } from '../entities';
+import { DecryptedKeyknoxValue, EncryptedKeyknoxValue } from '../entities';
 
 export default interface IKeyknoxClient {
   pushValue(
@@ -9,4 +9,6 @@ export default interface IKeyknoxClient {
   ): Promise<EncryptedKeyknoxValue>;
 
   pullValue(token: string): Promise<EncryptedKeyknoxValue>;
+
+  resetValue(token: string): Promise<DecryptedKeyknoxValue>;
 }
