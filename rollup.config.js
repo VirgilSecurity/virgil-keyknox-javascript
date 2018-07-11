@@ -14,6 +14,9 @@ module.exports = {
     dir: path.join(__dirname, 'dist'),
   },
   plugins: [
-    typescript({ useTsconfigDeclarationDir: true }),
+    typescript({
+      exclude: ['**/*.test.ts', '**/*.spec.ts', '**/__mocks__/*.ts'],
+      useTsconfigDeclarationDir: true,
+    }),
   ],
 };
