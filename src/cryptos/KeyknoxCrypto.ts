@@ -20,15 +20,17 @@ export default class KeyknoxCrypto implements IKeyknoxCrypto {
     privateKey: VirgilPrivateKey,
     publicKey: VirgilPublicKey | VirgilPublicKey[],
   ): DecryptedKeyknoxValue {
-    const value = this.crypto.decryptThenVerifyDetached(
-      encryptedKeyknoxValue.value,
-      encryptedKeyknoxValue.meta,
-      privateKey,
-      publicKey,
-    );
+    const { value, meta } = encryptedKeyknoxValue;
+    if (!value.byteLength || !meta.byteLength) {
+      if (value.byteLength || meta.byteLength) {
+        throw new Error();
+      }
+      return encryptedKeyknoxValue;
+    }
+    const decrypted = this.crypto.decryptThenVerifyDetached(value, meta, privateKey, publicKey);
     return {
       ...encryptedKeyknoxValue,
-      value,
+      value: decrypted,
     };
   }
 
