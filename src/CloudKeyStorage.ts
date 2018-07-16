@@ -58,23 +58,23 @@ export default class CloudKeyStorage {
     return Boolean(this.cache[name]);
   }
 
-  deleteEntry(name: string): Promise<void> {
-    return this.deleteEntries([name]);
+  async deleteEntry(name: string): Promise<void> {
+    await this.deleteEntries([name]);
   }
 
-  deleteEntries(names: string[]): Promise<void> {
+  async deleteEntries(names: string[]): Promise<void> {
     this.checkSyncCall();
     names.forEach(name => {
       this.checkIfCloudEntryExists(name);
       delete this.cache[name];
     });
-    return this.pushCacheEntries();
+    await this.pushCacheEntries();
   }
 
-  deleteAllEntries(): Promise<void> {
+  async deleteAllEntries(): Promise<void> {
     this.checkSyncCall();
     this.cache = {};
-    return this.pushCacheEntries();
+    await this.pushCacheEntries();
   }
 
   async updateRecipients(
