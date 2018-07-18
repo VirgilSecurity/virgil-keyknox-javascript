@@ -66,16 +66,14 @@ describe('CloudKeyStorage', () => {
   });
 
   test('KTC-21', async () => {
+    const [keyEntry] = generateKeyEntries(1);
     expect.assertions(4);
     await cloudKeyStorage.retrieveCloudEntries();
-    const name = 'name';
-    const data = Buffer.from('data');
-    const meta = { meta: 'meta' };
-    await cloudKeyStorage.storeEntry(name, data, meta);
-    expect(cloudKeyStorage.existsEntry(name)).toBeTruthy();
+    await cloudKeyStorage.storeEntry(keyEntry.name, keyEntry.data, keyEntry.meta);
+    expect(cloudKeyStorage.existsEntry(keyEntry.name)).toBeTruthy();
     expect(cloudKeyStorage.existsEntry('name1')).toBeFalsy();
     await cloudKeyStorage.retrieveCloudEntries();
-    expect(cloudKeyStorage.existsEntry(name)).toBeTruthy();
+    expect(cloudKeyStorage.existsEntry(keyEntry.name)).toBeTruthy();
     expect(cloudKeyStorage.existsEntry('name1')).toBeFalsy();
   });
 
