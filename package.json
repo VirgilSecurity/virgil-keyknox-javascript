@@ -25,6 +25,24 @@
       "git add"
     ]
   },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json",
+      "node"
+    ],
+    "setupTestFrameworkScriptFile": "./jest.setup.js",
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ],
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.ts$",
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    }
+  },
   "dependencies": {
     "axios": "^0.18.0",
     "virgil-crypto": "^3.0.0-alpha.14",

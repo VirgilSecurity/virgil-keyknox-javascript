@@ -10,5 +10,6 @@ package-lock.json
 .env
 
 .rpt2_cache
+.virgil_keys
 coverage
 dist
