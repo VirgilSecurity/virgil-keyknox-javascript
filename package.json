@@ -10,7 +10,7 @@
   "license": "BSD-3-Clause",
   "scripts": {
     "test": "jest",
-    "clean": "rimraf .rpt2_cache coverage dist",
+    "clean": "rimraf .rpt2_cache .virgil_key_entries coverage dist",
     "build:cjs": "cross-env NODE_ENV=cjs rollup -c",
     "build:es": "cross-env NODE_ENV=es rollup -c",
     "build": "npm run build:cjs && npm run build:es",
