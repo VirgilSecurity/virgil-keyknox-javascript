@@ -2,19 +2,23 @@ import { VirgilPrivateKey, VirgilPublicKey } from 'virgil-crypto/dist/types/inte
 import { IKeyEntry, IKeyEntryStorage } from 'virgil-sdk';
 
 import CloudKeyStorage from './CloudKeyStorage';
-import { KeyEntry } from './entities';
+import { KeyEntry, CloudEntry } from './entities';
 import { createKeyEntry, extractDate } from './KeyEntryUtils';
 import { Data, Meta } from './types';
 
 export default class SyncKeyStorage {
   private readonly identity: string;
   private readonly cloudKeyStorage: CloudKeyStorage;
-  private readonly keyStorage: IKeyEntryStorage;
+  private readonly keyEntryStorage: IKeyEntryStorage;
 
-  constructor(identity: string, cloudKeyStorage: CloudKeyStorage, keyStorage: IKeyEntryStorage) {
+  constructor(
+    identity: string,
+    cloudKeyStorage: CloudKeyStorage,
+    keyEntryStorage: IKeyEntryStorage,
+  ) {
     this.identity = identity;
     this.cloudKeyStorage = cloudKeyStorage;
-    this.keyStorage = keyStorage;
+    this.keyEntryStorage = keyEntryStorage;
   }
 
   async storeEntries(keyEntries: KeyEntry[]): Promise<IKeyEntry[]> {
@@ -25,7 +29,7 @@ export default class SyncKeyStorage {
     const storeRequests = cloudEntries.map(cloudEntry => {
       const keyEntry = createKeyEntry(cloudEntry);
       storedKeyEntries.push(keyEntry);
-      return this.keyStorage.save(keyEntry);
+      return this.keyEntryStorage.save(keyEntry);
     });
     await Promise.all(storeRequests);
     return storedKeyEntries;
@@ -40,20 +44,21 @@ export default class SyncKeyStorage {
     await this.checkIfKeyEntryExists(name);
     const cloudEntry = await this.cloudKeyStorage.updateEntry(name, data, meta);
     const keyEntry = createKeyEntry(cloudEntry);
-    await this.keyStorage.save(keyEntry);
+    await this.keyEntryStorage.remove(keyEntry.name);
+    await this.keyEntryStorage.save(keyEntry);
   }
 
   retrieveEntry(name: string): Promise<IKeyEntry> {
     this.checkIfKeyEntryExists(name);
-    return this.keyStorage.load(name) as Promise<IKeyEntry>;
+    return this.keyEntryStorage.load(name) as Promise<IKeyEntry>;
   }
 
   retrieveAllEntries(): Promise<IKeyEntry[]> {
-    return this.keyStorage.list();
+    return this.keyEntryStorage.list();
   }
 
   existsEntry(name: string): Promise<boolean> {
-    return this.keyStorage.exists(name);
+    return this.keyEntryStorage.exists(name);
   }
 
   deleteEntry(name: string): Promise<void> {
@@ -61,16 +66,16 @@ export default class SyncKeyStorage {
   }
 
   async deleteEntries(names: string[]): Promise<void> {
-    const deleteRequests = names.map(name => this.keyStorage.remove(name));
-    await Promise.all(deleteRequests);
     await this.cloudKeyStorage.deleteEntries(names);
+    const deleteRequests = names.map(name => this.keyEntryStorage.remove(name));
+    await Promise.all(deleteRequests);
   }
 
   async deleteAllEntries(): Promise<void> {
-    const keyEntries = await this.keyStorage.list();
-    const deleteRequests = keyEntries.map(keyEntry => this.keyStorage.remove(keyEntry.name));
-    await Promise.all(deleteRequests);
     await this.cloudKeyStorage.deleteAllEntries();
+    const keyEntries = await this.keyEntryStorage.list();
+    const deleteRequests = keyEntries.map(keyEntry => this.keyEntryStorage.remove(keyEntry.name));
+    await Promise.all(deleteRequests);
   }
 
   async updateRecipients(
@@ -83,11 +88,21 @@ export default class SyncKeyStorage {
   async sync(): Promise<void> {
     await this.cloudKeyStorage.retrieveCloudEntries();
     const cloudEntries = this.cloudKeyStorage.retrieveAllEntries();
-    const keyEntries = await this.keyStorage.list();
-    const keyEntriesMap: { [key: string]: IKeyEntry | undefined } = {};
-    keyEntries.forEach(keyEntry => {
-      keyEntriesMap[keyEntry.name] = keyEntry;
-    });
+    const cloudEntriesMap = cloudEntries.reduce<{ [key: string]: CloudEntry | undefined }>(
+      (result, cloudEntry) => {
+        result[cloudEntry.name] = cloudEntry;
+        return result;
+      },
+      {},
+    );
+    const keyEntries = await this.keyEntryStorage.list();
+    const keyEntriesMap = keyEntries.reduce<{ [key: string]: IKeyEntry | undefined }>(
+      (result, keyEntry) => {
+        result[keyEntry.name] = keyEntry;
+        return result;
+      },
+      {},
+    );
 
     const storeNames: string[] = [];
     const deleteNames: string[] = [];
@@ -96,14 +111,14 @@ export default class SyncKeyStorage {
       if (keyEntry) {
         const keyEntryDate = extractDate(keyEntry);
         if (cloudEntry.modificationDate > keyEntryDate.modificationDate) {
-          storeNames.push(cloudEntry.name);
+          return storeNames.push(cloudEntry.name);
         }
       } else {
         storeNames.push(cloudEntry.name);
       }
     });
     keyEntries.forEach(keyEntry => {
-      if (!this.cloudKeyStorage.existsEntry(keyEntry.name)) {
+      if (!cloudEntriesMap[keyEntry.name]) {
         deleteNames.push(keyEntry.name);
       }
     });
@@ -112,28 +127,29 @@ export default class SyncKeyStorage {
   }
 
   private async checkIfKeyEntryExists(name: string): Promise<void> {
-    const exists = await this.keyStorage.exists(name);
+    const exists = await this.keyEntryStorage.exists(name);
     if (!exists) {
       throw new Error();
     }
   }
 
   private async checkIfKeyEntryNotExists(name: string): Promise<void> {
-    const exists = await this.keyStorage.exists(name);
+    const exists = await this.keyEntryStorage.exists(name);
     if (exists) {
       throw new Error();
     }
   }
 
-  private syncKeyStorage(storeNames: string[], deleteNames: string[]): Promise<void> {
-    const deleteRequests = deleteNames.map(name =>
-      this.keyStorage.remove(name).then(() => Promise.resolve()),
-    );
-    const storeRequests = storeNames.map(name => {
+  private async syncKeyStorage(storeNames: string[], deleteNames: string[]): Promise<void> {
+    const deleteRequests = deleteNames.map(async name => {
+      await this.keyEntryStorage.remove(name);
+    });
+    const storeRequests = storeNames.map(async name => {
       const cloudEntry = this.cloudKeyStorage.retrieveEntry(name);
       const entry = createKeyEntry(cloudEntry);
-      return this.keyStorage.save(entry).then(() => Promise.resolve());
+      await this.keyEntryStorage.remove(entry.name);
+      await this.keyEntryStorage.save(entry);
     });
-    return Promise.all([...deleteRequests, ...storeRequests]).then(() => Promise.resolve());
+    await Promise.all([...deleteRequests, ...storeRequests]);
   }
 }
