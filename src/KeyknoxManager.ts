@@ -10,11 +10,19 @@ import { DecryptedKeyknoxValue } from './entities';
 export default class KeyknoxManager {
   private readonly accessTokenProvider: IAccessTokenProvider;
 
-  private privateKey: VirgilPrivateKey;
-  private publicKey: VirgilPublicKey | VirgilPublicKey[];
+  private myPrivateKey: VirgilPrivateKey;
+  private myPublicKey: VirgilPublicKey | VirgilPublicKey[];
 
   private readonly keyknoxClient: IKeyknoxClient;
   private readonly keyknoxCrypto: IKeyknoxCrypto;
+
+  get privateKey(): VirgilPrivateKey {
+    return this.myPrivateKey;
+  }
+
+  get publicKey(): VirgilPublicKey | VirgilPublicKey[] {
+    return this.myPublicKey;
+  }
 
   constructor(
     accessTokenProvider: IAccessTokenProvider,
@@ -24,28 +32,28 @@ export default class KeyknoxManager {
     keyknoxClient?: IKeyknoxClient,
   ) {
     this.accessTokenProvider = accessTokenProvider;
-    this.privateKey = privateKey;
-    this.publicKey = publicKey;
+    this.myPrivateKey = privateKey;
+    this.myPublicKey = publicKey;
     this.keyknoxClient = keyknoxClient || new KeyknoxClient();
     this.keyknoxCrypto = keyknoxCrypto || new KeyknoxCrypto();
   }
 
   async pushValue(value: Buffer, previousHash?: Buffer): Promise<DecryptedKeyknoxValue> {
     const token = await this.accessTokenProvider.getToken({ operation: 'put' });
-    const dataAndMetadata = this.keyknoxCrypto.encrypt(value, this.privateKey, this.publicKey);
+    const dataAndMetadata = this.keyknoxCrypto.encrypt(value, this.myPrivateKey, this.myPublicKey);
     const encryptedKeyknoxValue = await this.keyknoxClient.pushValue(
       dataAndMetadata.metadata,
       dataAndMetadata.encryptedData,
       token.toString(),
       previousHash,
     );
-    return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.privateKey, this.publicKey);
+    return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.myPrivateKey, this.myPublicKey);
   }
 
   async pullValue(): Promise<DecryptedKeyknoxValue> {
     const token = await this.accessTokenProvider.getToken({ operation: 'get' });
     const encryptedKeyknoxValue = await this.keyknoxClient.pullValue(token.toString());
-    return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.privateKey, this.publicKey);
+    return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.myPrivateKey, this.myPublicKey);
   }
 
   async resetValue(): Promise<DecryptedKeyknoxValue> {
@@ -84,15 +92,15 @@ export default class KeyknoxManager {
     }
     const decrypedKeyknoxValue = await this.pullValue();
     if (newPrivateKey) {
-      this.privateKey = newPrivateKey;
+      this.myPrivateKey = newPrivateKey;
     }
     if (newPublicKey) {
-      this.publicKey = newPublicKey;
+      this.myPublicKey = newPublicKey;
     }
     const dataAndMetadata = this.keyknoxCrypto.encrypt(
       decrypedKeyknoxValue.value,
-      this.privateKey,
-      this.publicKey,
+      this.myPrivateKey,
+      this.myPublicKey,
     );
     const token = await this.accessTokenProvider.getToken({ operation: 'put' });
     const encryptedKeyknoxValue = await this.keyknoxClient.pushValue(
@@ -101,7 +109,7 @@ export default class KeyknoxManager {
       token.toString(),
       decrypedKeyknoxValue.keyknoxHash,
     );
-    return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.privateKey, this.publicKey);
+    return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.myPrivateKey, this.myPublicKey);
   }
 
   private async updateRecipientsKeys(
@@ -110,15 +118,15 @@ export default class KeyknoxManager {
   ): Promise<DecryptedKeyknoxValue> {
     const decrypedKeyknoxValue = await this.pullValue();
     if (newPrivateKey) {
-      this.privateKey = newPrivateKey;
+      this.myPrivateKey = newPrivateKey;
     }
     if (newPublicKey) {
-      this.publicKey = newPublicKey;
+      this.myPublicKey = newPublicKey;
     }
     const dataAndMetadata = this.keyknoxCrypto.encrypt(
       decrypedKeyknoxValue.value,
-      this.privateKey,
-      this.publicKey,
+      this.myPrivateKey,
+      this.myPublicKey,
     );
     const token = await this.accessTokenProvider.getToken({ operation: 'put' });
     const encryptedKeyknoxValue = await this.keyknoxClient.pushValue(
@@ -127,6 +135,6 @@ export default class KeyknoxManager {
       token.toString(),
       decrypedKeyknoxValue.keyknoxHash,
     );
-    return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.privateKey, this.publicKey);
+    return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.myPrivateKey, this.myPublicKey);
   }
 }
