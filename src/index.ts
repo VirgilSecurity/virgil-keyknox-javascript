@@ -1,5 +1,4 @@
-export { IKeyStorage } from 'virgil-sdk/dist/types/Sdk/Lib/KeyStorage/IKeyStorage';
-export { KeyStorage } from 'virgil-sdk';
+export { IKeyEntry, IKeyEntryStorage, KeyEntryStorage } from 'virgil-sdk';
 
 export { default as IKeyknoxClient } from './clients/IKeyknoxClient';
 export { default as KeyknoxClient } from './clients/KeyknoxClient';

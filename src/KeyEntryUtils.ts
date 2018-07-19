@@ -1,4 +1,4 @@
-import { IKeyEntry } from 'virgil-sdk/dist/types/Sdk/Lib/KeyStorage/IKeyStorage';
+import { IKeyEntry } from 'virgil-sdk';
 
 import { CloudEntry } from './entities';
 

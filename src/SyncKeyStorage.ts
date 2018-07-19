@@ -1,5 +1,5 @@
 import { VirgilPrivateKey, VirgilPublicKey } from 'virgil-crypto/dist/types/interfaces';
-import { IKeyEntry, IKeyStorage } from 'virgil-sdk/dist/types/Sdk/Lib/KeyStorage/IKeyStorage';
+import { IKeyEntry, IKeyEntryStorage } from 'virgil-sdk';
 
 import CloudKeyStorage from './CloudKeyStorage';
 import { KeyEntry } from './entities';
@@ -9,9 +9,9 @@ import { Data, Meta } from './types';
 export default class SyncKeyStorage {
   private readonly identity: string;
   private readonly cloudKeyStorage: CloudKeyStorage;
-  private readonly keyStorage: IKeyStorage;
+  private readonly keyStorage: IKeyEntryStorage;
 
-  constructor(identity: string, cloudKeyStorage: CloudKeyStorage, keyStorage: IKeyStorage) {
+  constructor(identity: string, cloudKeyStorage: CloudKeyStorage, keyStorage: IKeyEntryStorage) {
     this.identity = identity;
     this.cloudKeyStorage = cloudKeyStorage;
     this.keyStorage = keyStorage;
