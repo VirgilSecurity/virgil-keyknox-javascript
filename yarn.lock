@@ -3831,7 +3831,7 @@ virgil-crypto@^3.0.0-alpha.14:
 
 virgil-sdk@VirgilSecurity/virgil-sdk-javascript#private-key-storage:
   version "5.0.0-alpha.5"
-  resolved "https://codeload.github.com/VirgilSecurity/virgil-sdk-javascript/tar.gz/8ac0ff95a59b1fec0fb8a7a19d3111c5dd9ae33c"
+  resolved "https://codeload.github.com/VirgilSecurity/virgil-sdk-javascript/tar.gz/8aa903c8653bd4991678fc67dee007f85c9177a5"
   dependencies:
     mkdirp "^0.5.1"
     node-fetch "^2.1.2"
