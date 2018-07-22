@@ -4,7 +4,6 @@ import * as uuid from 'uuid/v4';
 
 import CloudKeyStorage from '../CloudKeyStorage';
 import { CloudEntry, KeyEntry } from '../entities';
-import KeyknoxManager from '../KeyknoxManager';
 
 function generateKeyEntries(amount: number): KeyEntry[] {
   const keyEntries = [];
@@ -33,12 +32,11 @@ describe('CloudKeyStorage', () => {
     });
     const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
     const keyPair = virgilCrypto.generateKeys();
-    const keyknoxManager = new KeyknoxManager(
+    cloudKeyStorage = CloudKeyStorage.create(
       accessTokenProvider,
       keyPair.privateKey,
       keyPair.publicKey,
     );
-    cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
   });
 
   test('KTC-19', async () => {

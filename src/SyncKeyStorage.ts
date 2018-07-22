@@ -1,4 +1,5 @@
 import { VirgilPrivateKey, VirgilPublicKey } from 'virgil-crypto/dist/types/interfaces';
+import { IAccessTokenProvider } from 'virgil-sdk/dist/types/Sdk/Web/Auth/AccessTokenProviders';
 import { IKeyEntry, IKeyEntryStorage } from 'virgil-sdk';
 
 import CloudKeyStorage from './CloudKeyStorage';
@@ -19,6 +20,17 @@ export default class SyncKeyStorage {
     this.identity = identity;
     this.cloudKeyStorage = cloudKeyStorage;
     this.keyEntryStorage = keyEntryStorage;
+  }
+
+  static create(
+    identity: string,
+    accessTokenProvider: IAccessTokenProvider,
+    privateKey: VirgilPrivateKey,
+    publicKey: VirgilPublicKey | VirgilPublicKey[],
+    keyEntryStorage: IKeyEntryStorage,
+  ): SyncKeyStorage {
+    const cloudKeyStorage = CloudKeyStorage.create(accessTokenProvider, privateKey, publicKey);
+    return new SyncKeyStorage(identity, cloudKeyStorage, keyEntryStorage);
   }
 
   async storeEntries(keyEntries: KeyEntry[]): Promise<IKeyEntry[]> {

@@ -38,12 +38,13 @@ describe('SyncKeyStorage', () => {
       apiKeyId: process.env.API_KEY_ID!,
       accessTokenSigner: virgilAccessTokenSigner,
     });
-    const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
+    const identity = uuid();
+    const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, identity);
     const keyPair = virgilCrypto.generateKeys();
     keyknoxManager = new KeyknoxManager(accessTokenProvider, keyPair.privateKey, keyPair.publicKey);
     cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
-    keyEntryStorage = new KeyEntryStorage(join(process.env.KEY_ENTRIES_FOLDER!, uuid()));
-    syncKeyStorage = new SyncKeyStorage('identity', cloudKeyStorage, keyEntryStorage);
+    keyEntryStorage = new KeyEntryStorage(join(process.env.KEY_ENTRIES_FOLDER!, identity));
+    syncKeyStorage = new SyncKeyStorage(identity, cloudKeyStorage, keyEntryStorage);
   });
 
   test('KTC-29', async () => {

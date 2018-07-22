@@ -1,4 +1,5 @@
 import { VirgilPrivateKey, VirgilPublicKey } from 'virgil-crypto/dist/types/interfaces';
+import { IAccessTokenProvider } from 'virgil-sdk/dist/types/Sdk/Web/Auth/AccessTokenProviders';
 
 import { CloudEntry, DecryptedKeyknoxValue, KeyEntry } from './entities';
 import KeyknoxManager from './KeyknoxManager';
@@ -14,6 +15,15 @@ export default class CloudKeyStorage {
 
   constructor(keyknoxManager: KeyknoxManager) {
     this.keyknoxManager = keyknoxManager;
+  }
+
+  static create(
+    accessTokenProvider: IAccessTokenProvider,
+    privateKey: VirgilPrivateKey,
+    publicKey: VirgilPublicKey | VirgilPublicKey[],
+  ): CloudKeyStorage {
+    const keyknoxManager = new KeyknoxManager(accessTokenProvider, privateKey, publicKey);
+    return new CloudKeyStorage(keyknoxManager);
   }
 
   async storeEntries(keyEntries: KeyEntry[]): Promise<CloudEntry[]> {
