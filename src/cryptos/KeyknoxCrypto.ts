@@ -23,7 +23,7 @@ export default class KeyknoxCrypto implements IKeyknoxCrypto {
     const { value, meta } = encryptedKeyknoxValue;
     if (!value.byteLength || !meta.byteLength) {
       if (value.byteLength || meta.byteLength) {
-        throw new Error();
+        throw new TypeError("'EncryptedKeyknoxValue' is invalid");
       }
       return encryptedKeyknoxValue;
     }

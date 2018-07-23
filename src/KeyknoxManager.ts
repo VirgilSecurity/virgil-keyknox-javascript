@@ -82,7 +82,7 @@ export default class KeyknoxManager {
     if (options.newPrivateKey || options.newPublicKey) {
       return this.updateRecipientsKeys(options.newPrivateKey, options.newPublicKey);
     }
-    throw new Error();
+    throw new TypeError();
   }
 
   private async updateRecipientsValues(

@@ -2,6 +2,11 @@ import { VirgilPrivateKey, VirgilPublicKey } from 'virgil-crypto/dist/types/inte
 import { IAccessTokenProvider } from 'virgil-sdk/dist/types/Sdk/Web/Auth/AccessTokenProviders';
 
 import { CloudEntry, DecryptedKeyknoxValue, KeyEntry } from './entities';
+import {
+  CloudKeyStorageOutOfSyncError,
+  CloudKeyStorageEntryExistsError,
+  CloudKeyStorageEntryDoesntExistError,
+} from './errors';
 import KeyknoxManager from './KeyknoxManager';
 import { serialize, deserialize } from './CloudEntrySerializer';
 import { Data, Meta } from './types';
@@ -107,19 +112,19 @@ export default class CloudKeyStorage {
 
   private checkSyncCall() {
     if (!this.syncWasCalled) {
-      throw new Error();
+      throw new CloudKeyStorageOutOfSyncError();
     }
   }
 
   private checkIfCloudEntryExists(entryName: string) {
     if (!this.cache[entryName]) {
-      throw new Error();
+      throw new CloudKeyStorageEntryDoesntExistError(entryName);
     }
   }
 
   private checkIfCloudEntryNotExists(entryName: string) {
     if (this.cache[entryName]) {
-      throw new Error();
+      throw new CloudKeyStorageEntryExistsError(entryName);
     }
   }
 

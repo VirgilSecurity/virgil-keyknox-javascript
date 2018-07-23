@@ -11,6 +11,7 @@ import * as uuid from 'uuid/v4';
 
 import CloudKeyStorage from '../CloudKeyStorage';
 import { KeyEntry } from '../entities';
+import { CloudKeyStorageOutOfSyncError } from '../errors';
 import KeyknoxManager from '../KeyknoxManager';
 import SyncKeyStorage from '../SyncKeyStorage';
 
@@ -296,24 +297,32 @@ describe('SyncKeyStorage', () => {
     const keyEntry = { name: uuid(), value: Buffer.from('value') };
     expect.assertions(10);
     await keyEntryStorage.save(keyEntry);
-    await expect(syncKeyStorage.deleteEntry(keyEntry.name)).rejects.toThrow();
-    await expect(syncKeyStorage.deleteEntries([keyEntry.name])).rejects.toThrow();
-    await expect(syncKeyStorage.deleteAllEntries()).rejects.toThrow();
+    await expect(syncKeyStorage.deleteEntry(keyEntry.name)).rejects.toThrow(
+      CloudKeyStorageOutOfSyncError,
+    );
+    await expect(syncKeyStorage.deleteEntries([keyEntry.name])).rejects.toThrow(
+      CloudKeyStorageOutOfSyncError,
+    );
+    await expect(syncKeyStorage.deleteAllEntries()).rejects.toThrow(CloudKeyStorageOutOfSyncError);
     const keyEntries = generateKeyEntries(1);
     const [keyEntry1] = keyEntries;
-    await expect(syncKeyStorage.storeEntry(keyEntry1.name, keyEntry1.data)).rejects.toThrow();
-    await expect(syncKeyStorage.storeEntries(keyEntries)).rejects.toThrow();
+    await expect(syncKeyStorage.storeEntry(keyEntry1.name, keyEntry1.data)).rejects.toThrow(
+      CloudKeyStorageOutOfSyncError,
+    );
+    await expect(syncKeyStorage.storeEntries(keyEntries)).rejects.toThrow(
+      CloudKeyStorageOutOfSyncError,
+    );
     await expect(syncKeyStorage.existsEntry(keyEntry.name)).resolves.toBeTruthy();
     const entries = await syncKeyStorage.retrieveAllEntries();
     expect(entries.length).toBe(1);
     await expect(syncKeyStorage.retrieveEntry(keyEntry.name)).resolves.toBeDefined();
-    await expect(
-      syncKeyStorage.updateEntry(keyEntry.name, Buffer.from('newData')),
-    ).rejects.toThrow();
+    await expect(syncKeyStorage.updateEntry(keyEntry.name, Buffer.from('newData'))).rejects.toThrow(
+      CloudKeyStorageOutOfSyncError,
+    );
     const virgilCrypto = new VirgilCrypto();
     const keyPair = virgilCrypto.generateKeys();
     await expect(
       syncKeyStorage.updateRecipients(keyPair.privateKey, keyPair.publicKey),
-    ).rejects.toThrow();
+    ).rejects.toThrow(CloudKeyStorageOutOfSyncError);
   });
 });

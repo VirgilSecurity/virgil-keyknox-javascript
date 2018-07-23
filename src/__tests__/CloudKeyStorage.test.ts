@@ -2,6 +2,7 @@ import { VirgilCrypto, VirgilAccessTokenSigner } from 'virgil-crypto';
 import { JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
 import * as uuid from 'uuid/v4';
 
+import { CloudKeyStorageOutOfSyncError } from '../errors';
 import CloudKeyStorage from '../CloudKeyStorage';
 import { CloudEntry, KeyEntry } from '../entities';
 
@@ -207,20 +208,26 @@ describe('CloudKeyStorage', () => {
     const error2 = () => cloudKeyStorage.retrieveEntry('name');
     const error3 = () => cloudKeyStorage.existsEntry('name');
     expect.assertions(9);
-    expect(error1).toThrow();
-    expect(error2).toThrow();
-    expect(error3).toThrow();
+    expect(error1).toThrow(CloudKeyStorageOutOfSyncError);
+    expect(error2).toThrow(CloudKeyStorageOutOfSyncError);
+    expect(error3).toThrow(CloudKeyStorageOutOfSyncError);
     await expect(
       cloudKeyStorage.storeEntry(keyEntry1.name, keyEntry1.data, keyEntry1.meta),
-    ).rejects.toThrow();
-    await expect(cloudKeyStorage.storeEntries(keyEntries)).rejects.toThrow();
+    ).rejects.toThrow(CloudKeyStorageOutOfSyncError);
+    await expect(cloudKeyStorage.storeEntries(keyEntries)).rejects.toThrow(
+      CloudKeyStorageOutOfSyncError,
+    );
     await expect(
       cloudKeyStorage.updateEntry(keyEntry1.name, keyEntry1.data, keyEntry1.meta),
-    ).rejects.toThrow();
-    await expect(cloudKeyStorage.deleteEntry(keyEntry1.name)).rejects.toThrow();
-    await expect(cloudKeyStorage.deleteEntries([keyEntry1.name, keyEntry2.name])).rejects.toThrow();
+    ).rejects.toThrow(CloudKeyStorageOutOfSyncError);
+    await expect(cloudKeyStorage.deleteEntry(keyEntry1.name)).rejects.toThrow(
+      CloudKeyStorageOutOfSyncError,
+    );
+    await expect(cloudKeyStorage.deleteEntries([keyEntry1.name, keyEntry2.name])).rejects.toThrow(
+      CloudKeyStorageOutOfSyncError,
+    );
     await expect(
       cloudKeyStorage.updateRecipients(keyPair.privateKey, keyPair.publicKey),
-    ).rejects.toThrow();
+    ).rejects.toThrow(CloudKeyStorageOutOfSyncError);
   });
 });

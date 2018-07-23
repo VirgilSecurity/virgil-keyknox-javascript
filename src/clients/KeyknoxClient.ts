@@ -1,6 +1,7 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import { DecryptedKeyknoxValue, EncryptedKeyknoxValue } from '../entities';
+import { KeyknoxClientError } from '../errors';
 import IKeyknoxClient from './IKeyknoxClient';
 
 interface KeyknoxData {
@@ -17,6 +18,7 @@ export default class KeyknoxClient implements IKeyknoxClient {
 
   constructor(axiosInstance?: AxiosInstance) {
     this.axios = axiosInstance || axios.create({ baseURL: KeyknoxClient.defaultBaseURL });
+    this.axios.interceptors.response.use(undefined, KeyknoxClient.responseErrorHandler);
   }
 
   async pushValue(
@@ -75,5 +77,17 @@ export default class KeyknoxClient implements IKeyknoxClient {
 
   private static getAuthorizationHeader(token: string) {
     return `${KeyknoxClient.AUTHORIZATION_PREFIX} ${token}`;
+  }
+
+  private static responseErrorHandler(error: AxiosError) {
+    const { response } = error;
+    if (response) {
+      const { data } = response;
+      if (data && data.code && data.message) {
+        return Promise.reject(new KeyknoxClientError(data.message, response.status, data.code));
+      }
+      return Promise.reject(new KeyknoxClientError(error.message, response.status));
+    }
+    return Promise.reject(new KeyknoxClientError(error.message));
   }
 }

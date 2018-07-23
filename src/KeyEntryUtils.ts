@@ -24,7 +24,7 @@ export function extractDate(
   modificationDate: Date;
 } {
   if (!keyEntry.meta) {
-    throw new Error();
+    throw new TypeError("Invalid 'IKeyEntry'");
   }
   const creationDate = new Date(keyEntry.meta[creationDateKey]);
   const modificationDate = new Date(keyEntry.meta[creationDateKey]);
