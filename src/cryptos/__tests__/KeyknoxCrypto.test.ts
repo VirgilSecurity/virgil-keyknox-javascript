@@ -1,15 +1,10 @@
-import { VirgilCrypto } from 'virgil-crypto';
-import {
-  VirgilPrivateKey,
-  VirgilPublicKey,
-  IVirgilCrypto,
-} from 'virgil-crypto/dist/types/interfaces';
+import { VirgilPrivateKey, VirgilPublicKey, VirgilCrypto } from 'virgil-crypto';
 
 import KeyknoxCrypto from '../KeyknoxCrypto';
 
 describe('KeyknoxCrypto', () => {
   let keyknoxCrypto: KeyknoxCrypto;
-  let virgilCrypto: IVirgilCrypto;
+  let virgilCrypto: VirgilCrypto;
 
   beforeEach(() => {
     virgilCrypto = new VirgilCrypto();

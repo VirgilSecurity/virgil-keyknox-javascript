@@ -1,4 +1,4 @@
-import { VirgilPrivateKey, VirgilPublicKey } from 'virgil-crypto/dist/types/interfaces';
+import { VirgilPrivateKey, VirgilPublicKey } from 'virgil-crypto';
 
 import { DecryptedKeyknoxValue, EncryptedKeyknoxValue } from '../entities';
 

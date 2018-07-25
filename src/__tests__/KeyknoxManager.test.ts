@@ -1,9 +1,10 @@
-import { VirgilCrypto, VirgilAccessTokenSigner } from 'virgil-crypto';
 import {
   VirgilKeyPair,
   VirgilPrivateKey,
   VirgilPublicKey,
-} from 'virgil-crypto/dist/types/interfaces';
+  VirgilCrypto,
+  VirgilAccessTokenSigner,
+} from 'virgil-crypto';
 import { JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
 import * as uuid from 'uuid/v4';
 

@@ -1,6 +1,5 @@
 import { VirgilCrypto, VirgilAccessTokenSigner } from 'virgil-crypto';
-import { JwtGenerator } from 'virgil-sdk';
-import { Jwt } from 'virgil-sdk/dist/types/Sdk/Web/Auth/Jwt';
+import { Jwt, JwtGenerator } from 'virgil-sdk';
 import * as uuid from 'uuid/v4';
 
 import KeyknoxClient from '../KeyknoxClient';

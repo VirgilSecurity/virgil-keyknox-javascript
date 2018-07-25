@@ -1,6 +1,5 @@
-import { VirgilPrivateKey, VirgilPublicKey } from 'virgil-crypto/dist/types/interfaces';
-import { IAccessTokenProvider } from 'virgil-sdk/dist/types/Sdk/Web/Auth/AccessTokenProviders';
-import { IKeyEntry, IKeyEntryStorage } from 'virgil-sdk';
+import { VirgilPrivateKey, VirgilPublicKey } from 'virgil-crypto';
+import { IAccessTokenProvider, IKeyEntry, IKeyEntryStorage } from 'virgil-sdk';
 
 import CloudKeyStorage from './CloudKeyStorage';
 import { KeyEntry, CloudEntry } from './entities';

@@ -1,17 +1,12 @@
-import { VirgilCrypto } from 'virgil-crypto';
-import {
-  VirgilPrivateKey,
-  VirgilPublicKey,
-  IVirgilCrypto,
-} from 'virgil-crypto/dist/types/interfaces';
+import { VirgilPrivateKey, VirgilPublicKey, VirgilCrypto } from 'virgil-crypto';
 
 import { EncryptedKeyknoxValue, DecryptedKeyknoxValue } from '../entities';
 import IKeyknoxCrypto from './IKeyknoxCrypto';
 
 export default class KeyknoxCrypto implements IKeyknoxCrypto {
-  private readonly crypto: IVirgilCrypto;
+  private readonly crypto: VirgilCrypto;
 
-  constructor(crypto?: IVirgilCrypto) {
+  constructor(crypto?: VirgilCrypto) {
     this.crypto = crypto || new VirgilCrypto();
   }
 

@@ -1,5 +1,5 @@
-import { VirgilPrivateKey, VirgilPublicKey } from 'virgil-crypto/dist/types/interfaces';
-import { IAccessTokenProvider } from 'virgil-sdk/dist/types/Sdk/Web/Auth/AccessTokenProviders';
+import { VirgilPrivateKey, VirgilPublicKey } from 'virgil-crypto';
+import { IAccessTokenProvider } from 'virgil-sdk';
 
 import IKeyknoxClient from './clients/IKeyknoxClient';
 import KeyknoxClient from './clients/KeyknoxClient';
