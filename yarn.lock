@@ -1115,6 +1115,12 @@ fd-slicer@~1.1.0:
   dependencies:
     pend "~1.2.0"
 
+fetch-ponyfill@^6.0.2:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/fetch-ponyfill/-/fetch-ponyfill-6.0.2.tgz#bc2d92afd0140e39518beccd2fd0682ab4491cb6"
+  dependencies:
+    node-fetch "~2.1.0"
+
 figures@^1.7.0:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/figures/-/figures-1.7.0.tgz#cbe1e3affcf1cd44b80cadfed28dc793a9701d2e"
@@ -2555,6 +2561,10 @@ node-fetch@^2.1.2:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.2.0.tgz#4ee79bde909262f9775f731e3656d0db55ced5b5"
 
+node-fetch@~2.1.0:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.1.2.tgz#ab884e8e7e57e38a944753cec706f788d1768bb5"
+
 node-int64@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/node-int64/-/node-int64-0.4.0.tgz#87a9065cdb355d3182d8f94ce11188b825c68a3b"
@@ -3829,14 +3839,13 @@ virgil-crypto@^3.0.0:
     tempy "^0.2.1"
     yauzl "^2.9.1"
 
-virgil-sdk@VirgilSecurity/virgil-sdk-javascript#private-key-storage:
-  version "5.0.0-alpha.5"
-  resolved "https://codeload.github.com/VirgilSecurity/virgil-sdk-javascript/tar.gz/e80e637435991cad37f5a22f1634bdbc76b7d4e5"
+virgil-sdk@^5.0.0-rc.1:
+  version "5.0.0-rc.1"
+  resolved "https://registry.yarnpkg.com/virgil-sdk/-/virgil-sdk-5.0.0-rc.1.tgz#c7672128db9baf5912d38157f83e67d93637cbb1"
   dependencies:
+    fetch-ponyfill "^6.0.2"
     mkdirp "^0.5.1"
-    node-fetch "^2.1.2"
     rimraf "^2.6.2"
-    whatwg-fetch "^2.0.4"
 
 w3c-hr-time@^1.0.1:
   version "1.0.1"
@@ -3866,10 +3875,6 @@ whatwg-encoding@^1.0.1, whatwg-encoding@^1.0.3:
   resolved "https://registry.yarnpkg.com/whatwg-encoding/-/whatwg-encoding-1.0.3.tgz#57c235bc8657e914d24e1a397d3c82daee0a6ba3"
   dependencies:
     iconv-lite "0.4.19"
-
-whatwg-fetch@^2.0.4:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/whatwg-fetch/-/whatwg-fetch-2.0.4.tgz#dde6a5df315f9d39991aa17621853d720b85566f"
 
 whatwg-mimetype@^2.0.0, whatwg-mimetype@^2.1.0:
   version "2.1.0"
