@@ -4,8 +4,8 @@ import { IAccessTokenProvider } from 'virgil-sdk/dist/types/Sdk/Web/Auth/AccessT
 import { CloudEntry, DecryptedKeyknoxValue, KeyEntry } from './entities';
 import {
   CloudKeyStorageOutOfSyncError,
-  CloudKeyStorageEntryExistsError,
-  CloudKeyStorageEntryDoesntExistError,
+  CloudEntryExistsError,
+  CloudEntryDoesntExistError,
 } from './errors';
 import KeyknoxManager from './KeyknoxManager';
 import { serialize, deserialize } from './CloudEntrySerializer';
@@ -118,13 +118,13 @@ export default class CloudKeyStorage {
 
   private checkIfCloudEntryExists(entryName: string) {
     if (!this.cache[entryName]) {
-      throw new CloudKeyStorageEntryDoesntExistError(entryName);
+      throw new CloudEntryDoesntExistError(entryName);
     }
   }
 
   private checkIfCloudEntryNotExists(entryName: string) {
     if (this.cache[entryName]) {
-      throw new CloudKeyStorageEntryExistsError(entryName);
+      throw new CloudEntryExistsError(entryName);
     }
   }
 

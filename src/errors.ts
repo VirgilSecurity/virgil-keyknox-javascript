@@ -11,7 +11,7 @@ export class KeyknoxClientError extends KeyknoxError {
 
   constructor(message: string, status?: number, code?: number) {
     super(message);
-    Object.setPrototypeOf(this, KeyknoxError);
+    Object.setPrototypeOf(this, KeyknoxClientError.prototype);
     this.status = status;
     this.code = code;
   }
@@ -24,30 +24,42 @@ export class CloudKeyStorageOutOfSyncError extends KeyknoxError {
   }
 }
 
-export class CloudKeyStorageEntryExistsError extends KeyknoxError {
-  constructor(entryName: string) {
-    super(`Entry '${entryName}' already exists`);
-    Object.setPrototypeOf(this, CloudKeyStorageEntryExistsError.prototype);
+export class CloudEntryExistsError extends KeyknoxError {
+  cloudEntryName: string;
+
+  constructor(cloudEntryName: string) {
+    super(`Cloud entry '${cloudEntryName}' already exists`);
+    this.cloudEntryName = cloudEntryName;
+    Object.setPrototypeOf(this, CloudEntryExistsError.prototype);
   }
 }
 
-export class CloudKeyStorageEntryDoesntExistError extends KeyknoxError {
-  constructor(entryName: string) {
-    super(`Entry '${entryName}' doesn't exist`);
-    Object.setPrototypeOf(this, CloudKeyStorageEntryDoesntExistError.prototype);
+export class CloudEntryDoesntExistError extends KeyknoxError {
+  cloudEntryName: string;
+
+  constructor(cloudEntryName: string) {
+    super(`Cloud entry '${cloudEntryName}' doesn't exist`);
+    this.cloudEntryName = cloudEntryName;
+    Object.setPrototypeOf(this, CloudEntryDoesntExistError.prototype);
+  }
+}
+
+export class KeyEntryExistsError extends KeyknoxError {
+  keyEntryName: string;
+
+  constructor(keyEntryName: string) {
+    super(`Key entry '${keyEntryName}' already exists`);
+    this.keyEntryName = keyEntryName;
+    Object.setPrototypeOf(this, KeyEntryExistsError.prototype);
   }
 }
 
 export class KeyEntryDoesntExistError extends KeyknoxError {
+  keyEntryName: string;
+
   constructor(keyEntryName: string) {
     super(`Key entry '${keyEntryName}' doesn't exist`);
+    this.keyEntryName = keyEntryName;
     Object.setPrototypeOf(this, KeyEntryDoesntExistError.prototype);
-  }
-}
-
-export class KeyEntryAlreadyExistsError extends KeyknoxError {
-  constructor(keyEntryName: string) {
-    super(`Key entry '${keyEntryName}' already exists`);
-    Object.setPrototypeOf(this, KeyEntryAlreadyExistsError.prototype);
   }
 }

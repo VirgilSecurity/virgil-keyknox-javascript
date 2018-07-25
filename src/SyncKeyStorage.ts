@@ -4,7 +4,7 @@ import { IKeyEntry, IKeyEntryStorage } from 'virgil-sdk';
 
 import CloudKeyStorage from './CloudKeyStorage';
 import { KeyEntry, CloudEntry } from './entities';
-import { KeyEntryDoesntExistError, KeyEntryAlreadyExistsError } from './errors';
+import { KeyEntryExistsError, KeyEntryDoesntExistError } from './errors';
 import { createKeyEntry, extractDate } from './KeyEntryUtils';
 import { Data, Meta } from './types';
 
@@ -149,7 +149,7 @@ export default class SyncKeyStorage {
   private async checkIfKeyEntryNotExists(name: string): Promise<void> {
     const exists = await this.keyEntryStorage.exists(name);
     if (exists) {
-      throw new KeyEntryAlreadyExistsError(name);
+      throw new KeyEntryExistsError(name);
     }
   }
 
