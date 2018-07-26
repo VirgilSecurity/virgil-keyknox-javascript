@@ -2,7 +2,11 @@ import { VirgilCrypto, VirgilAccessTokenSigner } from 'virgil-crypto';
 import { JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
 import * as uuid from 'uuid/v4';
 
-import { CloudKeyStorageOutOfSyncError } from '../errors';
+import {
+  CloudKeyStorageOutOfSyncError,
+  CloudEntryExistsError,
+  CloudEntryDoesntExistError,
+} from '../errors';
 import CloudKeyStorage from '../CloudKeyStorage';
 import { CloudEntry, KeyEntry } from '../entities';
 
@@ -229,5 +233,33 @@ describe('CloudKeyStorage', () => {
     await expect(
       cloudKeyStorage.updateRecipients(keyPair.privateKey, keyPair.publicKey),
     ).rejects.toThrow(CloudKeyStorageOutOfSyncError);
+  });
+
+  it("should throw 'CloudEntryExistsError' if we try to store entry with name that's already in use", async () => {
+    const [keyEntry1, keyEntry2] = generateKeyEntries(2);
+    keyEntry2.name = keyEntry1.name;
+    expect.assertions(2);
+    await cloudKeyStorage.retrieveCloudEntries();
+    await cloudKeyStorage.storeEntry(keyEntry1.name, keyEntry1.data, keyEntry1.meta);
+    await expect(cloudKeyStorage.storeEntries([keyEntry2])).rejects.toThrow(CloudEntryExistsError);
+    await expect(
+      cloudKeyStorage.storeEntry(keyEntry2.name, keyEntry2.data, keyEntry2.meta),
+    ).rejects.toThrow(CloudEntryExistsError);
+  });
+
+  it("should throw 'CloudEntryDoesntExistError' if we try to retrieve non-existent entry", async () => {
+    expect.assertions(1);
+    await cloudKeyStorage.retrieveCloudEntries();
+    const retrieve = () => cloudKeyStorage.retrieveEntry('123');
+    expect(retrieve).toThrow(CloudEntryDoesntExistError);
+  });
+
+  it("should throw 'CloudEntryDoesntExistError' if we try to delete non-existent entry", async () => {
+    expect.assertions(2);
+    await cloudKeyStorage.retrieveCloudEntries();
+    await expect(cloudKeyStorage.deleteEntry('123')).rejects.toThrow(CloudEntryDoesntExistError);
+    await expect(cloudKeyStorage.deleteEntries(['123', '456'])).rejects.toThrow(
+      CloudEntryDoesntExistError,
+    );
   });
 });

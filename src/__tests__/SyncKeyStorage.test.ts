@@ -11,7 +11,11 @@ import * as uuid from 'uuid/v4';
 
 import CloudKeyStorage from '../CloudKeyStorage';
 import { KeyEntry } from '../entities';
-import { CloudKeyStorageOutOfSyncError } from '../errors';
+import {
+  CloudKeyStorageOutOfSyncError,
+  KeyEntryExistsError,
+  KeyEntryDoesntExistError,
+} from '../errors';
 import KeyknoxManager from '../KeyknoxManager';
 import SyncKeyStorage from '../SyncKeyStorage';
 
@@ -324,5 +328,32 @@ describe('SyncKeyStorage', () => {
     await expect(
       syncKeyStorage.updateRecipients(keyPair.privateKey, keyPair.publicKey),
     ).rejects.toThrow(CloudKeyStorageOutOfSyncError);
+  });
+
+  it("should throw 'KeyEntryExistsError' if we try to store entry with name that's already in use", async () => {
+    const [keyEntry1, keyEntry2] = generateKeyEntries(2);
+    keyEntry2.name = keyEntry1.name;
+    expect.assertions(2);
+    await syncKeyStorage.sync();
+    await syncKeyStorage.storeEntry(keyEntry1.name, keyEntry1.data, keyEntry1.meta);
+    await expect(
+      syncKeyStorage.storeEntry(keyEntry2.name, keyEntry2.data, keyEntry2.meta),
+    ).rejects.toThrow(KeyEntryExistsError);
+    await expect(syncKeyStorage.storeEntries([keyEntry2])).rejects.toThrow(KeyEntryExistsError);
+  });
+
+  it("should throw 'KeyEntryDoesntExistError' if we try to retrieve non-existent entry", async () => {
+    expect.assertions(1);
+    await syncKeyStorage.sync();
+    await expect(syncKeyStorage.retrieveEntry('123')).rejects.toThrow(KeyEntryDoesntExistError);
+  });
+
+  it("should throw 'KeyEntryDoesntExistError' if we try to update non-existent entry", async () => {
+    const [keyEntry] = generateKeyEntries(1);
+    expect.assertions(1);
+    await syncKeyStorage.sync();
+    await expect(
+      syncKeyStorage.updateEntry(keyEntry.name, keyEntry.data, keyEntry.meta),
+    ).rejects.toThrow(KeyEntryDoesntExistError);
   });
 });
