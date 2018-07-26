@@ -60,8 +60,8 @@ export default class SyncKeyStorage {
     await this.keyEntryStorage.save(keyEntry);
   }
 
-  retrieveEntry(name: string): Promise<IKeyEntry> {
-    this.checkIfKeyEntryExists(name);
+  async retrieveEntry(name: string): Promise<IKeyEntry> {
+    await this.checkIfKeyEntryExists(name);
     return this.keyEntryStorage.load(name) as Promise<IKeyEntry>;
   }
 
