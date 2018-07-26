@@ -7,15 +7,15 @@ import {
 
 describe('KeyEntryUtils', () => {
   describe('createKeyEntry', () => {
-    const dateToString = global.Date.prototype.toString;
+    const dateToString = global.Date.prototype.toISOString;
     const dateToStringValue = 'date';
 
     beforeEach(() => {
-      global.Date.prototype.toString = jest.fn(() => dateToStringValue);
+      global.Date.prototype.toISOString = jest.fn(() => dateToStringValue);
     });
 
     afterEach(() => {
-      global.Date.prototype.toString = dateToString;
+      global.Date.prototype.toISOString = dateToString;
     });
 
     it("should return 'IKeyEntry'", () => {
@@ -48,18 +48,19 @@ describe('KeyEntryUtils', () => {
     });
 
     it("should return 'creationDate' and 'modificationDate'", () => {
-      const date = new Date(0);
+      const date1 = new Date(0);
+      const date2 = new Date(1);
       const keyEntry = {
         name: 'name',
         value: Buffer.from('value'),
         meta: {
-          [creationDateKey]: date.toString(),
-          [modificationDateKey]: date.toString(),
+          [creationDateKey]: date1.toISOString(),
+          [modificationDateKey]: date2.toISOString(),
         },
       };
       const { creationDate, modificationDate } = extractDate(keyEntry);
-      expect(creationDate).toEqual(date);
-      expect(modificationDate).toEqual(date);
+      expect(creationDate).toEqual(date1);
+      expect(modificationDate).toEqual(date2);
     });
   });
 });

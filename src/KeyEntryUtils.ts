@@ -11,8 +11,8 @@ export function createKeyEntry(cloudEntry: CloudEntry): IKeyEntry {
     value: cloudEntry.data,
     meta: {
       ...cloudEntry.meta,
-      [creationDateKey]: cloudEntry.creationDate.toString(),
-      [modificationDateKey]: cloudEntry.modificationDate.toString(),
+      [creationDateKey]: cloudEntry.creationDate.toISOString(),
+      [modificationDateKey]: cloudEntry.modificationDate.toISOString(),
     },
   };
 }
@@ -27,6 +27,6 @@ export function extractDate(
     throw new TypeError("Invalid 'IKeyEntry'");
   }
   const creationDate = new Date(keyEntry.meta[creationDateKey]);
-  const modificationDate = new Date(keyEntry.meta[creationDateKey]);
+  const modificationDate = new Date(keyEntry.meta[modificationDateKey]);
   return { creationDate, modificationDate };
 }
