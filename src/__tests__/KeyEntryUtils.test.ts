@@ -42,6 +42,8 @@ describe('KeyEntryUtils', () => {
       const keyEntry = {
         name: 'name',
         value: Buffer.from('value'),
+        creationDate: new Date(),
+        modificationDate: new Date(),
       };
       const error = () => extractDate(keyEntry);
       expect(error).toThrow();
@@ -57,6 +59,8 @@ describe('KeyEntryUtils', () => {
           [creationDateKey]: date1.toISOString(),
           [modificationDateKey]: date2.toISOString(),
         },
+        creationDate: new Date(),
+        modificationDate: new Date(),
       };
       const { creationDate, modificationDate } = extractDate(keyEntry);
       expect(creationDate).toEqual(date1);

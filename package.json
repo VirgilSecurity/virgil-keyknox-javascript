@@ -48,18 +48,18 @@
   },
   "peerDependencies": {
     "virgil-crypto": "^3.0.0",
-    "virgil-sdk": "^5.0.0-rc.1"
+    "virgil-sdk": "^5.0.0-rc.2"
   },
   "devDependencies": {
-    "@types/jest": "^23.3.0",
-    "@types/node": "^10.5.2",
+    "@types/jest": "^23.3.1",
+    "@types/node": "^10.5.4",
     "@types/uuid": "^3.4.3",
     "cross-env": "^5.2.0",
     "dotenv": "^6.0.0",
     "husky": "^0.14.3",
-    "jest": "^23.4.1",
+    "jest": "^23.4.2",
     "lint-staged": "^7.2.0",
-    "prettier": "^1.13.7",
+    "prettier": "^1.14.0",
     "rimraf": "^2.6.2",
     "rollup": "^0.63.4",
     "rollup-plugin-typescript2": "^0.16.1",
@@ -71,6 +71,6 @@
     "typescript": "^2.9.2",
     "uuid": "^3.3.2",
     "virgil-crypto": "^3.0.0",
-    "virgil-sdk": "^5.0.0-rc.1"
+    "virgil-sdk": "^5.0.0-rc.2"
   }
 }

@@ -5,7 +5,13 @@ import { CloudEntry } from './entities';
 export const creationDateKey = 'k_cda';
 export const modificationDateKey = 'k_mda';
 
-export function createKeyEntry(cloudEntry: CloudEntry): IKeyEntry {
+export function createKeyEntry(
+  cloudEntry: CloudEntry,
+): {
+  name: string;
+  value: Buffer;
+  meta: { [key: string]: string };
+} {
   return {
     name: cloudEntry.name,
     value: cloudEntry.data,
