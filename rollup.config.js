@@ -35,10 +35,7 @@ if (!environment[env]) {
 
 module.exports = {
   input: path.join(__dirname, 'src', 'index.ts'),
-  external: Array.prototype.concat(
-    Object.keys(packageJson.dependencies),
-    Object.keys(packageJson.peerDependencies),
-  ),
+  external: Object.keys(packageJson.peerDependencies),
   output: {
     format,
     file: `${packageJson.name}.${env}.${format}.js`,
