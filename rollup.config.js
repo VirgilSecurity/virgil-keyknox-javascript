@@ -53,16 +53,16 @@ module.exports = {
   },
   plugins: [
     format === umd && resolve({ browser: true }),
+    format === umd && commonjs(),
     typescript({
       exclude: ['**/*.test.ts', '**/*.spec.ts', '**/__mocks__/*.ts'],
       useTsconfigDeclarationDir: true,
     }),
-    env === browser && nodeGlobals(),
     env === browser && inject({
       modules: {
         Buffer: ['buffer-es6', 'Buffer'],
       },
     }),
-    format === umd && commonjs(),
+    env === browser && nodeGlobals(),
   ],
 };
