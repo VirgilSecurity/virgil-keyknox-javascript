@@ -34,7 +34,7 @@ if (!environment[env]) {
 }
 
 let external = Object.keys(packageJson.peerDependencies);
-if (env !== umd) {
+if (format !== umd) {
   external = external.concat(Object.keys(packageJson.dependencies));
 }
 
