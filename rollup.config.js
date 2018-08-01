@@ -33,9 +33,14 @@ if (!environment[env]) {
   throw new TypeError(`'${format}' is not a valid module format for '${env}' environment`);
 }
 
+let external = Object.keys(packageJson.peerDependencies);
+if (env !== umd) {
+  external = external.concat(Object.keys(packageJson.dependencies));
+}
+
 module.exports = {
+  external,
   input: path.join(__dirname, 'src', 'index.ts'),
-  external: Object.keys(packageJson.peerDependencies),
   output: {
     format,
     file: `${packageJson.name}.${env}.${format}.js`,
