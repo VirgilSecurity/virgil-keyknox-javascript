@@ -246,9 +246,9 @@ describe('SyncKeyStorage', () => {
       [keyEntry2.name]: keyEntry2,
     };
     await keyEntryStorage.remove(keyEntry1.name);
-    await keyEntryStorage.save(keyEntry1.name, { value: keyEntry1.value });
+    await keyEntryStorage.save(keyEntry1);
     await keyEntryStorage.remove(keyEntry2.name);
-    await keyEntryStorage.save(keyEntry2.name, { value: keyEntry2.value });
+    await keyEntryStorage.save(keyEntry2);
     const entries = await syncKeyStorage.retrieveAllEntries();
     const [entry1, entry2] = entries;
     expect(entries.length).toBe(2);
@@ -300,7 +300,7 @@ describe('SyncKeyStorage', () => {
   test('KTC-40', async () => {
     const keyEntry = { name: uuid(), value: Buffer.from('value') };
     expect.assertions(10);
-    await keyEntryStorage.save(keyEntry.name, { value: keyEntry.value });
+    await keyEntryStorage.save(keyEntry);
     await expect(syncKeyStorage.deleteEntry(keyEntry.name)).rejects.toThrow(
       CloudKeyStorageOutOfSyncError,
     );

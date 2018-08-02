@@ -3968,9 +3968,9 @@ virgil-crypto@^3.0.0:
     tempy "^0.2.1"
     yauzl "^2.9.1"
 
-virgil-sdk@^5.0.0-rc.2:
-  version "5.0.0-rc.2"
-  resolved "https://registry.yarnpkg.com/virgil-sdk/-/virgil-sdk-5.0.0-rc.2.tgz#73f6b3a5b7772308dfaa60f624f956b6aa23bd78"
+virgil-sdk@^5.0.0-rc.3:
+  version "5.0.0-rc.3"
+  resolved "https://registry.yarnpkg.com/virgil-sdk/-/virgil-sdk-5.0.0-rc.3.tgz#1e9d40336147cdd3f36c4f393a98d26764fc6ab9"
   dependencies:
     fetch-ponyfill "^6.0.2"
     mkdirp "^0.5.1"

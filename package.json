@@ -57,7 +57,7 @@
   },
   "peerDependencies": {
     "virgil-crypto": "^3.0.0",
-    "virgil-sdk": "^5.0.0-rc.2"
+    "virgil-sdk": "^5.0.0-rc.3"
   },
   "devDependencies": {
     "@types/jest": "^23.3.1",
@@ -85,6 +85,6 @@
     "typescript": "^2.9.2",
     "uuid": "^3.3.2",
     "virgil-crypto": "^3.0.0",
-    "virgil-sdk": "^5.0.0-rc.2"
+    "virgil-sdk": "^5.0.0-rc.3"
   }
 }
