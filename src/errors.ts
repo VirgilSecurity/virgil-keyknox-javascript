@@ -1,7 +1,8 @@
 export class KeyknoxError extends Error {
   constructor(message: string) {
     super(message);
-    Object.setPrototypeOf(this, KeyknoxError.prototype);
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = 'KeyknoxError';
   }
 }
 
@@ -11,7 +12,7 @@ export class KeyknoxClientError extends KeyknoxError {
 
   constructor(message: string, status?: number, code?: number) {
     super(message);
-    Object.setPrototypeOf(this, KeyknoxClientError.prototype);
+    this.name = 'KeyknoxClientError';
     this.status = status;
     this.code = code;
   }
@@ -20,7 +21,7 @@ export class KeyknoxClientError extends KeyknoxError {
 export class CloudKeyStorageOutOfSyncError extends KeyknoxError {
   constructor() {
     super('CloudKeyStorage is out of sync');
-    Object.setPrototypeOf(this, CloudKeyStorageOutOfSyncError.prototype);
+    this.name = 'CloudKeyStorageOutOfSyncError';
   }
 }
 
@@ -29,8 +30,8 @@ export class CloudEntryExistsError extends KeyknoxError {
 
   constructor(cloudEntryName: string) {
     super(`Cloud entry '${cloudEntryName}' already exists`);
+    this.name = 'CloudEntryExistsError';
     this.cloudEntryName = cloudEntryName;
-    Object.setPrototypeOf(this, CloudEntryExistsError.prototype);
   }
 }
 
@@ -39,8 +40,8 @@ export class CloudEntryDoesntExistError extends KeyknoxError {
 
   constructor(cloudEntryName: string) {
     super(`Cloud entry '${cloudEntryName}' doesn't exist`);
+    this.name = 'CloudEntryDoesntExistError';
     this.cloudEntryName = cloudEntryName;
-    Object.setPrototypeOf(this, CloudEntryDoesntExistError.prototype);
   }
 }
 
@@ -49,8 +50,8 @@ export class KeyEntryExistsError extends KeyknoxError {
 
   constructor(keyEntryName: string) {
     super(`Key entry '${keyEntryName}' already exists`);
+    this.name = 'KeyEntryExistsError';
     this.keyEntryName = keyEntryName;
-    Object.setPrototypeOf(this, KeyEntryExistsError.prototype);
   }
 }
 
@@ -59,7 +60,7 @@ export class KeyEntryDoesntExistError extends KeyknoxError {
 
   constructor(keyEntryName: string) {
     super(`Key entry '${keyEntryName}' doesn't exist`);
+    this.name = 'KeyEntryDoesntExistError';
     this.keyEntryName = keyEntryName;
-    Object.setPrototypeOf(this, KeyEntryDoesntExistError.prototype);
   }
 }
