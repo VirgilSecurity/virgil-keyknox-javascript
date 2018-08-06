@@ -65,7 +65,7 @@ export default class CloudKeyStorage {
 
   retrieveAllEntries(): CloudEntry[] {
     this.checkSyncCall();
-    return Object.values(this.cache);
+    return Object.keys(this.cache).map(key => this.cache[key]);
   }
 
   existsEntry(name: string): boolean {
