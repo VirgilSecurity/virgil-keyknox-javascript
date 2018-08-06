@@ -22,15 +22,25 @@ export default class SyncKeyStorage {
     this.keyEntryStorage = keyEntryStorage;
   }
 
-  static create(
-    identity: string,
-    accessTokenProvider: IAccessTokenProvider,
-    privateKey: VirgilPrivateKey,
-    publicKey: VirgilPublicKey | VirgilPublicKey[],
-    keyEntryStorage: IKeyEntryStorage,
-  ): SyncKeyStorage {
-    const cloudKeyStorage = CloudKeyStorage.create(accessTokenProvider, privateKey, publicKey);
-    return new SyncKeyStorage(identity, cloudKeyStorage, keyEntryStorage);
+  static create(options: {
+    identity: string;
+    accessTokenProvider: IAccessTokenProvider;
+    privateKey: VirgilPrivateKey;
+    publicKey?: VirgilPublicKey;
+    publicKeys?: VirgilPublicKey[];
+    keyEntryStorage: IKeyEntryStorage;
+  }): SyncKeyStorage {
+    if (!options.publicKey && !options.publicKeys) {
+      throw new TypeError("You need to specify 'publicKey' or 'publicKeys'");
+    }
+    const { accessTokenProvider, privateKey, publicKey, publicKeys } = options;
+    const cloudKeyStorage = CloudKeyStorage.create({
+      accessTokenProvider,
+      privateKey,
+      publicKey,
+      publicKeys,
+    });
+    return new SyncKeyStorage(options.identity, cloudKeyStorage, options.keyEntryStorage);
   }
 
   async storeEntries(keyEntries: KeyEntry[]): Promise<IKeyEntry[]> {

@@ -37,11 +37,11 @@ describe('CloudKeyStorage', () => {
     });
     const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
     const keyPair = virgilCrypto.generateKeys();
-    cloudKeyStorage = CloudKeyStorage.create(
+    cloudKeyStorage = CloudKeyStorage.create({
       accessTokenProvider,
-      keyPair.privateKey,
-      keyPair.publicKey,
-    );
+      privateKey: keyPair.privateKey,
+      publicKey: keyPair.publicKey,
+    });
   });
 
   test('KTC-19', async () => {

@@ -22,12 +22,20 @@ export default class CloudKeyStorage {
     this.keyknoxManager = keyknoxManager;
   }
 
-  static create(
-    accessTokenProvider: IAccessTokenProvider,
-    privateKey: VirgilPrivateKey,
-    publicKey: VirgilPublicKey | VirgilPublicKey[],
-  ): CloudKeyStorage {
-    const keyknoxManager = new KeyknoxManager(accessTokenProvider, privateKey, publicKey);
+  static create(options: {
+    accessTokenProvider: IAccessTokenProvider;
+    privateKey: VirgilPrivateKey;
+    publicKey?: VirgilPublicKey;
+    publicKeys?: VirgilPublicKey[];
+  }): CloudKeyStorage {
+    if (!options.publicKey && !options.publicKeys) {
+      throw new TypeError("You need to specify 'publicKey' or 'publicKeys'");
+    }
+    const keyknoxManager = new KeyknoxManager(
+      options.accessTokenProvider,
+      options.privateKey,
+      options.publicKey! || options.publicKeys!,
+    );
     return new CloudKeyStorage(keyknoxManager);
   }
 
