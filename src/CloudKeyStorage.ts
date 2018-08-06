@@ -100,14 +100,17 @@ export default class CloudKeyStorage {
     await this.pushCacheEntries();
   }
 
-  async updateRecipients(
-    newPrivateKey?: VirgilPrivateKey,
-    newPublicKey?: VirgilPublicKey | VirgilPublicKey[],
-  ): Promise<void> {
+  async updateRecipients(options: {
+    newPrivateKey?: VirgilPrivateKey;
+    newPublicKey?: VirgilPublicKey;
+    newPublicKeys?: VirgilPublicKey[];
+  }): Promise<void> {
     this.throwUnlessSyncWasCalled();
+    const { newPrivateKey, newPublicKey, newPublicKeys } = options;
     this.decryptedKeyknoxValue = await this.keyknoxManager.updateRecipients({
       newPrivateKey,
       newPublicKey,
+      newPublicKeys,
     });
     this.cache = deserialize(this.decryptedKeyknoxValue.value);
   }

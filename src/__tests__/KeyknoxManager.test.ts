@@ -128,7 +128,7 @@ describe('KeyknoxManager', () => {
     publicKeys = getPublicKeys(keyPairs, 24, 50);
     let decryptedKeyknoxValue = await keyknoxManager2.updateRecipients({
       newPrivateKey: privateKey,
-      newPublicKey: publicKeys,
+      newPublicKeys: publicKeys,
     });
     expect(keyknoxManager2.privateKey).toBe(privateKey);
     expect(keyknoxManager2.publicKey).toBe(publicKeys);
@@ -159,11 +159,11 @@ describe('KeyknoxManager', () => {
     const keyknoxManager2 = createKeyknoxManager(privateKey, publicKeys, identity);
     privateKey = keyPairs[getRandomInRange(24, 50)].privateKey;
     publicKeys = getPublicKeys(keyPairs, 24, 50);
-    decryptedKeyknoxValue = await keyknoxManager2.updateRecipients({
+    decryptedKeyknoxValue = await keyknoxManager2.updateValue({
       value: updatedValue,
       previousHash: decryptedKeyknoxValue.keyknoxHash,
       newPrivateKey: privateKey,
-      newPublicKey: publicKeys,
+      newPublicKeys: publicKeys,
     });
     expect(keyknoxManager2.privateKey).toBe(privateKey);
     expect(keyknoxManager2.publicKey).toBe(publicKeys);
@@ -191,7 +191,7 @@ describe('KeyknoxManager', () => {
     expect.assertions(3);
     const decryptedKeyknoxValue = await keyknoxManager.updateRecipients({
       newPrivateKey: privateKey,
-      newPublicKey: publicKeys,
+      newPublicKeys: publicKeys,
     });
     expect(decryptedKeyknoxValue.meta.byteLength).toBe(0);
     expect(decryptedKeyknoxValue.value.byteLength).toBe(0);

@@ -96,11 +96,17 @@ export default class SyncKeyStorage {
     await Promise.all(deleteRequests);
   }
 
-  async updateRecipients(
-    newPrivateKey?: VirgilPrivateKey,
-    newPublicKey?: VirgilPublicKey | VirgilPublicKey[],
-  ): Promise<void> {
-    return this.cloudKeyStorage.updateRecipients(newPrivateKey, newPublicKey);
+  async updateRecipients(options: {
+    newPrivateKey?: VirgilPrivateKey;
+    newPublicKey?: VirgilPublicKey;
+    newPublicKeys?: VirgilPublicKey[];
+  }): Promise<void> {
+    const { newPrivateKey, newPublicKey, newPublicKeys } = options;
+    return this.cloudKeyStorage.updateRecipients({
+      newPrivateKey,
+      newPublicKey,
+      newPublicKeys,
+    });
   }
 
   async sync(): Promise<void> {

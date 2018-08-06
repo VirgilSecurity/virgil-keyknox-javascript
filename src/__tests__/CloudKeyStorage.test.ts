@@ -196,8 +196,11 @@ describe('CloudKeyStorage', () => {
     let cloudEntries = cloudKeyStorage.retrieveAllEntries();
     expect(cloudEntries.length).toBe(keyEntries.length);
     const virgilCrypto = new VirgilCrypto();
-    const keyPair = virgilCrypto.generateKeys();
-    await cloudKeyStorage.updateRecipients(keyPair.privateKey, keyPair.publicKey);
+    const { privateKey: newPrivateKey, publicKey: newPublicKey } = virgilCrypto.generateKeys();
+    await cloudKeyStorage.updateRecipients({
+      newPrivateKey,
+      newPublicKey,
+    });
     await cloudKeyStorage.retrieveCloudEntries();
     cloudEntries = cloudKeyStorage.retrieveAllEntries();
     expect(cloudEntries.length).toBe(keyEntries.length);
@@ -207,7 +210,7 @@ describe('CloudKeyStorage', () => {
     const keyEntries = generateKeyEntries(10);
     const [keyEntry1, keyEntry2] = keyEntries;
     const virgilCrypto = new VirgilCrypto();
-    const keyPair = virgilCrypto.generateKeys();
+    const { privateKey, publicKey } = virgilCrypto.generateKeys();
     const error1 = () => cloudKeyStorage.retrieveAllEntries();
     const error2 = () => cloudKeyStorage.retrieveEntry('name');
     const error3 = () => cloudKeyStorage.existsEntry('name');
@@ -231,7 +234,7 @@ describe('CloudKeyStorage', () => {
       CloudKeyStorageOutOfSyncError,
     );
     await expect(
-      cloudKeyStorage.updateRecipients(keyPair.privateKey, keyPair.publicKey),
+      cloudKeyStorage.updateRecipients({ newPrivateKey: privateKey, newPublicKey: publicKey }),
     ).rejects.toThrow(CloudKeyStorageOutOfSyncError);
   });
 

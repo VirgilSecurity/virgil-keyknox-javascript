@@ -171,10 +171,10 @@ describe('SyncKeyStorage', () => {
     await syncKeyStorage.sync();
     await syncKeyStorage.storeEntry(keyEntry.name, keyEntry.data);
     const virgilCrypto = new VirgilCrypto();
-    const keyPair = virgilCrypto.generateKeys();
-    await syncKeyStorage.updateRecipients(keyPair.privateKey, keyPair.publicKey);
-    expect(keyknoxManager.privateKey).toBe(keyPair.privateKey);
-    expect(keyknoxManager.publicKey).toBe(keyPair.publicKey);
+    const { privateKey: newPrivateKey, publicKey: newPublicKey } = virgilCrypto.generateKeys();
+    await syncKeyStorage.updateRecipients({ newPrivateKey, newPublicKey });
+    expect(keyknoxManager.privateKey).toBe(newPrivateKey);
+    expect(keyknoxManager.publicKey).toBe(newPublicKey);
     await syncKeyStorage.sync();
     const entry = await syncKeyStorage.retrieveEntry(keyEntry.name);
     expect(entry).toBeDefined();
@@ -324,10 +324,10 @@ describe('SyncKeyStorage', () => {
       CloudKeyStorageOutOfSyncError,
     );
     const virgilCrypto = new VirgilCrypto();
-    const keyPair = virgilCrypto.generateKeys();
-    await expect(
-      syncKeyStorage.updateRecipients(keyPair.privateKey, keyPair.publicKey),
-    ).rejects.toThrow(CloudKeyStorageOutOfSyncError);
+    const { privateKey: newPrivateKey, publicKey: newPublicKey } = virgilCrypto.generateKeys();
+    await expect(syncKeyStorage.updateRecipients({ newPrivateKey, newPublicKey })).rejects.toThrow(
+      CloudKeyStorageOutOfSyncError,
+    );
   });
 
   it("should throw 'KeyEntryExistsError' if we try to store entry with name that's already in use", async () => {
