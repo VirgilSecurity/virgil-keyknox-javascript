@@ -15,7 +15,7 @@ export default class CloudKeyStorage {
   private readonly keyknoxManager: KeyknoxManager;
 
   private decryptedKeyknoxValue?: DecryptedKeyknoxValue;
-  private cache: { [key: string]: CloudEntry } = {};
+  private cache: Map<string, CloudEntry> = new Map();
   private syncWasCalled: boolean = false;
 
   constructor(keyknoxManager: KeyknoxManager) {
@@ -35,10 +35,10 @@ export default class CloudKeyStorage {
     this.throwUnlessSyncWasCalled();
     keyEntries.forEach(keyEntry => {
       this.throwIfCloudEntryExists(keyEntry.name);
-      this.cache[keyEntry.name] = CloudKeyStorage.createCloudEntry(keyEntry);
+      this.cache.set(keyEntry.name, CloudKeyStorage.createCloudEntry(keyEntry));
     });
     await this.pushCacheEntries();
-    return keyEntries.map(keyEntry => this.cache[keyEntry.name]);
+    return keyEntries.map(keyEntry => this.cache.get(keyEntry.name)!);
   }
 
   async storeEntry(name: string, data: Data, meta?: Meta): Promise<CloudEntry> {
@@ -49,28 +49,28 @@ export default class CloudKeyStorage {
   async updateEntry(name: string, data: Data, meta?: Meta): Promise<CloudEntry> {
     this.throwUnlessSyncWasCalled();
     this.throwUnlessCloudEntryExists(name);
-    this.cache[name] = CloudKeyStorage.createCloudEntry(
-      { name, data, meta },
-      this.cache[name].creationDate,
+    this.cache.set(
+      name,
+      CloudKeyStorage.createCloudEntry({ name, data, meta }, this.cache.get(name)!.creationDate),
     );
     await this.pushCacheEntries();
-    return this.cache[name];
+    return this.cache.get(name)!;
   }
 
   retrieveEntry(name: string): CloudEntry {
     this.throwUnlessSyncWasCalled();
     this.throwUnlessCloudEntryExists(name);
-    return this.cache[name];
+    return this.cache.get(name)!;
   }
 
   retrieveAllEntries(): CloudEntry[] {
     this.throwUnlessSyncWasCalled();
-    return Object.values(this.cache);
+    return Array.from(this.cache.values());
   }
 
   existsEntry(name: string): boolean {
     this.throwUnlessSyncWasCalled();
-    return Boolean(this.cache[name]);
+    return Boolean(this.cache.get(name));
   }
 
   async deleteEntry(name: string): Promise<void> {
@@ -81,14 +81,14 @@ export default class CloudKeyStorage {
     this.throwUnlessSyncWasCalled();
     names.forEach(name => {
       this.throwUnlessCloudEntryExists(name);
-      delete this.cache[name];
+      this.cache.delete(name);
     });
     await this.pushCacheEntries();
   }
 
   async deleteAllEntries(): Promise<void> {
     this.throwUnlessSyncWasCalled();
-    this.cache = {};
+    this.cache.clear();
     await this.pushCacheEntries();
   }
 
@@ -117,13 +117,13 @@ export default class CloudKeyStorage {
   }
 
   private throwUnlessCloudEntryExists(entryName: string) {
-    if (!this.cache[entryName]) {
+    if (!this.cache.get(entryName)) {
       throw new CloudEntryDoesntExistError(entryName);
     }
   }
 
   private throwIfCloudEntryExists(entryName: string) {
-    if (this.cache[entryName]) {
+    if (this.cache.get(entryName)) {
       throw new CloudEntryExistsError(entryName);
     }
   }
