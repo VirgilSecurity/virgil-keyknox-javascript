@@ -34,7 +34,7 @@ export default class SyncKeyStorage {
   }
 
   async storeEntries(keyEntries: KeyEntry[]): Promise<IKeyEntry[]> {
-    const checkRequests = keyEntries.map(keyEntry => this.checkIfKeyEntryNotExists(keyEntry.name));
+    const checkRequests = keyEntries.map(keyEntry => this.throwIfKeyEntryExists(keyEntry.name));
     await Promise.all(checkRequests);
     const cloudEntries = await this.cloudKeyStorage.storeEntries(keyEntries);
     const storeRequests = cloudEntries.map(async cloudEntry => {
@@ -50,14 +50,14 @@ export default class SyncKeyStorage {
   }
 
   async updateEntry(name: string, data: Data, meta?: Meta): Promise<void> {
-    await this.checkIfKeyEntryExists(name);
+    await this.throwUnlessKeyEntryExists(name);
     const cloudEntry = await this.cloudKeyStorage.updateEntry(name, data, meta);
     const keyEntry = createKeyEntry(cloudEntry);
     await this.keyEntryStorage.update(keyEntry);
   }
 
   async retrieveEntry(name: string): Promise<IKeyEntry> {
-    await this.checkIfKeyEntryExists(name);
+    await this.throwUnlessKeyEntryExists(name);
     return this.keyEntryStorage.load(name) as Promise<IKeyEntry>;
   }
 
@@ -135,14 +135,14 @@ export default class SyncKeyStorage {
     return this.syncKeyStorage(storeNames, updateNames, deleteNames);
   }
 
-  private async checkIfKeyEntryExists(name: string): Promise<void> {
+  private async throwUnlessKeyEntryExists(name: string): Promise<void> {
     const exists = await this.keyEntryStorage.exists(name);
     if (!exists) {
       throw new KeyEntryDoesntExistError(name);
     }
   }
 
-  private async checkIfKeyEntryNotExists(name: string): Promise<void> {
+  private async throwIfKeyEntryExists(name: string): Promise<void> {
     const exists = await this.keyEntryStorage.exists(name);
     if (exists) {
       throw new KeyEntryExistsError(name);

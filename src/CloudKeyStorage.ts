@@ -32,9 +32,9 @@ export default class CloudKeyStorage {
   }
 
   async storeEntries(keyEntries: KeyEntry[]): Promise<CloudEntry[]> {
-    this.checkSyncCall();
+    this.throwUnlessSyncWasCalled();
     keyEntries.forEach(keyEntry => {
-      this.checkIfCloudEntryNotExists(keyEntry.name);
+      this.throwIfCloudEntryExists(keyEntry.name);
       this.cache[keyEntry.name] = CloudKeyStorage.createCloudEntry(keyEntry);
     });
     await this.pushCacheEntries();
@@ -47,8 +47,8 @@ export default class CloudKeyStorage {
   }
 
   async updateEntry(name: string, data: Data, meta?: Meta): Promise<CloudEntry> {
-    this.checkSyncCall();
-    this.checkIfCloudEntryExists(name);
+    this.throwUnlessSyncWasCalled();
+    this.throwUnlessCloudEntryExists(name);
     this.cache[name] = CloudKeyStorage.createCloudEntry(
       { name, data, meta },
       this.cache[name].creationDate,
@@ -58,18 +58,18 @@ export default class CloudKeyStorage {
   }
 
   retrieveEntry(name: string): CloudEntry {
-    this.checkSyncCall();
-    this.checkIfCloudEntryExists(name);
+    this.throwUnlessSyncWasCalled();
+    this.throwUnlessCloudEntryExists(name);
     return this.cache[name];
   }
 
   retrieveAllEntries(): CloudEntry[] {
-    this.checkSyncCall();
+    this.throwUnlessSyncWasCalled();
     return Object.values(this.cache);
   }
 
   existsEntry(name: string): boolean {
-    this.checkSyncCall();
+    this.throwUnlessSyncWasCalled();
     return Boolean(this.cache[name]);
   }
 
@@ -78,16 +78,16 @@ export default class CloudKeyStorage {
   }
 
   async deleteEntries(names: string[]): Promise<void> {
-    this.checkSyncCall();
+    this.throwUnlessSyncWasCalled();
     names.forEach(name => {
-      this.checkIfCloudEntryExists(name);
+      this.throwUnlessCloudEntryExists(name);
       delete this.cache[name];
     });
     await this.pushCacheEntries();
   }
 
   async deleteAllEntries(): Promise<void> {
-    this.checkSyncCall();
+    this.throwUnlessSyncWasCalled();
     this.cache = {};
     await this.pushCacheEntries();
   }
@@ -96,7 +96,7 @@ export default class CloudKeyStorage {
     newPrivateKey?: VirgilPrivateKey,
     newPublicKey?: VirgilPublicKey | VirgilPublicKey[],
   ): Promise<void> {
-    this.checkSyncCall();
+    this.throwUnlessSyncWasCalled();
     this.decryptedKeyknoxValue = await this.keyknoxManager.updateRecipients({
       newPrivateKey,
       newPublicKey,
@@ -110,19 +110,19 @@ export default class CloudKeyStorage {
     this.syncWasCalled = true;
   }
 
-  private checkSyncCall() {
+  private throwUnlessSyncWasCalled() {
     if (!this.syncWasCalled) {
       throw new CloudKeyStorageOutOfSyncError();
     }
   }
 
-  private checkIfCloudEntryExists(entryName: string) {
+  private throwUnlessCloudEntryExists(entryName: string) {
     if (!this.cache[entryName]) {
       throw new CloudEntryDoesntExistError(entryName);
     }
   }
 
-  private checkIfCloudEntryNotExists(entryName: string) {
+  private throwIfCloudEntryExists(entryName: string) {
     if (this.cache[entryName]) {
       throw new CloudEntryExistsError(entryName);
     }
