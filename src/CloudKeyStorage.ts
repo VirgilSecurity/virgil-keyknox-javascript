@@ -57,12 +57,13 @@ export default class CloudKeyStorage {
   async updateEntry(name: string, data: Data, meta?: Meta): Promise<CloudEntry> {
     this.throwUnlessSyncWasCalled();
     this.throwUnlessCloudEntryExists(name);
-    this.cache.set(
-      name,
-      CloudKeyStorage.createCloudEntry({ name, data, meta }, this.cache.get(name)!.creationDate),
+    const cloudEntry = CloudKeyStorage.createCloudEntry(
+      { name, data, meta },
+      this.cache.get(name)!.creationDate,
     );
+    this.cache.set(name, cloudEntry);
     await this.pushCacheEntries();
-    return this.cache.get(name)!;
+    return cloudEntry;
   }
 
   retrieveEntry(name: string): CloudEntry {
@@ -78,7 +79,7 @@ export default class CloudKeyStorage {
 
   existsEntry(name: string): boolean {
     this.throwUnlessSyncWasCalled();
-    return Boolean(this.cache.get(name));
+    return this.cache.has(name);
   }
 
   async deleteEntry(name: string): Promise<void> {
@@ -128,13 +129,13 @@ export default class CloudKeyStorage {
   }
 
   private throwUnlessCloudEntryExists(entryName: string) {
-    if (!this.cache.get(entryName)) {
+    if (!this.cache.has(entryName)) {
       throw new CloudEntryDoesntExistError(entryName);
     }
   }
 
   private throwIfCloudEntryExists(entryName: string) {
-    if (this.cache.get(entryName)) {
+    if (this.cache.has(entryName)) {
       throw new CloudEntryExistsError(entryName);
     }
   }
