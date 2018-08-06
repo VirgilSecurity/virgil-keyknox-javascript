@@ -89,7 +89,7 @@ describe('KeyknoxManager', () => {
     await keyknoxManager1.pushValue(value);
     const decryptedKeyknoxValue = await keyknoxManager1.pullValue();
     expect(decryptedKeyknoxValue.value).toEqual(value);
-    publicKeys = getPublicKeys(keyPairs, 24, 50);
+    publicKeys = getPublicKeys(keyPairs, 25, 50);
     const keyknoxManager2 = createKeyknoxManager(keyPairs[0].privateKey, publicKeys, identity);
     await expect(keyknoxManager2.pullValue()).rejects.toThrow();
   });
@@ -109,7 +109,7 @@ describe('KeyknoxManager', () => {
     const keyknoxManager2 = createKeyknoxManager(privateKey, publicKeys, identity);
     decryptedKeyknoxValue = await keyknoxManager2.pullValue();
     expect(decryptedKeyknoxValue.value).toEqual(value);
-    privateKey = keyPairs[getRandomInRange(24, 50)].privateKey;
+    privateKey = keyPairs[getRandomInRange(25, 50)].privateKey;
     const keyknoxManager3 = createKeyknoxManager(privateKey, publicKeys, identity);
     await expect(keyknoxManager3.pullValue()).rejects.toThrow();
   });
@@ -124,8 +124,8 @@ describe('KeyknoxManager', () => {
     const keyknoxManager1 = createKeyknoxManager(privateKey, publicKeys, identity);
     await keyknoxManager1.pushValue(value);
     const keyknoxManager2 = createKeyknoxManager(privateKey, publicKeys, identity);
-    privateKey = keyPairs[getRandomInRange(24, 50)].privateKey;
-    publicKeys = getPublicKeys(keyPairs, 24, 50);
+    privateKey = keyPairs[getRandomInRange(25, 50)].privateKey;
+    publicKeys = getPublicKeys(keyPairs, 25, 50);
     let decryptedKeyknoxValue = await keyknoxManager2.updateRecipients({
       newPrivateKey: privateKey,
       newPublicKey: publicKeys,
@@ -133,14 +133,14 @@ describe('KeyknoxManager', () => {
     expect(keyknoxManager2.privateKey).toBe(privateKey);
     expect(keyknoxManager2.publicKey).toBe(publicKeys);
     expect(decryptedKeyknoxValue.value).toEqual(value);
-    privateKey = keyPairs[getRandomInRange(24, 50)].privateKey;
+    privateKey = keyPairs[getRandomInRange(25, 50)].privateKey;
     const keyknoxManager3 = createKeyknoxManager(privateKey, publicKeys, identity);
     decryptedKeyknoxValue = await keyknoxManager3.pullValue();
     expect(decryptedKeyknoxValue.value).toEqual(value);
     privateKey = keyPairs[getRandomInRange(0, 25)].privateKey;
     const keyknoxManager4 = createKeyknoxManager(privateKey, publicKeys, identity);
     await expect(keyknoxManager4.pullValue()).rejects.toThrow();
-    privateKey = keyPairs[getRandomInRange(24, 50)].privateKey;
+    privateKey = keyPairs[getRandomInRange(25, 50)].privateKey;
     publicKeys = getPublicKeys(keyPairs, 0, 25);
     const keyknoxManager5 = createKeyknoxManager(privateKey, publicKeys, identity);
     await expect(keyknoxManager5.pullValue()).rejects.toThrow();
@@ -157,8 +157,8 @@ describe('KeyknoxManager', () => {
     const keyknoxManager1 = createKeyknoxManager(privateKey, publicKeys, identity);
     let decryptedKeyknoxValue = await keyknoxManager1.pushValue(value);
     const keyknoxManager2 = createKeyknoxManager(privateKey, publicKeys, identity);
-    privateKey = keyPairs[getRandomInRange(24, 50)].privateKey;
-    publicKeys = getPublicKeys(keyPairs, 24, 50);
+    privateKey = keyPairs[getRandomInRange(25, 50)].privateKey;
+    publicKeys = getPublicKeys(keyPairs, 25, 50);
     decryptedKeyknoxValue = await keyknoxManager2.updateRecipients({
       value: updatedValue,
       previousHash: decryptedKeyknoxValue.keyknoxHash,
@@ -168,14 +168,14 @@ describe('KeyknoxManager', () => {
     expect(keyknoxManager2.privateKey).toBe(privateKey);
     expect(keyknoxManager2.publicKey).toBe(publicKeys);
     expect(decryptedKeyknoxValue.value).toEqual(value);
-    privateKey = keyPairs[getRandomInRange(24, 50)].privateKey;
+    privateKey = keyPairs[getRandomInRange(25, 50)].privateKey;
     const keyknoxManager3 = createKeyknoxManager(privateKey, publicKeys, identity);
     decryptedKeyknoxValue = await keyknoxManager3.pullValue();
     expect(decryptedKeyknoxValue.value).toEqual(value);
     privateKey = keyPairs[getRandomInRange(0, 25)].privateKey;
     const keyknoxManager4 = createKeyknoxManager(privateKey, publicKeys, identity);
     await expect(keyknoxManager4.pullValue()).rejects.toThrow();
-    privateKey = keyPairs[getRandomInRange(24, 50)].privateKey;
+    privateKey = keyPairs[getRandomInRange(25, 50)].privateKey;
     publicKeys = getPublicKeys(keyPairs, 0, 25);
     const keyknoxManager5 = createKeyknoxManager(privateKey, publicKeys, identity);
     await expect(keyknoxManager5.pullValue()).rejects.toThrow();
@@ -187,7 +187,7 @@ describe('KeyknoxManager', () => {
     let publicKeys = getPublicKeys(keyPairs, 0, 25);
     const keyknoxManager = createKeyknoxManager(privateKey, publicKeys);
     privateKey = keyPairs[24].privateKey;
-    publicKeys = getPublicKeys(keyPairs, 24, 50);
+    publicKeys = getPublicKeys(keyPairs, 25, 50);
     expect.assertions(3);
     const decryptedKeyknoxValue = await keyknoxManager.updateRecipients({
       newPrivateKey: privateKey,
