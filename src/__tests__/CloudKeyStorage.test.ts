@@ -9,6 +9,7 @@ import {
 } from '../errors';
 import CloudKeyStorage from '../CloudKeyStorage';
 import { CloudEntry, KeyEntry } from '../entities';
+import KeyknoxManager from '../KeyknoxManager';
 
 function generateKeyEntries(amount: number): KeyEntry[] {
   const keyEntries = [];
@@ -236,6 +237,31 @@ describe('CloudKeyStorage', () => {
     await expect(
       cloudKeyStorage.updateRecipients({ newPrivateKey: privateKey, newPublicKey: publicKey }),
     ).rejects.toThrow(CloudKeyStorageOutOfSyncError);
+  });
+
+  test('KTC-41', async () => {
+    const virgilCrypto = new VirgilCrypto();
+    const virgilAccessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
+    const apiKey = virgilCrypto.importPrivateKey(process.env.API_KEY!);
+    const jwtGenerator = new JwtGenerator({
+      apiKey,
+      appId: process.env.APP_ID!,
+      apiKeyId: process.env.API_KEY_ID!,
+      accessTokenSigner: virgilAccessTokenSigner,
+    });
+    const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
+    const keyPair = virgilCrypto.generateKeys();
+    const keyknoxManager = new KeyknoxManager(
+      accessTokenProvider,
+      keyPair.privateKey,
+      keyPair.publicKey,
+    );
+    cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
+    await keyknoxManager.pushValue(Buffer.from(uuid()));
+    await cloudKeyStorage.deleteAllEntries();
+    await cloudKeyStorage.retrieveCloudEntries();
+    const entries = cloudKeyStorage.retrieveAllEntries();
+    expect(entries.length).toBe(0);
   });
 
   it("should throw 'CloudEntryExistsError' if we try to store entry with name that's already in use", async () => {
