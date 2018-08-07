@@ -299,7 +299,7 @@ describe('SyncKeyStorage', () => {
 
   test('KTC-40', async () => {
     const keyEntry = { name: uuid(), value: Buffer.from('value') };
-    expect.assertions(10);
+    expect.assertions(9);
     await keyEntryStorage.save(keyEntry);
     await expect(syncKeyStorage.deleteEntry(keyEntry.name)).rejects.toThrow(
       CloudKeyStorageOutOfSyncError,
@@ -307,7 +307,6 @@ describe('SyncKeyStorage', () => {
     await expect(syncKeyStorage.deleteEntries([keyEntry.name])).rejects.toThrow(
       CloudKeyStorageOutOfSyncError,
     );
-    await expect(syncKeyStorage.deleteAllEntries()).rejects.toThrow(CloudKeyStorageOutOfSyncError);
     const keyEntries = generateKeyEntries(1);
     const [keyEntry1] = keyEntries;
     await expect(syncKeyStorage.storeEntry(keyEntry1.name, keyEntry1.data)).rejects.toThrow(

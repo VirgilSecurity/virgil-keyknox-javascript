@@ -96,9 +96,8 @@ export default class CloudKeyStorage {
   }
 
   async deleteAllEntries(): Promise<void> {
-    this.throwUnlessSyncWasCalled();
     this.cache.clear();
-    await this.pushCacheEntries();
+    await this.keyknoxManager.resetValue();
   }
 
   async updateRecipients(options: {
