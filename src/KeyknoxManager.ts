@@ -65,44 +65,26 @@ export default class KeyknoxManager {
     return this.keyknoxClient.resetValue(token.toString());
   }
 
-  async updateRecipients(options: {
+  async updateValue(options: {
+    value: Buffer;
+    previousHash: Buffer;
     newPrivateKey?: VirgilPrivateKey;
-    newPublicKey?: VirgilPublicKey | VirgilPublicKey[];
-    value?: Buffer;
-    previousHash?: Buffer;
+    newPublicKey?: VirgilPublicKey;
+    newPublicKeys?: VirgilPublicKey[];
   }): Promise<DecryptedKeyknoxValue> {
-    if (options.value && options.previousHash) {
-      return this.updateRecipientsValues(
-        options.value,
-        options.previousHash,
-        options.newPrivateKey,
-        options.newPublicKey,
-      );
+    if (!options.newPrivateKey && !options.newPublicKey && !options.newPublicKeys) {
+      return this.pushValue(options.value, options.previousHash);
     }
-    if (options.newPrivateKey || options.newPublicKey) {
-      return this.updateRecipientsKeys(options.newPrivateKey, options.newPublicKey);
+    const decryptedKeyknoxValue = await this.pullValue();
+    if (options.newPrivateKey) {
+      this.myPrivateKey = options.newPrivateKey;
     }
-    throw new TypeError();
-  }
-
-  private async updateRecipientsValues(
-    value: Buffer,
-    previousHash: Buffer,
-    newPrivateKey?: VirgilPrivateKey,
-    newPublicKey?: VirgilPublicKey | VirgilPublicKey[],
-  ): Promise<DecryptedKeyknoxValue> {
-    if (!newPrivateKey && !newPublicKey) {
-      return this.pushValue(value, previousHash);
-    }
-    const decrypedKeyknoxValue = await this.pullValue();
-    if (newPrivateKey) {
-      this.myPrivateKey = newPrivateKey;
-    }
+    const newPublicKey = options.newPublicKey || options.newPublicKeys;
     if (newPublicKey) {
       this.myPublicKey = newPublicKey;
     }
     const { metadata, encryptedData } = this.keyknoxCrypto.encrypt(
-      decrypedKeyknoxValue.value,
+      decryptedKeyknoxValue.value,
       this.myPrivateKey,
       this.myPublicKey,
     );
@@ -111,27 +93,29 @@ export default class KeyknoxManager {
       metadata,
       encryptedData,
       token.toString(),
-      decrypedKeyknoxValue.keyknoxHash,
+      decryptedKeyknoxValue.keyknoxHash,
     );
     return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.myPrivateKey, this.myPublicKey);
   }
 
-  private async updateRecipientsKeys(
-    newPrivateKey?: VirgilPrivateKey,
-    newPublicKey?: VirgilPublicKey | VirgilPublicKey[],
-  ): Promise<DecryptedKeyknoxValue> {
-    const decrypedKeyknoxValue = await this.pullValue();
-    if (!decrypedKeyknoxValue.meta.byteLength && !decrypedKeyknoxValue.value.byteLength) {
-      return decrypedKeyknoxValue;
+  async updateRecipients(options: {
+    newPrivateKey?: VirgilPrivateKey;
+    newPublicKey?: VirgilPublicKey;
+    newPublicKeys?: VirgilPublicKey[];
+  }): Promise<DecryptedKeyknoxValue> {
+    const decryptedKeyknoxValue = await this.pullValue();
+    if (!decryptedKeyknoxValue.meta.byteLength && !decryptedKeyknoxValue.value.byteLength) {
+      return decryptedKeyknoxValue;
     }
-    if (newPrivateKey) {
-      this.myPrivateKey = newPrivateKey;
+    if (options.newPrivateKey) {
+      this.myPrivateKey = options.newPrivateKey;
     }
+    const newPublicKey = options.newPublicKey || options.newPublicKeys;
     if (newPublicKey) {
       this.myPublicKey = newPublicKey;
     }
     const { metadata, encryptedData } = this.keyknoxCrypto.encrypt(
-      decrypedKeyknoxValue.value,
+      decryptedKeyknoxValue.value,
       this.myPrivateKey,
       this.myPublicKey,
     );
@@ -140,7 +124,7 @@ export default class KeyknoxManager {
       metadata,
       encryptedData,
       token.toString(),
-      decrypedKeyknoxValue.keyknoxHash,
+      decryptedKeyknoxValue.keyknoxHash,
     );
     return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.myPrivateKey, this.myPublicKey);
   }

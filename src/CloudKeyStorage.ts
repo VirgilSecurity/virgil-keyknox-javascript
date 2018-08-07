@@ -15,30 +15,38 @@ export default class CloudKeyStorage {
   private readonly keyknoxManager: KeyknoxManager;
 
   private decryptedKeyknoxValue?: DecryptedKeyknoxValue;
-  private cache: { [key: string]: CloudEntry } = {};
+  private cache: Map<string, CloudEntry> = new Map();
   private syncWasCalled: boolean = false;
 
   constructor(keyknoxManager: KeyknoxManager) {
     this.keyknoxManager = keyknoxManager;
   }
 
-  static create(
-    accessTokenProvider: IAccessTokenProvider,
-    privateKey: VirgilPrivateKey,
-    publicKey: VirgilPublicKey | VirgilPublicKey[],
-  ): CloudKeyStorage {
-    const keyknoxManager = new KeyknoxManager(accessTokenProvider, privateKey, publicKey);
+  static create(options: {
+    accessTokenProvider: IAccessTokenProvider;
+    privateKey: VirgilPrivateKey;
+    publicKey?: VirgilPublicKey;
+    publicKeys?: VirgilPublicKey[];
+  }): CloudKeyStorage {
+    if (!options.publicKey && !options.publicKeys) {
+      throw new TypeError("You need to specify 'publicKey' or 'publicKeys'");
+    }
+    const keyknoxManager = new KeyknoxManager(
+      options.accessTokenProvider,
+      options.privateKey,
+      options.publicKey! || options.publicKeys!,
+    );
     return new CloudKeyStorage(keyknoxManager);
   }
 
   async storeEntries(keyEntries: KeyEntry[]): Promise<CloudEntry[]> {
-    this.checkSyncCall();
+    this.throwUnlessSyncWasCalled();
     keyEntries.forEach(keyEntry => {
-      this.checkIfCloudEntryNotExists(keyEntry.name);
-      this.cache[keyEntry.name] = CloudKeyStorage.createCloudEntry(keyEntry);
+      this.throwIfCloudEntryExists(keyEntry.name);
+      this.cache.set(keyEntry.name, CloudKeyStorage.createCloudEntry(keyEntry));
     });
     await this.pushCacheEntries();
-    return keyEntries.map(keyEntry => this.cache[keyEntry.name]);
+    return keyEntries.map(keyEntry => this.cache.get(keyEntry.name)!);
   }
 
   async storeEntry(name: string, data: Data, meta?: Meta): Promise<CloudEntry> {
@@ -47,30 +55,31 @@ export default class CloudKeyStorage {
   }
 
   async updateEntry(name: string, data: Data, meta?: Meta): Promise<CloudEntry> {
-    this.checkSyncCall();
-    this.checkIfCloudEntryExists(name);
-    this.cache[name] = CloudKeyStorage.createCloudEntry(
+    this.throwUnlessSyncWasCalled();
+    this.throwUnlessCloudEntryExists(name);
+    const cloudEntry = CloudKeyStorage.createCloudEntry(
       { name, data, meta },
-      this.cache[name].creationDate,
+      this.cache.get(name)!.creationDate,
     );
+    this.cache.set(name, cloudEntry);
     await this.pushCacheEntries();
-    return this.cache[name];
+    return cloudEntry;
   }
 
   retrieveEntry(name: string): CloudEntry {
-    this.checkSyncCall();
-    this.checkIfCloudEntryExists(name);
-    return this.cache[name];
+    this.throwUnlessSyncWasCalled();
+    this.throwUnlessCloudEntryExists(name);
+    return this.cache.get(name)!;
   }
 
   retrieveAllEntries(): CloudEntry[] {
-    this.checkSyncCall();
-    return Object.keys(this.cache).map(key => this.cache[key]);
+    this.throwUnlessSyncWasCalled();
+    return Array.from(this.cache.values());
   }
 
   existsEntry(name: string): boolean {
-    this.checkSyncCall();
-    return Boolean(this.cache[name]);
+    this.throwUnlessSyncWasCalled();
+    return this.cache.has(name);
   }
 
   async deleteEntry(name: string): Promise<void> {
@@ -78,28 +87,31 @@ export default class CloudKeyStorage {
   }
 
   async deleteEntries(names: string[]): Promise<void> {
-    this.checkSyncCall();
+    this.throwUnlessSyncWasCalled();
     names.forEach(name => {
-      this.checkIfCloudEntryExists(name);
-      delete this.cache[name];
+      this.throwUnlessCloudEntryExists(name);
+      this.cache.delete(name);
     });
     await this.pushCacheEntries();
   }
 
   async deleteAllEntries(): Promise<void> {
-    this.checkSyncCall();
-    this.cache = {};
+    this.throwUnlessSyncWasCalled();
+    this.cache.clear();
     await this.pushCacheEntries();
   }
 
-  async updateRecipients(
-    newPrivateKey?: VirgilPrivateKey,
-    newPublicKey?: VirgilPublicKey | VirgilPublicKey[],
-  ): Promise<void> {
-    this.checkSyncCall();
+  async updateRecipients(options: {
+    newPrivateKey?: VirgilPrivateKey;
+    newPublicKey?: VirgilPublicKey;
+    newPublicKeys?: VirgilPublicKey[];
+  }): Promise<void> {
+    this.throwUnlessSyncWasCalled();
+    const { newPrivateKey, newPublicKey, newPublicKeys } = options;
     this.decryptedKeyknoxValue = await this.keyknoxManager.updateRecipients({
       newPrivateKey,
       newPublicKey,
+      newPublicKeys,
     });
     this.cache = deserialize(this.decryptedKeyknoxValue.value);
   }
@@ -110,20 +122,20 @@ export default class CloudKeyStorage {
     this.syncWasCalled = true;
   }
 
-  private checkSyncCall() {
+  private throwUnlessSyncWasCalled() {
     if (!this.syncWasCalled) {
       throw new CloudKeyStorageOutOfSyncError();
     }
   }
 
-  private checkIfCloudEntryExists(entryName: string) {
-    if (!this.cache[entryName]) {
+  private throwUnlessCloudEntryExists(entryName: string) {
+    if (!this.cache.has(entryName)) {
       throw new CloudEntryDoesntExistError(entryName);
     }
   }
 
-  private checkIfCloudEntryNotExists(entryName: string) {
-    if (this.cache[entryName]) {
+  private throwIfCloudEntryExists(entryName: string) {
+    if (this.cache.has(entryName)) {
       throw new CloudEntryExistsError(entryName);
     }
   }

@@ -22,19 +22,29 @@ export default class SyncKeyStorage {
     this.keyEntryStorage = keyEntryStorage;
   }
 
-  static create(
-    identity: string,
-    accessTokenProvider: IAccessTokenProvider,
-    privateKey: VirgilPrivateKey,
-    publicKey: VirgilPublicKey | VirgilPublicKey[],
-    keyEntryStorage: IKeyEntryStorage,
-  ): SyncKeyStorage {
-    const cloudKeyStorage = CloudKeyStorage.create(accessTokenProvider, privateKey, publicKey);
-    return new SyncKeyStorage(identity, cloudKeyStorage, keyEntryStorage);
+  static create(options: {
+    identity: string;
+    accessTokenProvider: IAccessTokenProvider;
+    privateKey: VirgilPrivateKey;
+    publicKey?: VirgilPublicKey;
+    publicKeys?: VirgilPublicKey[];
+    keyEntryStorage: IKeyEntryStorage;
+  }): SyncKeyStorage {
+    if (!options.publicKey && !options.publicKeys) {
+      throw new TypeError("You need to specify 'publicKey' or 'publicKeys'");
+    }
+    const { accessTokenProvider, privateKey, publicKey, publicKeys } = options;
+    const cloudKeyStorage = CloudKeyStorage.create({
+      accessTokenProvider,
+      privateKey,
+      publicKey,
+      publicKeys,
+    });
+    return new SyncKeyStorage(options.identity, cloudKeyStorage, options.keyEntryStorage);
   }
 
   async storeEntries(keyEntries: KeyEntry[]): Promise<IKeyEntry[]> {
-    const checkRequests = keyEntries.map(keyEntry => this.checkIfKeyEntryNotExists(keyEntry.name));
+    const checkRequests = keyEntries.map(keyEntry => this.throwIfKeyEntryExists(keyEntry.name));
     await Promise.all(checkRequests);
     const cloudEntries = await this.cloudKeyStorage.storeEntries(keyEntries);
     const storeRequests = cloudEntries.map(async cloudEntry => {
@@ -50,14 +60,14 @@ export default class SyncKeyStorage {
   }
 
   async updateEntry(name: string, data: Data, meta?: Meta): Promise<void> {
-    await this.checkIfKeyEntryExists(name);
+    await this.throwUnlessKeyEntryExists(name);
     const cloudEntry = await this.cloudKeyStorage.updateEntry(name, data, meta);
     const keyEntry = createKeyEntry(cloudEntry);
     await this.keyEntryStorage.update(keyEntry);
   }
 
   async retrieveEntry(name: string): Promise<IKeyEntry> {
-    await this.checkIfKeyEntryExists(name);
+    await this.throwUnlessKeyEntryExists(name);
     return this.keyEntryStorage.load(name) as Promise<IKeyEntry>;
   }
 
@@ -86,11 +96,17 @@ export default class SyncKeyStorage {
     await Promise.all(deleteRequests);
   }
 
-  async updateRecipients(
-    newPrivateKey?: VirgilPrivateKey,
-    newPublicKey?: VirgilPublicKey | VirgilPublicKey[],
-  ): Promise<void> {
-    return this.cloudKeyStorage.updateRecipients(newPrivateKey, newPublicKey);
+  async updateRecipients(options: {
+    newPrivateKey?: VirgilPrivateKey;
+    newPublicKey?: VirgilPublicKey;
+    newPublicKeys?: VirgilPublicKey[];
+  }): Promise<void> {
+    const { newPrivateKey, newPublicKey, newPublicKeys } = options;
+    return this.cloudKeyStorage.updateRecipients({
+      newPrivateKey,
+      newPublicKey,
+      newPublicKeys,
+    });
   }
 
   async sync(): Promise<void> {
@@ -135,14 +151,14 @@ export default class SyncKeyStorage {
     return this.syncKeyStorage(storeNames, updateNames, deleteNames);
   }
 
-  private async checkIfKeyEntryExists(name: string): Promise<void> {
+  private async throwUnlessKeyEntryExists(name: string): Promise<void> {
     const exists = await this.keyEntryStorage.exists(name);
     if (!exists) {
       throw new KeyEntryDoesntExistError(name);
     }
   }
 
-  private async checkIfKeyEntryNotExists(name: string): Promise<void> {
+  private async throwIfKeyEntryExists(name: string): Promise<void> {
     const exists = await this.keyEntryStorage.exists(name);
     if (exists) {
       throw new KeyEntryExistsError(name);
