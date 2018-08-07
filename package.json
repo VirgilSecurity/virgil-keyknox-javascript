@@ -1,6 +1,6 @@
 {
   "name": "keyknox-sdk",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Keyknox SDK",
   "main": "./dist/keyknox-sdk.node.cjs.js",
   "module": "./dist/keyknox-sdk.node.es.js",
@@ -9,6 +9,9 @@
     "./dist/keyknox-sdk.node.es.js": "./dist/keyknox-sdk.browser.es.js"
   },
   "typings": "./dist/types/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "repository": "https://github.com/VirgilSecurity/keyknox-javascript",
   "author": "Virgil Security Inc. <support@virgilsecurity.com>",
   "license": "BSD-3-Clause",
