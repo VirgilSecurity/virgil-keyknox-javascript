@@ -8,6 +8,9 @@ const { uglify } = require('rollup-plugin-uglify');
 
 const packageJson = require('./package.json');
 
+const NAME = 'keyknox';
+const UMD_NAME = 'Keyknox';
+
 const env = process.env.ENV;
 const format = process.env.FORMAT;
 const minify = process.env.MINIFY === 'true';
@@ -54,9 +57,9 @@ module.exports = {
   input: path.join(__dirname, 'src', 'index.ts'),
   output: {
     format,
-    file: getFileName(packageJson.name, env, format, minify),
+    file: getFileName(NAME, env, format, minify),
     dir: path.join(__dirname, 'dist'),
-    name: 'Keyknox',
+    name: UMD_NAME,
     globals: {
       ['virgil-crypto']: 'VirgilCrypto',
       ['virgil-sdk']: 'Virgil',
