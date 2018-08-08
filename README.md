@@ -20,29 +20,30 @@ Virgil Keyknox Service allows users to store their sensitive data (such as Priva
 You can install this module from npm. Another option is to add it via `script` tag in browser.
 
 ### npm
-You will need to install `keyknox-sdk`.
+You will need to install `@virgilsecurity/keyknox`.
 ```sh
-npm install keyknox-sdk
+npm install @virgilsecurity/keyknox
 ```
 
-You will also need to install `virgil-crypto` and `virgil-sdk` from npm, unless you've already used them.
+You will also need to install `virgil-crypto` and `virgil-sdk` from npm.
 ```sh
-npm install virgil-crypto@3.0.0 virgil-sdk@next
+npm install virgil-crypto virgil-sdk@next
 ```
+> Note that minimum supported version of `virgil-crypto` is `3.0.0` and minimum supported version of `virgil-sdk` is `5.0.0-rc.3`.
 
 ### In browser via `script` tag
-You will need to add `keyknox-sdk` script.
+You will need to add `@virgilsecurity/keyknox` script.
 ```html
-<script src="https://unpkg.com/keyknox-sdk@0.1.0/dist/keyknox-sdk.browser.umd.js"></script>
+<script src="https://unpkg.com/@virgilsecurity/keyknox/dist/keyknox.browser.umd.min.js"></script>
 ```
 
-You will also need to add `virgil-crypto` and `virgil-sdk` scripts, unless you've already used them.
+You will also need to add `virgil-crypto` and `virgil-sdk` scripts.
 ```html
-<script src="https://unpkg.com/virgil-crypto@3.0.0/dist/virgil-crypto.browser.umd.min.js"></script>
+<script src="https://unpkg.com/virgil-crypto/dist/virgil-crypto.browser.umd.min.js"></script>
 <script src="https://unpkg.com/virgil-sdk@next/dist/virgil-sdk.browser.umd.min.js"></script>
 ```
 
-Now you can use global variables `Keyknox`, `Virgil` and `VirgilCrypto` as namespace objects, containing all of `keyknox-sdk`, `virgil-sdk` and `virgil-crypto` exports as properties.
+Now you can use global variables `Keyknox`, `Virgil` and `VirgilCrypto` as namespace objects, containing all of `@virgilsecurity/keyknox`, `virgil-sdk` and `virgil-crypto` exports as properties.
 
 ## Docs
 Virgil Security has a powerful set of APIs, and the documentation below can get you started today.
