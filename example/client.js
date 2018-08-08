@@ -2,12 +2,13 @@ const { get } = require('http');
 const { stringify } = require('querystring');
 const { VirgilCrypto } = require('virgil-crypto');
 const { KeyEntryStorage, CachingJwtProvider } = require('virgil-sdk');
+const uuid = require('uuid/v4');
 
 const { SyncKeyStorage } = require('../dist/keyknox.node.cjs');
 
 const config = {
   endpoint: 'http://localhost:3000',
-  identity: 'user@example.com',
+  identity: uuid(),
 };
 
 function renewJwtFn() {
@@ -37,15 +38,22 @@ const syncKeyStorage = SyncKeyStorage.create({
   publicKey: keyPair.publicKey,
 });
 
+console.log('syncing...');
 syncKeyStorage
   .sync()
-  .then(() => syncKeyStorage.retrieveAllEntries())
+  .then(() => {
+    console.log('sync complete');
+    console.log('retrieving all entries...');
+    return syncKeyStorage.retrieveAllEntries();
+  })
   .then(allEntries => {
     console.log('all entries:', allEntries);
+    console.log('storing new entry...');
     return syncKeyStorage.storeEntry('entry', Buffer.from('data'));
   })
   .then(storedEntry => {
     console.log('stored entry:', storedEntry);
+    console.log('storing new entries...');
     return syncKeyStorage.storeEntries([
       { name: 'entry1', data: Buffer.from('data1') },
       { name: 'entry2', data: Buffer.from('data2') },
@@ -54,32 +62,53 @@ syncKeyStorage
   })
   .then(storedEntries => {
     console.log('stored entries:', storedEntries);
+    console.log('updating entry1...');
     return syncKeyStorage.updateEntry('entry1', Buffer.from('data1Updated'));
   })
-  .then(() => syncKeyStorage.retrieveEntry('entry1'))
+  .then(() => {
+    console.log('entry1 updated...');
+    console.log('retrieving entry1...');
+    return syncKeyStorage.retrieveEntry('entry1');
+  })
   .then(entry1 => {
     console.log('entry1:', entry1);
+    console.log('retrieving all entries...');
     return syncKeyStorage.retrieveAllEntries();
   })
   .then(allEntries => {
     console.log('all entries:', allEntries);
+    console.log('deleting entry1...');
     return syncKeyStorage.deleteEntry('entry1');
   })
-  .then(() => syncKeyStorage.retrieveAllEntries())
+  .then(() => {
+    console.log('entry1 deleted');
+    console.log('retrieving all entries...');
+    return syncKeyStorage.retrieveAllEntries();
+  })
   .then(allEntries => {
     console.log('all entries:', allEntries);
+    console.log('deleting entry2 and entry3...');
     return syncKeyStorage.deleteEntries(['entry2', 'entry3']);
   })
-  .then(() => syncKeyStorage.retrieveAllEntries())
+  .then(() => {
+    console.log('entry2 and entry3 deleted');
+    console.log('retrieving all entries...');
+    return syncKeyStorage.retrieveAllEntries();
+  })
   .then(allEntries => {
     console.log('all entries:', allEntries);
+    console.log('updating recipients...');
     const newKeyPair = virgilCrypto.generateKeys();
     return syncKeyStorage.updateRecipients({
       newPrivateKey: newKeyPair.privateKey,
       newPublicKey: newKeyPair.publicKey,
     });
   })
-  .then(() => syncKeyStorage.retrieveAllEntries())
+  .then(() => {
+    console.log('recipients updated');
+    console.log('retrieving all entries...');
+    return syncKeyStorage.retrieveAllEntries();
+  })
   .then(allEntries => {
     console.log('all entries:', allEntries);
   });
