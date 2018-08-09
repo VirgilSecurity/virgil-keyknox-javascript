@@ -1,12 +1,12 @@
 {
-  "name": "keyknox-sdk",
+  "name": "@virgilsecurity/keyknox",
   "version": "0.1.0",
-  "description": "Keyknox SDK",
-  "main": "./dist/keyknox-sdk.node.cjs.js",
-  "module": "./dist/keyknox-sdk.node.es.js",
+  "description": "Keyknox SDK allows developers to communicate with Virgil Keyknox Service to upload, download, and synchronize encrypted sensitive data (private keys) between different devices.",
+  "main": "./dist/keyknox.node.cjs.js",
+  "module": "./dist/keyknox.node.es.js",
   "browser": {
-    "./dist/keyknox-sdk.node.cjs.js": "./dist/keyknox-sdk.browser.cjs.js",
-    "./dist/keyknox-sdk.node.es.js": "./dist/keyknox-sdk.browser.es.js"
+    "./dist/keyknox.node.cjs.js": "./dist/keyknox.browser.cjs.js",
+    "./dist/keyknox.node.es.js": "./dist/keyknox.browser.es.js"
   },
   "typings": "./dist/types/index.d.ts",
   "files": [
@@ -24,7 +24,8 @@
     "build:browser:cjs": "cross-env ENV=browser FORMAT=cjs rollup -c",
     "build:browser:es": "cross-env ENV=browser FORMAT=es rollup -c",
     "build:browser:umd": "cross-env ENV=browser FORMAT=umd rollup -c",
-    "build:browser": "npm run build:browser:cjs && npm run build:browser:es && npm run build:browser:umd",
+    "build:browser:umd:min": "cross-env ENV=browser FORMAT=umd MINIFY=true rollup -c",
+    "build:browser": "npm run build:browser:cjs && npm run build:browser:es && npm run build:browser:umd && npm run build:browser:umd:min",
     "build": "npm run build:node && npm run build:browser",
     "prepare": "npm run clean && npm run build",
     "lint": "tslint --project tsconfig.json",
@@ -80,6 +81,7 @@
     "rollup-plugin-node-globals": "^1.2.1",
     "rollup-plugin-node-resolve": "^3.3.0",
     "rollup-plugin-typescript2": "^0.16.1",
+    "rollup-plugin-uglify": "^4.0.0",
     "ts-jest": "^23.0.1",
     "tslint": "^5.11.0",
     "tslint-config-airbnb": "^5.9.2",

@@ -4,11 +4,16 @@ const inject = require('rollup-plugin-inject');
 const nodeGlobals = require('rollup-plugin-node-globals');
 const resolve = require('rollup-plugin-node-resolve');
 const typescript = require('rollup-plugin-typescript2');
+const { uglify } = require('rollup-plugin-uglify');
 
 const packageJson = require('./package.json');
 
+const NAME = 'keyknox';
+const UMD_NAME = 'Keyknox';
+
 const env = process.env.ENV;
 const format = process.env.FORMAT;
+const minify = process.env.MINIFY === 'true';
 
 const browser = 'browser';
 const node = 'node';
@@ -38,14 +43,23 @@ if (format !== umd) {
   external = external.concat(Object.keys(packageJson.dependencies));
 }
 
+function getFileName(name, environment, format, isMinified) {
+  const parts = [name, environment, format];
+  if (isMinified) {
+    parts.push('min');
+  }
+  parts.push('js');
+  return parts.join('.');
+}
+
 module.exports = {
   external,
   input: path.join(__dirname, 'src', 'index.ts'),
   output: {
     format,
-    file: `${packageJson.name}.${env}.${format}.js`,
+    file: getFileName(NAME, env, format, minify),
     dir: path.join(__dirname, 'dist'),
-    name: 'Keyknox',
+    name: UMD_NAME,
     globals: {
       ['virgil-crypto']: 'VirgilCrypto',
       ['virgil-sdk']: 'Virgil',
@@ -64,5 +78,6 @@ module.exports = {
       },
     }),
     env === browser && nodeGlobals(),
+    minify && uglify(),
   ],
 };
