@@ -27,7 +27,7 @@
     "build:browser:umd:min": "cross-env ENV=browser FORMAT=umd MINIFY=true rollup -c",
     "build:browser": "npm run build:browser:cjs && npm run build:browser:es && npm run build:browser:umd && npm run build:browser:umd:min",
     "build": "npm run build:node && npm run build:browser",
-    "prepare": "npm run clean && npm run build",
+    "prepublishOnly": "npm run clean && npm run build",
     "lint": "tslint --project tsconfig.json",
     "prettier": "prettier 'src/**/*.ts' --write",
     "precommit": "lint-staged"
