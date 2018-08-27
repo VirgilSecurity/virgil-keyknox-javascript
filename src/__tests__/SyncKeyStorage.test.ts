@@ -49,7 +49,7 @@ describe('SyncKeyStorage', () => {
     keyknoxManager = new KeyknoxManager(accessTokenProvider, keyPair.privateKey, keyPair.publicKey);
     cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
     keyEntryStorage = new KeyEntryStorage(join(process.env.KEY_ENTRIES_FOLDER!, identity));
-    syncKeyStorage = new SyncKeyStorage(identity, cloudKeyStorage, keyEntryStorage);
+    syncKeyStorage = new SyncKeyStorage(cloudKeyStorage, keyEntryStorage);
   });
 
   test('KTC-29', async () => {
@@ -171,10 +171,10 @@ describe('SyncKeyStorage', () => {
     await syncKeyStorage.sync();
     await syncKeyStorage.storeEntry(keyEntry.name, keyEntry.data);
     const virgilCrypto = new VirgilCrypto();
-    const { privateKey: newPrivateKey, publicKey: newPublicKey } = virgilCrypto.generateKeys();
-    await syncKeyStorage.updateRecipients({ newPrivateKey, newPublicKey });
+    const { privateKey: newPrivateKey, publicKey: newPublicKeys } = virgilCrypto.generateKeys();
+    await syncKeyStorage.updateRecipients({ newPrivateKey, newPublicKeys });
     expect(keyknoxManager.privateKey).toBe(newPrivateKey);
-    expect(keyknoxManager.publicKey).toBe(newPublicKey);
+    expect(keyknoxManager.publicKeys).toBe(newPublicKeys);
     await syncKeyStorage.sync();
     const entry = await syncKeyStorage.retrieveEntry(keyEntry.name);
     expect(entry).toBeDefined();
@@ -323,8 +323,8 @@ describe('SyncKeyStorage', () => {
       CloudKeyStorageOutOfSyncError,
     );
     const virgilCrypto = new VirgilCrypto();
-    const { privateKey: newPrivateKey, publicKey: newPublicKey } = virgilCrypto.generateKeys();
-    await expect(syncKeyStorage.updateRecipients({ newPrivateKey, newPublicKey })).rejects.toThrow(
+    const { privateKey: newPrivateKey, publicKey: newPublicKeys } = virgilCrypto.generateKeys();
+    await expect(syncKeyStorage.updateRecipients({ newPrivateKey, newPublicKeys })).rejects.toThrow(
       CloudKeyStorageOutOfSyncError,
     );
   });

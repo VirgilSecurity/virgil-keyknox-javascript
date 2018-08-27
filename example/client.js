@@ -33,9 +33,8 @@ const keyPair = virgilCrypto.generateKeys();
 const syncKeyStorage = SyncKeyStorage.create({
   accessTokenProvider,
   keyEntryStorage,
-  identity: config.identity,
   privateKey: keyPair.privateKey,
-  publicKey: keyPair.publicKey,
+  publicKeys: keyPair.publicKey,
 });
 
 console.log('syncing...');
@@ -101,7 +100,7 @@ syncKeyStorage
     const newKeyPair = virgilCrypto.generateKeys();
     return syncKeyStorage.updateRecipients({
       newPrivateKey: newKeyPair.privateKey,
-      newPublicKey: newKeyPair.publicKey,
+      newPublicKeys: newKeyPair.publicKey,
     });
   })
   .then(() => {

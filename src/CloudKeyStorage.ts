@@ -25,16 +25,12 @@ export default class CloudKeyStorage {
   static create(options: {
     accessTokenProvider: IAccessTokenProvider;
     privateKey: VirgilPrivateKey;
-    publicKey?: VirgilPublicKey;
-    publicKeys?: VirgilPublicKey[];
+    publicKeys: VirgilPublicKey | VirgilPublicKey[];
   }): CloudKeyStorage {
-    if (!options.publicKey && !options.publicKeys) {
-      throw new TypeError("You need to specify 'publicKey' or 'publicKeys'");
-    }
     const keyknoxManager = new KeyknoxManager(
       options.accessTokenProvider,
       options.privateKey,
-      options.publicKey! || options.publicKeys!,
+      options.publicKeys!,
     );
     return new CloudKeyStorage(keyknoxManager);
   }
@@ -102,14 +98,12 @@ export default class CloudKeyStorage {
 
   async updateRecipients(options: {
     newPrivateKey?: VirgilPrivateKey;
-    newPublicKey?: VirgilPublicKey;
-    newPublicKeys?: VirgilPublicKey[];
+    newPublicKeys?: VirgilPublicKey | VirgilPublicKey[];
   }): Promise<void> {
     this.throwUnlessSyncWasCalled();
-    const { newPrivateKey, newPublicKey, newPublicKeys } = options;
+    const { newPrivateKey, newPublicKeys } = options;
     this.decryptedKeyknoxValue = await this.keyknoxManager.updateRecipients({
       newPrivateKey,
-      newPublicKey,
       newPublicKeys,
     });
     this.cache = deserialize(this.decryptedKeyknoxValue.value);

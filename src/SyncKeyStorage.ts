@@ -8,39 +8,23 @@ import { createKeyEntry, extractDate } from './KeyEntryUtils';
 import { Data, Meta } from './types';
 
 export default class SyncKeyStorage {
-  private readonly identity: string;
   private readonly cloudKeyStorage: CloudKeyStorage;
   private readonly keyEntryStorage: IKeyEntryStorage;
 
-  constructor(
-    identity: string,
-    cloudKeyStorage: CloudKeyStorage,
-    keyEntryStorage: IKeyEntryStorage,
-  ) {
-    this.identity = identity;
+  constructor(cloudKeyStorage: CloudKeyStorage, keyEntryStorage: IKeyEntryStorage) {
     this.cloudKeyStorage = cloudKeyStorage;
     this.keyEntryStorage = keyEntryStorage;
   }
 
   static create(options: {
-    identity: string;
     accessTokenProvider: IAccessTokenProvider;
     privateKey: VirgilPrivateKey;
-    publicKey?: VirgilPublicKey;
-    publicKeys?: VirgilPublicKey[];
+    publicKeys: VirgilPublicKey | VirgilPublicKey[];
     keyEntryStorage: IKeyEntryStorage;
   }): SyncKeyStorage {
-    if (!options.publicKey && !options.publicKeys) {
-      throw new TypeError("You need to specify 'publicKey' or 'publicKeys'");
-    }
-    const { accessTokenProvider, privateKey, publicKey, publicKeys } = options;
-    const cloudKeyStorage = CloudKeyStorage.create({
-      accessTokenProvider,
-      privateKey,
-      publicKey,
-      publicKeys,
-    });
-    return new SyncKeyStorage(options.identity, cloudKeyStorage, options.keyEntryStorage);
+    const { accessTokenProvider, privateKey, publicKeys } = options;
+    const cloudKeyStorage = CloudKeyStorage.create({ accessTokenProvider, privateKey, publicKeys });
+    return new SyncKeyStorage(cloudKeyStorage, options.keyEntryStorage);
   }
 
   async storeEntries(keyEntries: KeyEntry[]): Promise<IKeyEntry[]> {
@@ -98,15 +82,10 @@ export default class SyncKeyStorage {
 
   async updateRecipients(options: {
     newPrivateKey?: VirgilPrivateKey;
-    newPublicKey?: VirgilPublicKey;
-    newPublicKeys?: VirgilPublicKey[];
+    newPublicKeys?: VirgilPublicKey | VirgilPublicKey[];
   }): Promise<void> {
-    const { newPrivateKey, newPublicKey, newPublicKeys } = options;
-    return this.cloudKeyStorage.updateRecipients({
-      newPrivateKey,
-      newPublicKey,
-      newPublicKeys,
-    });
+    const { newPrivateKey, newPublicKeys } = options;
+    return this.cloudKeyStorage.updateRecipients({ newPrivateKey, newPublicKeys });
   }
 
   async sync(): Promise<void> {

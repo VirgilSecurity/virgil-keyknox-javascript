@@ -13,7 +13,7 @@ export default class KeyknoxCrypto implements IKeyknoxCrypto {
   decrypt(
     encryptedKeyknoxValue: EncryptedKeyknoxValue,
     privateKey: VirgilPrivateKey,
-    publicKey: VirgilPublicKey | VirgilPublicKey[],
+    publicKeys: VirgilPublicKey | VirgilPublicKey[],
   ): DecryptedKeyknoxValue {
     const { value, meta } = encryptedKeyknoxValue;
     if (!value.byteLength || !meta.byteLength) {
@@ -22,7 +22,7 @@ export default class KeyknoxCrypto implements IKeyknoxCrypto {
       }
       return encryptedKeyknoxValue;
     }
-    const decrypted = this.crypto.decryptThenVerifyDetached(value, meta, privateKey, publicKey);
+    const decrypted = this.crypto.decryptThenVerifyDetached(value, meta, privateKey, publicKeys);
     return {
       ...encryptedKeyknoxValue,
       value: decrypted,
@@ -32,11 +32,11 @@ export default class KeyknoxCrypto implements IKeyknoxCrypto {
   encrypt(
     data: Buffer,
     privateKey: VirgilPrivateKey,
-    publicKey: VirgilPublicKey | VirgilPublicKey[],
+    publicKeys: VirgilPublicKey | VirgilPublicKey[],
   ): {
     encryptedData: Buffer;
     metadata: Buffer;
   } {
-    return this.crypto.signThenEncryptDetached(data, privateKey, publicKey);
+    return this.crypto.signThenEncryptDetached(data, privateKey, publicKeys);
   }
 }

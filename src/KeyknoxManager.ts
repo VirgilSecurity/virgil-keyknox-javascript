@@ -11,7 +11,7 @@ export default class KeyknoxManager {
   private readonly accessTokenProvider: IAccessTokenProvider;
 
   private myPrivateKey: VirgilPrivateKey;
-  private myPublicKey: VirgilPublicKey | VirgilPublicKey[];
+  private myPublicKeys: VirgilPublicKey | VirgilPublicKey[];
 
   private readonly keyknoxClient: IKeyknoxClient;
   private readonly keyknoxCrypto: IKeyknoxCrypto;
@@ -20,20 +20,20 @@ export default class KeyknoxManager {
     return this.myPrivateKey;
   }
 
-  get publicKey(): VirgilPublicKey | VirgilPublicKey[] {
-    return this.myPublicKey;
+  get publicKeys(): VirgilPublicKey | VirgilPublicKey[] {
+    return this.myPublicKeys;
   }
 
   constructor(
     accessTokenProvider: IAccessTokenProvider,
     privateKey: VirgilPrivateKey,
-    publicKey: VirgilPublicKey | VirgilPublicKey[],
+    publicKeys: VirgilPublicKey | VirgilPublicKey[],
     keyknoxClient?: IKeyknoxClient,
     keyknoxCrypto?: IKeyknoxCrypto,
   ) {
     this.accessTokenProvider = accessTokenProvider;
     this.myPrivateKey = privateKey;
-    this.myPublicKey = publicKey;
+    this.myPublicKeys = publicKeys;
     this.keyknoxClient = keyknoxClient || new KeyknoxClient();
     this.keyknoxCrypto = keyknoxCrypto || new KeyknoxCrypto();
   }
@@ -43,7 +43,7 @@ export default class KeyknoxManager {
     const { metadata, encryptedData } = this.keyknoxCrypto.encrypt(
       value,
       this.myPrivateKey,
-      this.myPublicKey,
+      this.myPublicKeys,
     );
     const encryptedKeyknoxValue = await this.keyknoxClient.pushValue(
       metadata,
@@ -51,13 +51,13 @@ export default class KeyknoxManager {
       token.toString(),
       previousHash,
     );
-    return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.myPrivateKey, this.myPublicKey);
+    return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.myPrivateKey, this.myPublicKeys);
   }
 
   async pullValue(): Promise<DecryptedKeyknoxValue> {
     const token = await this.accessTokenProvider.getToken({ operation: 'get' });
     const encryptedKeyknoxValue = await this.keyknoxClient.pullValue(token.toString());
-    return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.myPrivateKey, this.myPublicKey);
+    return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.myPrivateKey, this.myPublicKeys);
   }
 
   async resetValue(): Promise<DecryptedKeyknoxValue> {
@@ -69,24 +69,23 @@ export default class KeyknoxManager {
     value: Buffer;
     previousHash: Buffer;
     newPrivateKey?: VirgilPrivateKey;
-    newPublicKey?: VirgilPublicKey;
-    newPublicKeys?: VirgilPublicKey[];
+    newPublicKeys?: VirgilPublicKey | VirgilPublicKey[];
   }): Promise<DecryptedKeyknoxValue> {
-    if (!options.newPrivateKey && !options.newPublicKey && !options.newPublicKeys) {
-      return this.pushValue(options.value, options.previousHash);
+    const { value, previousHash, newPrivateKey, newPublicKeys } = options;
+    if (!newPrivateKey && !newPublicKeys) {
+      return this.pushValue(value, previousHash);
     }
     const decryptedKeyknoxValue = await this.pullValue();
-    if (options.newPrivateKey) {
-      this.myPrivateKey = options.newPrivateKey;
+    if (newPrivateKey) {
+      this.myPrivateKey = newPrivateKey;
     }
-    const newPublicKey = options.newPublicKey || options.newPublicKeys;
-    if (newPublicKey) {
-      this.myPublicKey = newPublicKey;
+    if (newPublicKeys) {
+      this.myPublicKeys = newPublicKeys;
     }
     const { metadata, encryptedData } = this.keyknoxCrypto.encrypt(
       decryptedKeyknoxValue.value,
       this.myPrivateKey,
-      this.myPublicKey,
+      this.myPublicKeys,
     );
     const token = await this.accessTokenProvider.getToken({ operation: 'put' });
     const encryptedKeyknoxValue = await this.keyknoxClient.pushValue(
@@ -95,29 +94,28 @@ export default class KeyknoxManager {
       token.toString(),
       decryptedKeyknoxValue.keyknoxHash,
     );
-    return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.myPrivateKey, this.myPublicKey);
+    return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.myPrivateKey, this.myPublicKeys);
   }
 
   async updateRecipients(options: {
     newPrivateKey?: VirgilPrivateKey;
-    newPublicKey?: VirgilPublicKey;
-    newPublicKeys?: VirgilPublicKey[];
+    newPublicKeys?: VirgilPublicKey | VirgilPublicKey[];
   }): Promise<DecryptedKeyknoxValue> {
+    const { newPrivateKey, newPublicKeys } = options;
     const decryptedKeyknoxValue = await this.pullValue();
     if (!decryptedKeyknoxValue.meta.byteLength && !decryptedKeyknoxValue.value.byteLength) {
       return decryptedKeyknoxValue;
     }
-    if (options.newPrivateKey) {
-      this.myPrivateKey = options.newPrivateKey;
+    if (newPrivateKey) {
+      this.myPrivateKey = newPrivateKey;
     }
-    const newPublicKey = options.newPublicKey || options.newPublicKeys;
-    if (newPublicKey) {
-      this.myPublicKey = newPublicKey;
+    if (newPublicKeys) {
+      this.myPublicKeys = newPublicKeys;
     }
     const { metadata, encryptedData } = this.keyknoxCrypto.encrypt(
       decryptedKeyknoxValue.value,
       this.myPrivateKey,
-      this.myPublicKey,
+      this.myPublicKeys,
     );
     const token = await this.accessTokenProvider.getToken({ operation: 'put' });
     const encryptedKeyknoxValue = await this.keyknoxClient.pushValue(
@@ -126,6 +124,6 @@ export default class KeyknoxManager {
       token.toString(),
       decryptedKeyknoxValue.keyknoxHash,
     );
-    return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.myPrivateKey, this.myPublicKey);
+    return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.myPrivateKey, this.myPublicKeys);
   }
 }

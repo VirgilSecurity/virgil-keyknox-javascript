@@ -131,7 +131,7 @@ describe('KeyknoxManager', () => {
       newPublicKeys: publicKeys,
     });
     expect(keyknoxManager2.privateKey).toBe(privateKey);
-    expect(keyknoxManager2.publicKey).toBe(publicKeys);
+    expect(keyknoxManager2.publicKeys).toBe(publicKeys);
     expect(decryptedKeyknoxValue.value).toEqual(value);
     privateKey = keyPairs[getRandomInRange(25, 50)].privateKey;
     const keyknoxManager3 = createKeyknoxManager(privateKey, publicKeys, identity);
@@ -166,7 +166,7 @@ describe('KeyknoxManager', () => {
       newPublicKeys: publicKeys,
     });
     expect(keyknoxManager2.privateKey).toBe(privateKey);
-    expect(keyknoxManager2.publicKey).toBe(publicKeys);
+    expect(keyknoxManager2.publicKeys).toBe(publicKeys);
     expect(decryptedKeyknoxValue.value).toEqual(value);
     privateKey = keyPairs[getRandomInRange(25, 50)].privateKey;
     const keyknoxManager3 = createKeyknoxManager(privateKey, publicKeys, identity);
