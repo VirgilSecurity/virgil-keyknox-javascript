@@ -8,22 +8,15 @@ import { createKeyEntry, extractDate } from './KeyEntryUtils';
 import { Data, Meta } from './types';
 
 export default class SyncKeyStorage {
-  private readonly identity: string;
   private readonly cloudKeyStorage: CloudKeyStorage;
   private readonly keyEntryStorage: IKeyEntryStorage;
 
-  constructor(
-    identity: string,
-    cloudKeyStorage: CloudKeyStorage,
-    keyEntryStorage: IKeyEntryStorage,
-  ) {
-    this.identity = identity;
+  constructor(cloudKeyStorage: CloudKeyStorage, keyEntryStorage: IKeyEntryStorage) {
     this.cloudKeyStorage = cloudKeyStorage;
     this.keyEntryStorage = keyEntryStorage;
   }
 
   static create(options: {
-    identity: string;
     accessTokenProvider: IAccessTokenProvider;
     privateKey: VirgilPrivateKey;
     publicKey?: VirgilPublicKey;
@@ -40,7 +33,7 @@ export default class SyncKeyStorage {
       publicKey,
       publicKeys,
     });
-    return new SyncKeyStorage(options.identity, cloudKeyStorage, options.keyEntryStorage);
+    return new SyncKeyStorage(cloudKeyStorage, options.keyEntryStorage);
   }
 
   async storeEntries(keyEntries: KeyEntry[]): Promise<IKeyEntry[]> {

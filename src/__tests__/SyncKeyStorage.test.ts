@@ -49,7 +49,7 @@ describe('SyncKeyStorage', () => {
     keyknoxManager = new KeyknoxManager(accessTokenProvider, keyPair.privateKey, keyPair.publicKey);
     cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
     keyEntryStorage = new KeyEntryStorage(join(process.env.KEY_ENTRIES_FOLDER!, identity));
-    syncKeyStorage = new SyncKeyStorage(identity, cloudKeyStorage, keyEntryStorage);
+    syncKeyStorage = new SyncKeyStorage(cloudKeyStorage, keyEntryStorage);
   });
 
   test('KTC-29', async () => {
