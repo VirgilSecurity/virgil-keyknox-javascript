@@ -41,7 +41,7 @@ describe('CloudKeyStorage', () => {
     cloudKeyStorage = CloudKeyStorage.create({
       accessTokenProvider,
       privateKey: keyPair.privateKey,
-      publicKey: keyPair.publicKey,
+      publicKeys: keyPair.publicKey,
     });
   });
 
@@ -200,7 +200,7 @@ describe('CloudKeyStorage', () => {
     const { privateKey: newPrivateKey, publicKey: newPublicKey } = virgilCrypto.generateKeys();
     await cloudKeyStorage.updateRecipients({
       newPrivateKey,
-      newPublicKey,
+      newPublicKeys: newPublicKey,
     });
     await cloudKeyStorage.retrieveCloudEntries();
     cloudEntries = cloudKeyStorage.retrieveAllEntries();
@@ -235,7 +235,7 @@ describe('CloudKeyStorage', () => {
       CloudKeyStorageOutOfSyncError,
     );
     await expect(
-      cloudKeyStorage.updateRecipients({ newPrivateKey: privateKey, newPublicKey: publicKey }),
+      cloudKeyStorage.updateRecipients({ newPrivateKey: privateKey, newPublicKeys: publicKey }),
     ).rejects.toThrow(CloudKeyStorageOutOfSyncError);
   });
 

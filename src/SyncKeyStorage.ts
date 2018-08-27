@@ -19,20 +19,11 @@ export default class SyncKeyStorage {
   static create(options: {
     accessTokenProvider: IAccessTokenProvider;
     privateKey: VirgilPrivateKey;
-    publicKey?: VirgilPublicKey;
-    publicKeys?: VirgilPublicKey[];
+    publicKeys: VirgilPublicKey | VirgilPublicKey[];
     keyEntryStorage: IKeyEntryStorage;
   }): SyncKeyStorage {
-    if (!options.publicKey && !options.publicKeys) {
-      throw new TypeError("You need to specify 'publicKey' or 'publicKeys'");
-    }
-    const { accessTokenProvider, privateKey, publicKey, publicKeys } = options;
-    const cloudKeyStorage = CloudKeyStorage.create({
-      accessTokenProvider,
-      privateKey,
-      publicKey,
-      publicKeys,
-    });
+    const { accessTokenProvider, privateKey, publicKeys } = options;
+    const cloudKeyStorage = CloudKeyStorage.create({ accessTokenProvider, privateKey, publicKeys });
     return new SyncKeyStorage(cloudKeyStorage, options.keyEntryStorage);
   }
 
@@ -91,15 +82,10 @@ export default class SyncKeyStorage {
 
   async updateRecipients(options: {
     newPrivateKey?: VirgilPrivateKey;
-    newPublicKey?: VirgilPublicKey;
-    newPublicKeys?: VirgilPublicKey[];
+    newPublicKeys?: VirgilPublicKey | VirgilPublicKey[];
   }): Promise<void> {
-    const { newPrivateKey, newPublicKey, newPublicKeys } = options;
-    return this.cloudKeyStorage.updateRecipients({
-      newPrivateKey,
-      newPublicKey,
-      newPublicKeys,
-    });
+    const { newPrivateKey, newPublicKeys } = options;
+    return this.cloudKeyStorage.updateRecipients({ newPrivateKey, newPublicKeys });
   }
 
   async sync(): Promise<void> {

@@ -6,13 +6,13 @@ export default interface IKeyknoxCrypto {
   decrypt(
     encryptedKeyknoxValue: EncryptedKeyknoxValue,
     privateKey: VirgilPrivateKey,
-    publicKey: VirgilPublicKey | VirgilPublicKey[],
+    publicKeys: VirgilPublicKey | VirgilPublicKey[],
   ): DecryptedKeyknoxValue;
 
   encrypt(
     data: Buffer,
     privateKey: VirgilPrivateKey,
-    publicKey: VirgilPublicKey | VirgilPublicKey[],
+    publicKeys: VirgilPublicKey | VirgilPublicKey[],
   ): {
     encryptedData: Buffer;
     metadata: Buffer;
