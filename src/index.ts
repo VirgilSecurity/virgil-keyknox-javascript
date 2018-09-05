@@ -1,5 +1,7 @@
 export { default as IKeyknoxClient } from './clients/IKeyknoxClient';
+
 export { default as IKeyknoxCrypto } from './cryptos/IKeyknoxCrypto';
+export { default as KeyknoxCrypto } from './cryptos/KeyknoxCrypto';
 
 export * from './errors';
 
