@@ -5,7 +5,7 @@ import CloudKeyStorage from './CloudKeyStorage';
 import { KeyEntry, CloudEntry } from './entities';
 import { KeyEntryExistsError, KeyEntryDoesntExistError } from './errors';
 import { createKeyEntry, extractDate } from './KeyEntryUtils';
-import { Data, Meta } from './types';
+import { Meta } from './types';
 
 export default class SyncKeyStorage {
   private readonly cloudKeyStorage: CloudKeyStorage;
@@ -38,12 +38,12 @@ export default class SyncKeyStorage {
     return Promise.all(storeRequests);
   }
 
-  async storeEntry(name: string, data: Data, meta?: Meta): Promise<IKeyEntry> {
+  async storeEntry(name: string, data: Buffer, meta?: Meta): Promise<IKeyEntry> {
     const [keyEntry] = await this.storeEntries([{ name, data, meta }]);
     return keyEntry;
   }
 
-  async updateEntry(name: string, data: Data, meta?: Meta): Promise<void> {
+  async updateEntry(name: string, data: Buffer, meta?: Meta): Promise<void> {
     await this.throwUnlessKeyEntryExists(name);
     const cloudEntry = await this.cloudKeyStorage.updateEntry(name, data, meta);
     const keyEntry = createKeyEntry(cloudEntry);

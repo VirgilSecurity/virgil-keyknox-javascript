@@ -9,7 +9,7 @@ import {
 } from './errors';
 import KeyknoxManager from './KeyknoxManager';
 import { serialize, deserialize } from './CloudEntrySerializer';
-import { Data, Meta } from './types';
+import { Meta } from './types';
 
 export default class CloudKeyStorage {
   private readonly keyknoxManager: KeyknoxManager;
@@ -45,12 +45,12 @@ export default class CloudKeyStorage {
     return keyEntries.map(keyEntry => this.cache.get(keyEntry.name)!);
   }
 
-  async storeEntry(name: string, data: Data, meta?: Meta): Promise<CloudEntry> {
+  async storeEntry(name: string, data: Buffer, meta?: Meta): Promise<CloudEntry> {
     const [cloudEntry] = await this.storeEntries([{ name, data, meta }]);
     return cloudEntry;
   }
 
-  async updateEntry(name: string, data: Data, meta?: Meta): Promise<CloudEntry> {
+  async updateEntry(name: string, data: Buffer, meta?: Meta): Promise<CloudEntry> {
     this.throwUnlessSyncWasCalled();
     this.throwUnlessCloudEntryExists(name);
     const cloudEntry = CloudKeyStorage.createCloudEntry(
