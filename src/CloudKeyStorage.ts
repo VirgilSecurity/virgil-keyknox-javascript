@@ -30,7 +30,7 @@ export default class CloudKeyStorage {
     const keyknoxManager = new KeyknoxManager(
       options.accessTokenProvider,
       options.privateKey,
-      options.publicKeys!,
+      options.publicKeys,
     );
     return new CloudKeyStorage(keyknoxManager);
   }

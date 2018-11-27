@@ -1,4 +1,4 @@
-import { Data, Meta } from './types';
+import { Meta } from './types';
 
 interface KeyknoxValue {
   meta: Buffer;
@@ -13,7 +13,7 @@ export interface EncryptedKeyknoxValue extends KeyknoxValue {}
 
 export interface CloudEntry {
   name: string;
-  data: Data;
+  data: Buffer;
   creationDate: Date;
   modificationDate: Date;
   meta: Meta;
@@ -21,6 +21,6 @@ export interface CloudEntry {
 
 export interface KeyEntry {
   name: string;
-  data: Data;
+  data: Buffer;
   meta?: Meta;
 }
