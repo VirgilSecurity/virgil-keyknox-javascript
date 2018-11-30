@@ -46,7 +46,7 @@ describe('KeyEntryUtils', () => {
         modificationDate: new Date(),
       };
       const error = () => extractDate(keyEntry);
-      expect(error).toThrow();
+      expect(error).toThrow(TypeError);
     });
 
     it("should return 'creationDate' and 'modificationDate'", () => {

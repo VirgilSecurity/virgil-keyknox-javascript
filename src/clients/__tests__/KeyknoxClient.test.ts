@@ -23,10 +23,10 @@ describe('KeyknoxClient', () => {
   });
 
   test('KTC-1', async () => {
+    expect.assertions(8);
     const value = Buffer.from('value');
     const meta = Buffer.from('meta');
     const token = jwt.toString();
-    expect.assertions(8);
     const response1 = await client.pushValue(meta, value, token);
     const response2 = await client.pullValue(token);
     expect(response1.meta).toEqual(meta);
@@ -40,12 +40,12 @@ describe('KeyknoxClient', () => {
   });
 
   test('KTC-2', async () => {
+    expect.assertions(4);
     const value1 = Buffer.from('value1');
     const meta1 = Buffer.from('meta1');
     const value2 = Buffer.from('value2');
     const meta2 = Buffer.from('meta2');
     const token = jwt.toString();
-    expect.assertions(4);
     const response1 = await client.pushValue(meta1, value1, token);
     const response2 = await client.pushValue(meta2, value2, token, response1.keyknoxHash);
     expect(response2.meta).toEqual(meta2);
@@ -63,10 +63,10 @@ describe('KeyknoxClient', () => {
   });
 
   test('KTC-4', async () => {
+    expect.assertions(3);
     const value1 = Buffer.from('value1');
     const meta1 = Buffer.from('meta1');
     const token = jwt.toString();
-    expect.assertions(3);
     await client.pushValue(meta1, value1, token);
     const response2 = await client.resetValue(token);
     expect(response2.meta.byteLength).toBe(0);
