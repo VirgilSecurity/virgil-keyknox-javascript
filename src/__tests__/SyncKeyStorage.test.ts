@@ -16,6 +16,7 @@ import {
   KeyEntryExistsError,
   KeyEntryDoesntExistError,
 } from '../errors';
+import KeyEntryStorageWrapper from '../KeyEntryStorageWrapper';
 import KeyknoxManager from '../KeyknoxManager';
 import SyncKeyStorage from '../SyncKeyStorage';
 
@@ -30,7 +31,7 @@ function generateKeyEntries(amount: number): KeyEntry[] {
 describe('SyncKeyStorage', () => {
   let keyknoxManager: KeyknoxManager;
   let cloudKeyStorage: CloudKeyStorage;
-  let keyEntryStorage: IKeyEntryStorage;
+  let keyEntryStorageWrapper: KeyEntryStorageWrapper;
   let syncKeyStorage: SyncKeyStorage;
 
   beforeEach(() => {
@@ -46,10 +47,11 @@ describe('SyncKeyStorage', () => {
     const identity = uuid();
     const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, identity);
     const keyPair = virgilCrypto.generateKeys();
+    const keyEntryStorage = new KeyEntryStorage(join(process.env.KEY_ENTRIES_FOLDER!, identity));
     keyknoxManager = new KeyknoxManager(accessTokenProvider, keyPair.privateKey, keyPair.publicKey);
     cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
-    keyEntryStorage = new KeyEntryStorage(join(process.env.KEY_ENTRIES_FOLDER!, identity));
-    syncKeyStorage = new SyncKeyStorage(cloudKeyStorage, keyEntryStorage);
+    keyEntryStorageWrapper = new KeyEntryStorageWrapper(identity, keyEntryStorage);
+    syncKeyStorage = new SyncKeyStorage(identity, cloudKeyStorage, keyEntryStorage);
   });
 
   test('KTC-29', async () => {
@@ -68,28 +70,28 @@ describe('SyncKeyStorage', () => {
     expect.assertions(7 + 7 * compareAssertions);
 
     await syncKeyStorage.sync();
-    let storedKeyEntries = await keyEntryStorage.list();
+    let storedKeyEntries = await keyEntryStorageWrapper.list();
     expect(storedKeyEntries.length).toBe(0);
 
     await cloudKeyStorage.storeEntry(keyEntry1.name, keyEntry1.data);
     await syncKeyStorage.sync();
-    storedKeyEntries = await keyEntryStorage.list();
+    storedKeyEntries = await keyEntryStorageWrapper.list();
     let [storedKeyEntry1, storedKeyEntry2] = storedKeyEntries;
     expect(storedKeyEntries.length).toBe(1);
     compare(storedKeyEntry1, keyEntriesMap[storedKeyEntry1.name]);
 
     await cloudKeyStorage.storeEntry(keyEntry2.name, keyEntry2.data);
     await syncKeyStorage.sync();
-    storedKeyEntries = await keyEntryStorage.list();
+    storedKeyEntries = await keyEntryStorageWrapper.list();
     [storedKeyEntry1, storedKeyEntry2] = storedKeyEntries;
     expect(storedKeyEntries.length).toBe(2);
     compare(storedKeyEntry1, keyEntriesMap[storedKeyEntry1.name]);
     compare(storedKeyEntry2, keyEntriesMap[storedKeyEntry2.name]);
 
-    await keyEntryStorage.remove(keyEntry1.name);
-    await keyEntryStorage.remove(keyEntry2.name);
+    await keyEntryStorageWrapper.remove(keyEntry1.name);
+    await keyEntryStorageWrapper.remove(keyEntry2.name);
     await syncKeyStorage.sync();
-    storedKeyEntries = await keyEntryStorage.list();
+    storedKeyEntries = await keyEntryStorageWrapper.list();
     [storedKeyEntry1, storedKeyEntry2] = storedKeyEntries;
     expect(storedKeyEntries.length).toBe(2);
     compare(storedKeyEntry1, keyEntriesMap[storedKeyEntry1.name]);
@@ -97,7 +99,7 @@ describe('SyncKeyStorage', () => {
 
     await cloudKeyStorage.deleteEntry(keyEntry1.name);
     await syncKeyStorage.sync();
-    storedKeyEntries = await keyEntryStorage.list();
+    storedKeyEntries = await keyEntryStorageWrapper.list();
     [storedKeyEntry1] = storedKeyEntries;
     expect(storedKeyEntries.length).toBe(1);
     compare(storedKeyEntry1, keyEntry2);
@@ -105,14 +107,14 @@ describe('SyncKeyStorage', () => {
     const updatedEntry = { name: keyEntry2.name, data: Buffer.from('newData') };
     await cloudKeyStorage.updateEntry(updatedEntry.name, updatedEntry.data);
     await syncKeyStorage.sync();
-    storedKeyEntries = await keyEntryStorage.list();
+    storedKeyEntries = await keyEntryStorageWrapper.list();
     [storedKeyEntry1] = storedKeyEntries;
     expect(storedKeyEntries.length).toBe(1);
     compare(storedKeyEntry1, updatedEntry);
 
     await cloudKeyStorage.deleteAllEntries();
     await syncKeyStorage.sync();
-    storedKeyEntries = await keyEntryStorage.list();
+    storedKeyEntries = await keyEntryStorageWrapper.list();
     expect(storedKeyEntries.length).toBe(0);
   });
 
@@ -123,7 +125,7 @@ describe('SyncKeyStorage', () => {
     await syncKeyStorage.storeEntry(keyEntry.name, keyEntry.data);
     const entry = await syncKeyStorage.retrieveEntry(keyEntry.name);
     const cloudEntry = cloudKeyStorage.retrieveEntry(keyEntry.name);
-    const storageKeyEntry = await keyEntryStorage.load(keyEntry.name);
+    const storageKeyEntry = await keyEntryStorageWrapper.load(keyEntry.name);
     expect(entry.name).toBe(keyEntry.name);
     expect(entry.value).toEqual(keyEntry.data);
     expect(cloudEntry.name).toBe(keyEntry.name);
@@ -141,7 +143,7 @@ describe('SyncKeyStorage', () => {
     await syncKeyStorage.deleteEntry(keyEntry1.name);
     const entries = await syncKeyStorage.retrieveAllEntries();
     const cloudEntries = cloudKeyStorage.retrieveAllEntries();
-    const storageKeyEntries = await keyEntryStorage.list();
+    const storageKeyEntries = await keyEntryStorageWrapper.list();
     expect(entries.length).toBe(1);
     expect(cloudEntries.length).toBe(1);
     expect(storageKeyEntries.length).toBe(1);
@@ -156,7 +158,7 @@ describe('SyncKeyStorage', () => {
     await syncKeyStorage.updateEntry(keyEntry.name, newData);
     const entry = await syncKeyStorage.retrieveEntry(keyEntry.name);
     const cloudEntry = cloudKeyStorage.retrieveEntry(keyEntry.name);
-    const storageKeyEntry = await keyEntryStorage.load(keyEntry.name);
+    const storageKeyEntry = await keyEntryStorageWrapper.load(keyEntry.name);
     expect(entry.name).toBe(keyEntry.name);
     expect(entry.value).toEqual(newData);
     expect(cloudEntry.name).toBe(keyEntry.name);
@@ -192,7 +194,7 @@ describe('SyncKeyStorage', () => {
     await syncKeyStorage.storeEntries(keyEntries);
     const entries = await syncKeyStorage.retrieveAllEntries();
     const cloudEntries = cloudKeyStorage.retrieveAllEntries();
-    const storageKeyEntries = await keyEntryStorage.list();
+    const storageKeyEntries = await keyEntryStorageWrapper.list();
     expect(entries.length).toBe(totalEntries);
     entries.forEach(keyEntry => {
       const myKeyEntry = keyEntriesMap[keyEntry.name];
@@ -222,7 +224,7 @@ describe('SyncKeyStorage', () => {
     await syncKeyStorage.deleteEntries([keyEntry1.name, keyEntry2.name]);
     const keyEntry = await syncKeyStorage.retrieveEntry(keyEntry3.name);
     const cloudEntry = cloudKeyStorage.retrieveEntry(keyEntry3.name);
-    const storageKeyEntry = await keyEntryStorage.load(keyEntry3.name);
+    const storageKeyEntry = await keyEntryStorageWrapper.load(keyEntry3.name);
     expect(keyEntry.name).toBe(keyEntry3.name);
     expect(keyEntry.value).toEqual(keyEntry3.data);
     expect(cloudEntry.name).toBe(keyEntry3.name);
@@ -245,10 +247,10 @@ describe('SyncKeyStorage', () => {
       [keyEntry1.name]: keyEntry1,
       [keyEntry2.name]: keyEntry2,
     };
-    await keyEntryStorage.remove(keyEntry1.name);
-    await keyEntryStorage.save(keyEntry1);
-    await keyEntryStorage.remove(keyEntry2.name);
-    await keyEntryStorage.save(keyEntry2);
+    await keyEntryStorageWrapper.remove(keyEntry1.name);
+    await keyEntryStorageWrapper.save(keyEntry1);
+    await keyEntryStorageWrapper.remove(keyEntry2.name);
+    await keyEntryStorageWrapper.save(keyEntry2);
     const entries = await syncKeyStorage.retrieveAllEntries();
     const [entry1, entry2] = entries;
     expect(entries.length).toBe(2);
@@ -268,7 +270,7 @@ describe('SyncKeyStorage', () => {
     await syncKeyStorage.deleteAllEntries();
     const entries = await syncKeyStorage.retrieveAllEntries();
     const cloudEntries = cloudKeyStorage.retrieveAllEntries();
-    const storageKeyEntries = await keyEntryStorage.list();
+    const storageKeyEntries = await keyEntryStorageWrapper.list();
     expect(entries.length).toBe(0);
     expect(cloudEntries.length).toBe(0);
     expect(storageKeyEntries.length).toBe(0);
@@ -280,7 +282,7 @@ describe('SyncKeyStorage', () => {
     await syncKeyStorage.deleteAllEntries();
     const keyEntries = await syncKeyStorage.retrieveAllEntries();
     const cloudEntries = cloudKeyStorage.retrieveAllEntries();
-    const storageKeyEntries = await keyEntryStorage.list();
+    const storageKeyEntries = await keyEntryStorageWrapper.list();
     expect(keyEntries.length).toBe(0);
     expect(cloudEntries.length).toBe(0);
     expect(storageKeyEntries.length).toBe(0);
@@ -300,7 +302,7 @@ describe('SyncKeyStorage', () => {
   test('KTC-40', async () => {
     const keyEntry = { name: uuid(), value: Buffer.from('value') };
     expect.assertions(9);
-    await keyEntryStorage.save(keyEntry);
+    await keyEntryStorageWrapper.save(keyEntry);
     await expect(syncKeyStorage.deleteEntry(keyEntry.name)).rejects.toThrow(
       CloudKeyStorageOutOfSyncError,
     );
