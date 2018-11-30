@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 const { createServer } = require('http');
 const { parse } = require('querystring');
 const { VirgilCrypto, VirgilAccessTokenSigner } = require('virgil-crypto');

@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 const { get } = require('http');
 const { stringify } = require('querystring');
 const { VirgilCrypto } = require('virgil-crypto');

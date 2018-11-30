@@ -28,8 +28,9 @@
     "build:browser": "npm run build:browser:cjs && npm run build:browser:es && npm run build:browser:umd && npm run build:browser:umd:min",
     "build": "npm run build:node && npm run build:browser",
     "prepare": "npm run clean && npm run build",
-    "lint": "tslint --project tsconfig.json",
-    "prettier": "prettier 'src/**/*.ts' --write"
+    "eslint": "eslint '**/*.js'",
+    "tslint": "tslint --project tsconfig.json",
+    "lint": "npm run eslint && npm run tslint"
   },
   "dependencies": {
     "axios": "^0.18.0"
@@ -45,6 +46,11 @@
     "buffer-es6": "^4.9.3",
     "cross-env": "^5.2.0",
     "dotenv": "^6.1.0",
+    "eslint": "^5.3.0",
+    "eslint-config-airbnb-base": "13.1.0",
+    "eslint-config-prettier": "^3.3.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-prettier": "^3.0.0",
     "husky": "^1.2.0",
     "jest": "^23.6.0",
     "lint-staged": "^8.1.0",

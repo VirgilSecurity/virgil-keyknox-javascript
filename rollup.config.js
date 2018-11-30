@@ -1,4 +1,4 @@
-const path = require('path');
+const { join } = require('path');
 const commonjs = require('rollup-plugin-commonjs');
 const inject = require('rollup-plugin-inject');
 const nodeGlobals = require('rollup-plugin-node-globals');
@@ -7,6 +7,15 @@ const typescript = require('rollup-plugin-typescript2');
 const { uglify } = require('rollup-plugin-uglify');
 
 const packageJson = require('./package.json');
+
+function getFileName(name, environment, format, isMinified) {
+  const parts = [name, environment, format];
+  if (isMinified) {
+    parts.push('min');
+  }
+  parts.push('js');
+  return parts.join('.');
+}
 
 const NAME = 'keyknox';
 const UMD_NAME = 'Keyknox';
@@ -43,26 +52,17 @@ if (format !== umd) {
   external = external.concat(Object.keys(packageJson.dependencies));
 }
 
-function getFileName(name, environment, format, isMinified) {
-  const parts = [name, environment, format];
-  if (isMinified) {
-    parts.push('min');
-  }
-  parts.push('js');
-  return parts.join('.');
-}
-
 module.exports = {
   external,
-  input: path.join(__dirname, 'src', 'index.ts'),
+  input: join(__dirname, 'src', 'index.ts'),
   output: {
     format,
     file: getFileName(NAME, env, format, minify),
-    dir: path.join(__dirname, 'dist'),
+    dir: join(__dirname, 'dist'),
     name: UMD_NAME,
     globals: {
-      ['virgil-crypto']: 'VirgilCrypto',
-      ['virgil-sdk']: 'Virgil',
+      'virgil-crypto': 'VirgilCrypto',
+      'virgil-sdk': 'Virgil',
     },
   },
   plugins: [
@@ -72,11 +72,12 @@ module.exports = {
       exclude: ['**/*.test.ts', '**/*.spec.ts', '**/__mocks__/*.ts'],
       useTsconfigDeclarationDir: true,
     }),
-    env === browser && inject({
-      modules: {
-        Buffer: ['buffer-es6', 'Buffer'],
-      },
-    }),
+    env === browser &&
+      inject({
+        modules: {
+          Buffer: ['buffer-es6', 'Buffer'],
+        },
+      }),
     env === browser && nodeGlobals(),
     minify && uglify(),
   ],
