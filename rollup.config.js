@@ -69,7 +69,7 @@ module.exports = {
     format === umd && resolve({ browser: true }),
     format === umd && commonjs(),
     typescript({
-      exclude: ['**/*.test.ts', '**/*.spec.ts', '**/__mocks__/*.ts'],
+      exclude: ['**/*.test.ts'],
       useTsconfigDeclarationDir: true,
     }),
     env === browser &&
