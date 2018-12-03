@@ -1,13 +1,16 @@
 const { get } = require('http');
 const { stringify } = require('querystring');
+const dotenv = require('dotenv');
 const { VirgilCrypto } = require('virgil-crypto');
 const { KeyEntryStorage, CachingJwtProvider } = require('virgil-sdk');
 const uuid = require('uuid/v4');
 
 const { SyncKeyStorage } = require('../dist/keyknox.node.cjs');
 
+dotenv.config();
+
 const config = {
-  endpoint: 'http://localhost:3000',
+  endpoint: `http://localhost:${process.env.PORT}`,
   identity: uuid(),
 };
 
