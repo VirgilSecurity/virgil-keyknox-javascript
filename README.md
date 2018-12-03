@@ -48,6 +48,7 @@ Now you can use global variables `Keyknox`, `Virgil` and `VirgilCrypto` as names
 
 ## Usage Example
 To begin using Virgil Keyknox SDK you'll need to initialize `SyncKeyStorage` class. This class is responsible for synchronization between device storage - IndexedDB in a browser or file system in Node.js - and Keyknox Cloud. In order to initialize `SyncKeyStorage` class you'll need the following values:
+- `identity` of the user
 - `accessTokenProvider` to provide access token for Virgil services
 - `keyEntryStorage` to store data locally
 - `privateKey` of current device/user
@@ -55,6 +56,9 @@ To begin using Virgil Keyknox SDK you'll need to initialize `SyncKeyStorage` cla
 
 ```js
 const { SyncKeyStorage } = require('@virgilsecurity/keyknox');
+
+// Identity of the user
+const identity = ...;
 
 // Setup Access Token provider to provide access token for Virgil services
 // Check https://github.com/VirgilSecurity/virgil-sdk-javascript
@@ -71,6 +75,7 @@ const publicKeys = ...;
 const privateKey = ...;
 
 const syncKeyStorage = SyncKeyStorage.create({
+  identity,
   accessTokenProvider,
   keyEntryStorage,
   privateKey,
