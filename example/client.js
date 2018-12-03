@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 const { get } = require('http');
 const { stringify } = require('querystring');
 const { VirgilCrypto } = require('virgil-crypto');
@@ -35,6 +33,7 @@ const keyPair = virgilCrypto.generateKeys();
 const syncKeyStorage = SyncKeyStorage.create({
   accessTokenProvider,
   keyEntryStorage,
+  identity: config.identity,
   privateKey: keyPair.privateKey,
   publicKeys: keyPair.publicKey,
 });
