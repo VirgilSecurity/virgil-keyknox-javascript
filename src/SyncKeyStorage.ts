@@ -81,11 +81,7 @@ export default class SyncKeyStorage {
 
   async deleteAllEntries(): Promise<void> {
     await this.cloudKeyStorage.deleteAllEntries();
-    const keyEntries = await this.keyEntryStorageWrapper.list();
-    const deleteRequests = keyEntries.map(keyEntry =>
-      this.keyEntryStorageWrapper.remove(keyEntry.name),
-    );
-    await Promise.all(deleteRequests);
+    await this.keyEntryStorageWrapper.clear();
   }
 
   async updateRecipients(options: {
