@@ -4,27 +4,33 @@ import { IAccessTokenProvider, IKeyEntry, IKeyEntryStorage } from 'virgil-sdk';
 import CloudKeyStorage from './CloudKeyStorage';
 import { KeyEntry, CloudEntry } from './entities';
 import { KeyEntryExistsError, KeyEntryDoesntExistError } from './errors';
+import KeyEntryStorageWrapper from './KeyEntryStorageWrapper';
 import { createKeyEntry, extractDate } from './KeyEntryUtils';
 import { Meta } from './types';
 
 export default class SyncKeyStorage {
   private readonly cloudKeyStorage: CloudKeyStorage;
-  private readonly keyEntryStorage: IKeyEntryStorage;
+  private readonly keyEntryStorageWrapper: KeyEntryStorageWrapper;
 
-  constructor(cloudKeyStorage: CloudKeyStorage, keyEntryStorage: IKeyEntryStorage) {
+  constructor(
+    identity: string,
+    cloudKeyStorage: CloudKeyStorage,
+    keyEntryStorage: IKeyEntryStorage,
+  ) {
     this.cloudKeyStorage = cloudKeyStorage;
-    this.keyEntryStorage = keyEntryStorage;
+    this.keyEntryStorageWrapper = new KeyEntryStorageWrapper(identity, keyEntryStorage);
   }
 
   static create(options: {
+    identity: string;
     accessTokenProvider: IAccessTokenProvider;
     privateKey: VirgilPrivateKey;
     publicKeys: VirgilPublicKey | VirgilPublicKey[];
     keyEntryStorage: IKeyEntryStorage;
   }): SyncKeyStorage {
-    const { accessTokenProvider, privateKey, publicKeys } = options;
+    const { identity, accessTokenProvider, privateKey, publicKeys } = options;
     const cloudKeyStorage = CloudKeyStorage.create({ accessTokenProvider, privateKey, publicKeys });
-    return new SyncKeyStorage(cloudKeyStorage, options.keyEntryStorage);
+    return new SyncKeyStorage(identity, cloudKeyStorage, options.keyEntryStorage);
   }
 
   async storeEntries(keyEntries: KeyEntry[]): Promise<IKeyEntry[]> {
@@ -33,7 +39,7 @@ export default class SyncKeyStorage {
     const cloudEntries = await this.cloudKeyStorage.storeEntries(keyEntries);
     const storeRequests = cloudEntries.map(async cloudEntry => {
       const keyEntry = createKeyEntry(cloudEntry);
-      return this.keyEntryStorage.save(keyEntry);
+      return this.keyEntryStorageWrapper.save(keyEntry);
     });
     return Promise.all(storeRequests);
   }
@@ -47,20 +53,20 @@ export default class SyncKeyStorage {
     await this.throwUnlessKeyEntryExists(name);
     const cloudEntry = await this.cloudKeyStorage.updateEntry(name, data, meta);
     const keyEntry = createKeyEntry(cloudEntry);
-    await this.keyEntryStorage.update(keyEntry);
+    await this.keyEntryStorageWrapper.update(keyEntry);
   }
 
   async retrieveEntry(name: string): Promise<IKeyEntry> {
     await this.throwUnlessKeyEntryExists(name);
-    return this.keyEntryStorage.load(name) as Promise<IKeyEntry>;
+    return this.keyEntryStorageWrapper.load(name) as Promise<IKeyEntry>;
   }
 
   retrieveAllEntries(): Promise<IKeyEntry[]> {
-    return this.keyEntryStorage.list();
+    return this.keyEntryStorageWrapper.list();
   }
 
   existsEntry(name: string): Promise<boolean> {
-    return this.keyEntryStorage.exists(name);
+    return this.keyEntryStorageWrapper.exists(name);
   }
 
   deleteEntry(name: string): Promise<void> {
@@ -69,15 +75,13 @@ export default class SyncKeyStorage {
 
   async deleteEntries(names: string[]): Promise<void> {
     await this.cloudKeyStorage.deleteEntries(names);
-    const deleteRequests = names.map(name => this.keyEntryStorage.remove(name));
+    const deleteRequests = names.map(name => this.keyEntryStorageWrapper.remove(name));
     await Promise.all(deleteRequests);
   }
 
   async deleteAllEntries(): Promise<void> {
     await this.cloudKeyStorage.deleteAllEntries();
-    const keyEntries = await this.keyEntryStorage.list();
-    const deleteRequests = keyEntries.map(keyEntry => this.keyEntryStorage.remove(keyEntry.name));
-    await Promise.all(deleteRequests);
+    await this.keyEntryStorageWrapper.clear();
   }
 
   async updateRecipients(options: {
@@ -98,7 +102,7 @@ export default class SyncKeyStorage {
       },
       {},
     );
-    const keyEntries = await this.keyEntryStorage.list();
+    const keyEntries = await this.keyEntryStorageWrapper.list();
     const keyEntriesMap = keyEntries.reduce<{ [key: string]: IKeyEntry | undefined }>(
       (result, keyEntry) => {
         result[keyEntry.name] = keyEntry;
@@ -131,14 +135,14 @@ export default class SyncKeyStorage {
   }
 
   private async throwUnlessKeyEntryExists(name: string): Promise<void> {
-    const exists = await this.keyEntryStorage.exists(name);
+    const exists = await this.keyEntryStorageWrapper.exists(name);
     if (!exists) {
       throw new KeyEntryDoesntExistError(name);
     }
   }
 
   private async throwIfKeyEntryExists(name: string): Promise<void> {
-    const exists = await this.keyEntryStorage.exists(name);
+    const exists = await this.keyEntryStorageWrapper.exists(name);
     if (exists) {
       throw new KeyEntryExistsError(name);
     }
@@ -150,17 +154,17 @@ export default class SyncKeyStorage {
     deleteNames: string[],
   ): Promise<void> {
     const deleteRequests = deleteNames.map(async name => {
-      await this.keyEntryStorage.remove(name);
+      await this.keyEntryStorageWrapper.remove(name);
     });
     const updateRequests = updateNames.map(async name => {
       const cloudEntry = this.cloudKeyStorage.retrieveEntry(name);
       const keyEntry = createKeyEntry(cloudEntry);
-      await this.keyEntryStorage.update(keyEntry);
+      await this.keyEntryStorageWrapper.update(keyEntry);
     });
     const storeRequests = storeNames.map(async name => {
       const cloudEntry = this.cloudKeyStorage.retrieveEntry(name);
       const keyEntry = createKeyEntry(cloudEntry);
-      await this.keyEntryStorage.save(keyEntry);
+      await this.keyEntryStorageWrapper.save(keyEntry);
     });
     await Promise.all([...deleteRequests, ...updateRequests, ...storeRequests]);
   }

@@ -1,23 +1,19 @@
 const { createServer } = require('http');
 const { parse } = require('querystring');
+const dotenv = require('dotenv');
 const { VirgilCrypto, VirgilAccessTokenSigner } = require('virgil-crypto');
 const { JwtGenerator } = require('virgil-sdk');
 
-const config = {
-  APP_ID: 'YOUR_APP_ID',
-  API_KEY: 'YOUR_API_KEY',
-  API_KEY_ID: 'YOUR_API_KEY_ID',
-  PORT: 3000,
-};
+dotenv.config();
 
 const virgilCrypto = new VirgilCrypto();
 const accessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
-const apiKey = virgilCrypto.importPrivateKey(config.API_KEY);
+const apiKey = virgilCrypto.importPrivateKey(process.env.API_KEY);
 const jwtGenerator = new JwtGenerator({
   apiKey,
   accessTokenSigner,
-  appId: config.APP_ID,
-  apiKeyId: config.API_KEY_ID,
+  appId: process.env.APP_ID,
+  apiKeyId: process.env.API_KEY_ID,
 });
 
 const server = createServer((request, response) => {
@@ -28,6 +24,6 @@ const server = createServer((request, response) => {
   response.end();
 });
 
-server.listen(config.PORT, () => {
-  console.log(`Server is running on port ${config.PORT}`);
+server.listen(process.env.PORT, () => {
+  console.log(`Server is running on port ${process.env.PORT}`);
 });

@@ -55,9 +55,9 @@ describe('KeyknoxCrypto', () => {
         publicKey,
       );
       expect(decryptedKeyknoxValue.value).toEqual(data);
-      expect(decryptedKeyknoxValue.meta).toBe(encryptedKeyknoxValue.meta);
+      expect(decryptedKeyknoxValue.meta).toEqual(encryptedKeyknoxValue.meta);
       expect(decryptedKeyknoxValue.version).toBe(encryptedKeyknoxValue.version);
-      expect(decryptedKeyknoxValue.keyknoxHash).toBe(encryptedKeyknoxValue.keyknoxHash);
+      expect(decryptedKeyknoxValue.keyknoxHash).toEqual(encryptedKeyknoxValue.keyknoxHash);
     });
   });
 

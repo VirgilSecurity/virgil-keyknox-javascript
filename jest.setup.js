@@ -1,3 +1,6 @@
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-env jest */
+
 const dotenv = require('dotenv');
 const { join } = require('path');
 
