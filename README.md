@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/@virgilsecurity/keyknox.svg)](https://www.npmjs.com/package/@virgilsecurity/keyknox)
 [![Build Status](https://travis-ci.com/VirgilSecurity/keyknox-javascript.svg?branch=master)](https://travis-ci.com/VirgilSecurity/keyknox-javascript)
-[![GitHub license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://github.com/VirgilSecurity/virgil/blob/master/LICENSE)
+[![GitHub license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://github.com/VirgilSecurity/virgil-keyknox-javascript/blob/master/LICENSE)
 
 [Introduction](#introduction) | [SDK Features](#sdk-features) | [Installation](#installation) | [Usage Example](#usage-example) | [Docs](#docs) | [Support](#support)
 
@@ -90,7 +90,7 @@ Virgil Security has a powerful set of APIs, and the documentation below can get 
 * [Virgil Security Documentation](https://developer.virgilsecurity.com)
 
 ## License
-This library is released under the [3-clause BSD License](LICENSE).
+This library is released under the [BSD 3-Clause License](LICENSE).
 
 ## Support
 Our developer support team is here to help you. Find out more information on our [Help Center](https://help.virgilsecurity.com).
