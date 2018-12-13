@@ -1,4 +1,4 @@
-/* eslint-disable import/no-extraneous-dependencies */
+/* eslint import/no-extraneous-dependencies: ["error", { "devDependencies": true }] */
 /* eslint-env jest */
 
 const dotenv = require('dotenv');
