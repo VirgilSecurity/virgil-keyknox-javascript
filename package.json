@@ -12,7 +12,7 @@
   "files": [
     "dist"
   ],
-  "repository": "https://github.com/VirgilSecurity/keyknox-javascript",
+  "repository": "https://github.com/VirgilSecurity/virgil-keyknox-javascript",
   "author": "Virgil Security Inc. <support@virgilsecurity.com>",
   "license": "BSD-3-Clause",
   "scripts": {
