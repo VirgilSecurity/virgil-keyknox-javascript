@@ -1,4 +1,3 @@
-import { VirgilPrivateKey, VirgilPublicKey } from 'virgil-crypto';
 import { IAccessTokenProvider } from 'virgil-sdk';
 
 import IKeyknoxClient from './clients/IKeyknoxClient';
@@ -6,6 +5,7 @@ import KeyknoxClient from './clients/KeyknoxClient';
 import IKeyknoxCrypto from './cryptos/IKeyknoxCrypto';
 import KeyknoxCrypto from './cryptos/KeyknoxCrypto';
 import { DecryptedKeyknoxValue } from './entities';
+import { VirgilPrivateKey, VirgilPublicKey } from './types';
 
 export default class KeyknoxManager {
   private readonly accessTokenProvider: IAccessTokenProvider;

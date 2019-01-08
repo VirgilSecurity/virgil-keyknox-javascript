@@ -1,4 +1,3 @@
-import { VirgilPrivateKey, VirgilPublicKey } from 'virgil-crypto';
 import { IAccessTokenProvider } from 'virgil-sdk';
 
 import { CloudEntry, DecryptedKeyknoxValue, KeyEntry } from './entities';
@@ -9,7 +8,7 @@ import {
 } from './errors';
 import KeyknoxManager from './KeyknoxManager';
 import { serialize, deserialize } from './CloudEntrySerializer';
-import { Meta } from './types';
+import { Meta, VirgilPrivateKey, VirgilPublicKey } from './types';
 
 export default class CloudKeyStorage {
   private readonly keyknoxManager: KeyknoxManager;
