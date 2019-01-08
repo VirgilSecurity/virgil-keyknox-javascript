@@ -1,4 +1,3 @@
-import { VirgilPrivateKey, VirgilPublicKey } from 'virgil-crypto';
 import { IAccessTokenProvider, IKeyEntry, IKeyEntryStorage } from 'virgil-sdk';
 
 import CloudKeyStorage from './CloudKeyStorage';
@@ -6,7 +5,7 @@ import { KeyEntry, CloudEntry } from './entities';
 import { KeyEntryExistsError, KeyEntryDoesntExistError } from './errors';
 import KeyEntryStorageWrapper from './KeyEntryStorageWrapper';
 import { createKeyEntry, extractDate } from './KeyEntryUtils';
-import { Meta } from './types';
+import { Meta, VirgilPrivateKey, VirgilPublicKey } from './types';
 
 export default class SyncKeyStorage {
   private readonly cloudKeyStorage: CloudKeyStorage;
