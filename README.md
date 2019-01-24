@@ -1,7 +1,7 @@
 # Virgil Keyknox JavaScript SDK
 
 [![npm](https://img.shields.io/npm/v/@virgilsecurity/keyknox.svg)](https://www.npmjs.com/package/@virgilsecurity/keyknox)
-[![Build Status](https://travis-ci.com/VirgilSecurity/keyknox-javascript.svg?branch=master)](https://travis-ci.com/VirgilSecurity/keyknox-javascript)
+[![Build Status](https://img.shields.io/travis/VirgilSecurity/virgil-keyknox-javascript.svg)](https://travis-ci.org/VirgilSecurity/virgil-keyknox-javascript)
 [![GitHub license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://github.com/VirgilSecurity/virgil-keyknox-javascript/blob/master/LICENSE)
 
 [Introduction](#introduction) | [SDK Features](#sdk-features) | [Installation](#installation) | [Usage Example](#usage-example) | [Docs](#docs) | [Support](#support)
