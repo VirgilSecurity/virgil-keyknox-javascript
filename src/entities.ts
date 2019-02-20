@@ -24,3 +24,9 @@ export interface KeyEntry {
   data: Buffer;
   meta?: Meta;
 }
+
+export interface KeyknoxData {
+  meta: string;
+  value: string;
+  version: string;
+}

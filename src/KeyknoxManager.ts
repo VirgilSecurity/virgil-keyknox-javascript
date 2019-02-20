@@ -4,7 +4,7 @@ import IKeyknoxClient from './clients/IKeyknoxClient';
 import KeyknoxClient from './clients/KeyknoxClient';
 import IKeyknoxCrypto from './cryptos/IKeyknoxCrypto';
 import KeyknoxCrypto from './cryptos/KeyknoxCrypto';
-import { DecryptedKeyknoxValue } from './entities';
+import { DecryptedKeyknoxValue, KeyknoxData } from './entities';
 import { VirgilPrivateKey, VirgilPublicKey } from './types';
 
 export default class KeyknoxManager {
@@ -60,7 +60,7 @@ export default class KeyknoxManager {
     return this.keyknoxCrypto.decrypt(encryptedKeyknoxValue, this.myPrivateKey, this.myPublicKeys);
   }
 
-  async resetValue(): Promise<DecryptedKeyknoxValue> {
+  async resetValue(): Promise<KeyknoxData> {
     const token = await this.accessTokenProvider.getToken({ operation: 'delete' });
     return this.keyknoxClient.resetValue(token.toString());
   }

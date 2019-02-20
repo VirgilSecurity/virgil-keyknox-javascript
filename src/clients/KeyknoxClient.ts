@@ -1,14 +1,8 @@
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 
-import { DecryptedKeyknoxValue, EncryptedKeyknoxValue } from '../entities';
+import { EncryptedKeyknoxValue, KeyknoxData } from '../entities';
 import { KeyknoxClientError } from '../errors';
 import IKeyknoxClient from './IKeyknoxClient';
-
-interface KeyknoxData {
-  meta: string;
-  value: string;
-  version: string;
-}
 
 export default class KeyknoxClient implements IKeyknoxClient {
   private static readonly AUTHORIZATION_PREFIX = 'Virgil';
@@ -53,14 +47,14 @@ export default class KeyknoxClient implements IKeyknoxClient {
     return KeyknoxClient.getEncryptedKeyknoxValue(response);
   }
 
-  async resetValue(token: string): Promise<DecryptedKeyknoxValue> {
+  async resetValue(token: string): Promise<KeyknoxData> {
     const config: AxiosRequestConfig = {
       headers: {
         Authorization: KeyknoxClient.getAuthorizationHeader(token),
       },
     };
     const response = await this.axios.post<KeyknoxData>('/keyknox/v1/reset', null, config);
-    return KeyknoxClient.getEncryptedKeyknoxValue(response);
+    return response.data;
   }
 
   private static getEncryptedKeyknoxValue(

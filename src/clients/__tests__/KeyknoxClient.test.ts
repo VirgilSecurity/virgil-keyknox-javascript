@@ -69,16 +69,16 @@ describe('KeyknoxClient', () => {
     const token = jwt.toString();
     await client.pushValue(meta1, value1, token);
     const response2 = await client.resetValue(token);
-    expect(response2.meta.byteLength).toBe(0);
-    expect(response2.value.byteLength).toBe(0);
+    expect(response2.meta).toBe('');
+    expect(response2.value).toBe('');
     expect(response2.version).toBe('2.0');
   });
 
   test('KTC-5', async () => {
     expect.assertions(3);
     const response = await client.resetValue(jwt.toString());
-    expect(response.meta.byteLength).toBe(0);
-    expect(response.value.byteLength).toBe(0);
+    expect(response.meta).toBe('');
+    expect(response.value).toBe('');
     expect(response.version).toBe('1.0');
   });
 });
