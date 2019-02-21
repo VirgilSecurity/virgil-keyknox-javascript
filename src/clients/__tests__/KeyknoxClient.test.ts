@@ -81,4 +81,12 @@ describe('KeyknoxClient', () => {
     expect(response.value).toBe('');
     expect(response.version).toBe('1.0');
   });
+
+  test('KTC-5 static', async () => {
+    expect.assertions(3);
+    const response = await KeyknoxClient.resetValue(jwt.toString());
+    expect(response.meta).toBe('');
+    expect(response.value).toBe('');
+    expect(response.version).toBe('1.0');
+  });
 });

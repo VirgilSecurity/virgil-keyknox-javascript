@@ -1,4 +1,9 @@
-import { VirgilCrypto, VirgilAccessTokenSigner } from 'virgil-crypto';
+import {
+  VirgilCrypto,
+  VirgilAccessTokenSigner,
+  VirgilPublicKey,
+  VirgilPrivateKey,
+} from 'virgil-crypto';
 import { JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
 import * as uuid from 'uuid/v4';
 
@@ -25,6 +30,11 @@ function generateKeyEntries(amount: number): KeyEntry[] {
 
 describe('CloudKeyStorage', () => {
   let cloudKeyStorage: CloudKeyStorage;
+  let accessTokenProvider: GeneratorJwtProvider;
+  let keyPair: {
+    publicKey: VirgilPublicKey;
+    privateKey: VirgilPrivateKey;
+  };
 
   beforeEach(() => {
     const virgilCrypto = new VirgilCrypto();
@@ -36,8 +46,8 @@ describe('CloudKeyStorage', () => {
       apiKeyId: process.env.API_KEY_ID!,
       accessTokenSigner: virgilAccessTokenSigner,
     });
-    const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
-    const keyPair = virgilCrypto.generateKeys();
+    accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
+    keyPair = virgilCrypto.generateKeys();
     cloudKeyStorage = CloudKeyStorage.create({
       accessTokenProvider,
       privateKey: keyPair.privateKey,
@@ -253,6 +263,21 @@ describe('CloudKeyStorage', () => {
     });
     const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
     const keyPair = virgilCrypto.generateKeys();
+    const keyknoxManager = new KeyknoxManager(
+      accessTokenProvider,
+      keyPair.privateKey,
+      keyPair.publicKey,
+    );
+    cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
+    await keyknoxManager.pushValue(Buffer.from(uuid()));
+    await cloudKeyStorage.deleteAllEntries();
+    await cloudKeyStorage.retrieveCloudEntries();
+    const entries = cloudKeyStorage.retrieveAllEntries();
+    expect(entries).toHaveLength(0);
+  });
+
+  test('KTC-41 static', async () => {
+    expect.assertions(1);
     const keyknoxManager = new KeyknoxManager(
       accessTokenProvider,
       keyPair.privateKey,

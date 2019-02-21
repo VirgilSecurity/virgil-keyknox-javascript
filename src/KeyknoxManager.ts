@@ -24,6 +24,11 @@ export default class KeyknoxManager {
     return this.myPublicKeys;
   }
 
+  static async resetValue(accessTokenProvider: IAccessTokenProvider) {
+    const token = await accessTokenProvider.getToken({ operation: 'delete' });
+    return KeyknoxClient.resetValue(token.toString());
+  }
+
   constructor(
     accessTokenProvider: IAccessTokenProvider,
     privateKey: VirgilPrivateKey,
