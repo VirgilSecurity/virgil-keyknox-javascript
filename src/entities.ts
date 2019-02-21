@@ -1,6 +1,6 @@
 import { Meta } from './types';
 
-interface KeyknoxValue {
+export interface KeyknoxValue {
   meta: Buffer;
   value: Buffer;
   version: string;
@@ -23,10 +23,4 @@ export interface KeyEntry {
   name: string;
   data: Buffer;
   meta?: Meta;
-}
-
-export interface KeyknoxData {
-  meta: string;
-  value: string;
-  version: string;
 }

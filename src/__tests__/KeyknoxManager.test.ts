@@ -208,16 +208,6 @@ describe('KeyknoxManager', () => {
     expect(decryptedKeyknoxValue.version).toBe('2.0');
   });
 
-  test('KTC-14 static', async () => {
-    expect.assertions(1);
-    const value = Buffer.from('value');
-    const { privateKey, publicKey } = virgilCrypto.generateKeys();
-    const keyknoxManager = new KeyknoxManager(accessTokenProvider, privateKey, publicKey);
-    await keyknoxManager.pushValue(value);
-    const decryptedKeyknoxValue = await KeyknoxManager.resetValue(accessTokenProvider);
-    expect(decryptedKeyknoxValue.version).toBe('2.0');
-  });
-
   test('KTC-15', async () => {
     expect.assertions(1);
     const identity = uuid();

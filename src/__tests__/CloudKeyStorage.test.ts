@@ -276,21 +276,6 @@ describe('CloudKeyStorage', () => {
     expect(entries).toHaveLength(0);
   });
 
-  test('KTC-41 static', async () => {
-    expect.assertions(1);
-    const keyknoxManager = new KeyknoxManager(
-      accessTokenProvider,
-      keyPair.privateKey,
-      keyPair.publicKey,
-    );
-    cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
-    await keyknoxManager.pushValue(Buffer.from(uuid()));
-    await CloudKeyStorage.resetAllEntries(accessTokenProvider);
-    await cloudKeyStorage.retrieveCloudEntries();
-    const entries = cloudKeyStorage.retrieveAllEntries();
-    expect(entries).toHaveLength(0);
-  });
-
   it("should throw 'CloudEntryExistsError' if we try to store entry with name that's already in use", async () => {
     expect.assertions(2);
     const [keyEntry1, keyEntry2] = generateKeyEntries(2);

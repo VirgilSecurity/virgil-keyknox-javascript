@@ -1,6 +1,6 @@
 import { IAccessTokenProvider } from 'virgil-sdk';
 
-import { CloudEntry, DecryptedKeyknoxValue, KeyEntry, KeyknoxData } from './entities';
+import { CloudEntry, DecryptedKeyknoxValue, KeyEntry } from './entities';
 import {
   CloudKeyStorageOutOfSyncError,
   CloudEntryExistsError,
@@ -32,10 +32,6 @@ export default class CloudKeyStorage {
       options.publicKeys,
     );
     return new CloudKeyStorage(keyknoxManager);
-  }
-
-  static async resetAllEntries(accessTokenProvider: IAccessTokenProvider): Promise<KeyknoxData> {
-    return KeyknoxManager.resetValue(accessTokenProvider);
   }
 
   async storeEntries(keyEntries: KeyEntry[]): Promise<CloudEntry[]> {
@@ -96,7 +92,7 @@ export default class CloudKeyStorage {
 
   async deleteAllEntries(): Promise<void> {
     this.cache.clear();
-    await this.keyknoxManager.resetValue();
+    this.decryptedKeyknoxValue = await this.keyknoxManager.resetValue();
   }
 
   async updateRecipients(options: {
