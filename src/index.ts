@@ -9,5 +9,7 @@ export { default as CloudKeyStorage } from './CloudKeyStorage';
 export { default as KeyknoxManager } from './KeyknoxManager';
 export { default as SyncKeyStorage } from './SyncKeyStorage';
 
+export * from './unsafeResetAllEntries';
+
 const buffer = Buffer;
 export { buffer as Buffer };
