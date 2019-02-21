@@ -34,7 +34,7 @@ export default class CloudKeyStorage {
     return new CloudKeyStorage(keyknoxManager);
   }
 
-  static async deleteAllEntries(accessTokenProvider: IAccessTokenProvider): Promise<KeyknoxData> {
+  static async resetAllEntries(accessTokenProvider: IAccessTokenProvider): Promise<KeyknoxData> {
     return KeyknoxManager.resetValue(accessTokenProvider);
   }
 
