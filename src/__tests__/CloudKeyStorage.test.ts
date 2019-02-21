@@ -285,7 +285,7 @@ describe('CloudKeyStorage', () => {
     );
     cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
     await keyknoxManager.pushValue(Buffer.from(uuid()));
-    CloudKeyStorage.resetAllEntries(accessTokenProvider);
+    await CloudKeyStorage.resetAllEntries(accessTokenProvider);
     await cloudKeyStorage.retrieveCloudEntries();
     const entries = cloudKeyStorage.retrieveAllEntries();
     expect(entries).toHaveLength(0);
