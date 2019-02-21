@@ -251,7 +251,7 @@ describe('CloudKeyStorage', () => {
   });
 
   test('KTC-41', async () => {
-    expect.assertions(1);
+    expect.assertions(2);
     const virgilCrypto = new VirgilCrypto();
     const virgilAccessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
     const apiKey = virgilCrypto.importPrivateKey(process.env.API_KEY!);
@@ -272,21 +272,12 @@ describe('CloudKeyStorage', () => {
     await keyknoxManager.pushValue(Buffer.from(uuid()));
     await cloudKeyStorage.deleteAllEntries();
     await cloudKeyStorage.retrieveCloudEntries();
-    const entries = cloudKeyStorage.retrieveAllEntries();
+    let entries = cloudKeyStorage.retrieveAllEntries();
     expect(entries).toHaveLength(0);
-  });
-
-  it('should store entries after deleteAllEntries', async () => {
-    expect.assertions(3);
     const [keyEntry] = generateKeyEntries(1);
-    await cloudKeyStorage.retrieveCloudEntries();
     await cloudKeyStorage.storeEntry(keyEntry.name, keyEntry.data, keyEntry.meta);
-    await cloudKeyStorage.deleteAllEntries();
-    await cloudKeyStorage.storeEntry(keyEntry.name, keyEntry.data, keyEntry.meta);
-    const cloudEntry = cloudKeyStorage.retrieveEntry(keyEntry.name);
-    expect(cloudEntry.name).toBe(keyEntry.name);
-    expect(cloudEntry.data).toEqual(keyEntry.data);
-    expect(cloudEntry.meta).toEqual(keyEntry.meta);
+    entries = cloudKeyStorage.retrieveAllEntries();
+    expect(entries).toHaveLength(1);
   });
 
   it("should throw 'CloudEntryExistsError' if we try to store entry with name that's already in use", async () => {
