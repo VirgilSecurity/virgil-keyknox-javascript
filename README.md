@@ -92,14 +92,7 @@ If you lost your private key, you are not able to decrypt saved data anymore. So
 import { unsafeResetAllEntries } from '@virgilsecurity/keyknox';
 
 const resetPromise = unsafeResetAllEntries(accessTokenProvider);
-
-const syncKeyStorage = SyncKeyStorage.create({
-  accessTokenProvider,
-  keyEntryStorage,
-  identity: config.identity,
-  privateKey: keyPair.privateKey,
-  publicKeys: keyPair.publicKey,
-});
+const syncKeyStorage = SyncKeyStorage.create(...);
 
 resetPromise.then(() => syncKeyStorage.sync());
 ```
