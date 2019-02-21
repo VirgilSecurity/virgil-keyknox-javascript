@@ -10,11 +10,10 @@ const packageJson = require('./package.json');
 
 function getFileName(name, environment, format, isMinified) {
   const parts = [name, environment, format];
-  if (isMinified) {
-    parts.push('min');
-  }
+  if (isMinified) parts.push('min');
   parts.push('js');
-  return parts.join('.');
+  const path = parts.join('.');
+  return join(__dirname, 'dist', path);
 }
 
 const NAME = 'keyknox';
@@ -58,7 +57,7 @@ module.exports = {
   output: {
     format,
     file: getFileName(NAME, env, format, minify),
-    dir: join(__dirname, 'dist'),
+
     name: UMD_NAME,
     globals: {
       'virgil-crypto': 'VirgilCrypto',
