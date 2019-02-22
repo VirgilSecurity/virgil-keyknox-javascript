@@ -1,4 +1,4 @@
-import { DecryptedKeyknoxValue, EncryptedKeyknoxValue } from '../entities';
+import { EncryptedKeyknoxValue, DecryptedKeyknoxValue } from '../entities';
 
 export default interface IKeyknoxClient {
   pushValue(

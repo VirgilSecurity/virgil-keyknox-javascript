@@ -1,4 +1,9 @@
-import { VirgilCrypto, VirgilAccessTokenSigner } from 'virgil-crypto';
+import {
+  VirgilCrypto,
+  VirgilAccessTokenSigner,
+  VirgilPublicKey,
+  VirgilPrivateKey,
+} from 'virgil-crypto';
 import { JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
 import * as uuid from 'uuid/v4';
 
@@ -25,6 +30,11 @@ function generateKeyEntries(amount: number): KeyEntry[] {
 
 describe('CloudKeyStorage', () => {
   let cloudKeyStorage: CloudKeyStorage;
+  let accessTokenProvider: GeneratorJwtProvider;
+  let keyPair: {
+    publicKey: VirgilPublicKey;
+    privateKey: VirgilPrivateKey;
+  };
 
   beforeEach(() => {
     const virgilCrypto = new VirgilCrypto();
@@ -36,8 +46,8 @@ describe('CloudKeyStorage', () => {
       apiKeyId: process.env.API_KEY_ID!,
       accessTokenSigner: virgilAccessTokenSigner,
     });
-    const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
-    const keyPair = virgilCrypto.generateKeys();
+    accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
+    keyPair = virgilCrypto.generateKeys();
     cloudKeyStorage = CloudKeyStorage.create({
       accessTokenProvider,
       privateKey: keyPair.privateKey,
@@ -241,7 +251,7 @@ describe('CloudKeyStorage', () => {
   });
 
   test('KTC-41', async () => {
-    expect.assertions(1);
+    expect.assertions(2);
     const virgilCrypto = new VirgilCrypto();
     const virgilAccessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
     const apiKey = virgilCrypto.importPrivateKey(process.env.API_KEY!);
@@ -262,8 +272,12 @@ describe('CloudKeyStorage', () => {
     await keyknoxManager.pushValue(Buffer.from(uuid()));
     await cloudKeyStorage.deleteAllEntries();
     await cloudKeyStorage.retrieveCloudEntries();
-    const entries = cloudKeyStorage.retrieveAllEntries();
+    let entries = cloudKeyStorage.retrieveAllEntries();
     expect(entries).toHaveLength(0);
+    const [keyEntry] = generateKeyEntries(1);
+    await cloudKeyStorage.storeEntry(keyEntry.name, keyEntry.data, keyEntry.meta);
+    entries = cloudKeyStorage.retrieveAllEntries();
+    expect(entries).toHaveLength(1);
   });
 
   it("should throw 'CloudEntryExistsError' if we try to store entry with name that's already in use", async () => {

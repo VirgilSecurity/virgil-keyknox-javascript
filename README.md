@@ -84,6 +84,20 @@ const syncKeyStorage = SyncKeyStorage.create({
 ```
 You can find a complete example of simple client-server application [here](example).
 
+### What if I lost my private key?
+
+If you lost your private key, you are not able to decrypt saved data anymore. So you need to reset your stored data in the Virgil Keyknox Service and start over.
+
+```js
+import { KeyknoxClient } from '@virgilsecurity/keyknox';
+
+const tokenPromise = accessTokenProvider.getToken({ operation: 'delete' });
+const resetPromise = tokenPromise.then(token => new KeyknoxClient().resetValue(token.toString()));
+const syncKeyStorage = SyncKeyStorage.create(...);
+
+resetPromise.then(() => syncKeyStorage.sync());
+```
+
 ## Docs
 Virgil Security has a powerful set of APIs, and the documentation below can get you started today.
 

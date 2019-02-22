@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 
-import { DecryptedKeyknoxValue, EncryptedKeyknoxValue } from '../entities';
+import { EncryptedKeyknoxValue, DecryptedKeyknoxValue, KeyknoxValue } from '../entities';
 import { KeyknoxClientError } from '../errors';
 import IKeyknoxClient from './IKeyknoxClient';
 
@@ -10,14 +10,15 @@ interface KeyknoxData {
   version: string;
 }
 
+const DEFAULT_BASE_URL: string = 'https://api.virgilsecurity.com';
+
 export default class KeyknoxClient implements IKeyknoxClient {
   private static readonly AUTHORIZATION_PREFIX = 'Virgil';
-  static readonly defaultBaseURL: string = 'https://api.virgilsecurity.com';
 
   private readonly axios: AxiosInstance;
 
-  constructor(axiosInstance?: AxiosInstance) {
-    this.axios = axiosInstance || axios.create({ baseURL: KeyknoxClient.defaultBaseURL });
+  constructor(apiUrl?: string, axiosInstance?: AxiosInstance) {
+    this.axios = axiosInstance || axios.create({ baseURL: apiUrl || DEFAULT_BASE_URL });
     this.axios.interceptors.response.use(undefined, KeyknoxClient.responseErrorHandler);
   }
 
@@ -40,7 +41,7 @@ export default class KeyknoxClient implements IKeyknoxClient {
       config.headers['Virgil-Keyknox-Previous-Hash'] = previousHash.toString('base64');
     }
     const response = await this.axios.put<KeyknoxData>('/keyknox/v1', payload, config);
-    return KeyknoxClient.getEncryptedKeyknoxValue(response);
+    return KeyknoxClient.getKeyknoxValue(response);
   }
 
   async pullValue(token: string): Promise<EncryptedKeyknoxValue> {
@@ -50,7 +51,7 @@ export default class KeyknoxClient implements IKeyknoxClient {
       },
     };
     const response = await this.axios.get<KeyknoxData>('/keyknox/v1', config);
-    return KeyknoxClient.getEncryptedKeyknoxValue(response);
+    return KeyknoxClient.getKeyknoxValue(response);
   }
 
   async resetValue(token: string): Promise<DecryptedKeyknoxValue> {
@@ -60,12 +61,10 @@ export default class KeyknoxClient implements IKeyknoxClient {
       },
     };
     const response = await this.axios.post<KeyknoxData>('/keyknox/v1/reset', null, config);
-    return KeyknoxClient.getEncryptedKeyknoxValue(response);
+    return KeyknoxClient.getKeyknoxValue(response);
   }
 
-  private static getEncryptedKeyknoxValue(
-    response: AxiosResponse<KeyknoxData>,
-  ): EncryptedKeyknoxValue {
+  private static getKeyknoxValue(response: AxiosResponse<KeyknoxData>): KeyknoxValue {
     const { data, headers } = response;
     return {
       meta: Buffer.from(data.meta, 'base64'),

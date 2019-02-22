@@ -11,6 +11,17 @@ import * as uuid from 'uuid/v4';
 import KeyknoxClient from '../clients/KeyknoxClient';
 import KeyknoxManager from '../KeyknoxManager';
 
+const virgilCrypto = new VirgilCrypto();
+const virgilAccessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
+const apiKey = virgilCrypto.importPrivateKey(process.env.API_KEY!);
+const jwtGenerator = new JwtGenerator({
+  apiKey,
+  appId: process.env.APP_ID!,
+  apiKeyId: process.env.API_KEY_ID!,
+  accessTokenSigner: virgilAccessTokenSigner,
+});
+const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
+
 function getRandomInRange(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min) + min);
 }
@@ -33,15 +44,6 @@ function createKeyknoxManager(
   publicKey: VirgilPublicKey | VirgilPublicKey[],
   identity?: string,
 ): KeyknoxManager {
-  const virgilCrypto = new VirgilCrypto();
-  const virgilAccessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
-  const apiKey = virgilCrypto.importPrivateKey(process.env.API_KEY!);
-  const jwtGenerator = new JwtGenerator({
-    apiKey,
-    appId: process.env.APP_ID!,
-    apiKeyId: process.env.API_KEY_ID!,
-    accessTokenSigner: virgilAccessTokenSigner,
-  });
   const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, identity || uuid());
   return new KeyknoxManager(accessTokenProvider, privateKey, publicKey);
 }

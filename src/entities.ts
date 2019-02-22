@@ -1,6 +1,6 @@
 import { Meta } from './types';
 
-interface KeyknoxValue {
+export interface KeyknoxValue {
   meta: Buffer;
   value: Buffer;
   version: string;
