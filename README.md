@@ -89,9 +89,10 @@ You can find a complete example of simple client-server application [here](examp
 If you lost your private key, you are not able to decrypt saved data anymore. So you need to reset your stored data in the Virgil Keyknox Service and start over.
 
 ```js
-import { unsafeResetAllEntries } from '@virgilsecurity/keyknox';
+import { KeyknoxClient } from '@virgilsecurity/keyknox';
 
-const resetPromise = unsafeResetAllEntries(accessTokenProvider);
+const tokenPromise = accessTokenProvider.getToken({ operation: 'delete' });
+const resetPromise = tokenPromise.then(token => new KeyknoxClient().resetValue(token.toString()));
 const syncKeyStorage = SyncKeyStorage.create(...);
 
 resetPromise.then(() => syncKeyStorage.sync());
