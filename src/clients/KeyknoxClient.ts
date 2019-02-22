@@ -14,26 +14,12 @@ const DEFAULT_BASE_URL: string = 'https://api.virgilsecurity.com';
 
 export default class KeyknoxClient implements IKeyknoxClient {
   private static readonly AUTHORIZATION_PREFIX = 'Virgil';
-  static readonly axios = axios.create({ baseURL: DEFAULT_BASE_URL });
 
   private readonly axios: AxiosInstance;
 
-  constructor(axiosInstance?: AxiosInstance) {
-    this.axios = axiosInstance || KeyknoxClient.axios;
+  constructor(apiUrl?: string, axiosInstance?: AxiosInstance) {
+    this.axios = axiosInstance || axios.create({ baseURL: apiUrl || DEFAULT_BASE_URL });
     this.axios.interceptors.response.use(undefined, KeyknoxClient.responseErrorHandler);
-  }
-
-  static async resetValue(
-    token: string,
-    axiosInstance: AxiosInstance = KeyknoxClient.axios,
-  ): Promise<DecryptedKeyknoxValue> {
-    const config: AxiosRequestConfig = {
-      headers: {
-        Authorization: KeyknoxClient.getAuthorizationHeader(token),
-      },
-    };
-    const response = await axiosInstance.post<KeyknoxData>('/keyknox/v1/reset', null, config);
-    return this.getKeyknoxValue(response);
   }
 
   async pushValue(
@@ -69,7 +55,13 @@ export default class KeyknoxClient implements IKeyknoxClient {
   }
 
   async resetValue(token: string): Promise<DecryptedKeyknoxValue> {
-    return KeyknoxClient.resetValue(token, this.axios);
+    const config: AxiosRequestConfig = {
+      headers: {
+        Authorization: KeyknoxClient.getAuthorizationHeader(token),
+      },
+    };
+    const response = await this.axios.post<KeyknoxData>('/keyknox/v1/reset', null, config);
+    return KeyknoxClient.getKeyknoxValue(response);
   }
 
   private static getKeyknoxValue(response: AxiosResponse<KeyknoxData>): KeyknoxValue {
