@@ -1,6 +1,6 @@
 {
   "name": "@virgilsecurity/keyknox",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Keyknox SDK allows developers to communicate with Virgil Keyknox Service to upload, download, and synchronize encrypted sensitive data (private keys) between different devices.",
   "main": "./dist/keyknox.node.cjs.js",
   "module": "./dist/keyknox.node.es.js",
@@ -33,7 +33,7 @@
     "lint": "npm run eslint && npm run tslint"
   },
   "dependencies": {
-    "axios": "^0.18.0"
+    "axios": "^0.19.0"
   },
   "peerDependencies": {
     "virgil-crypto": "^3.2.0",
@@ -61,7 +61,7 @@
     "rollup-plugin-inject": "^2.2.0",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^4.0.0",
-    "rollup-plugin-typescript2": "^0.19.2",
+    "rollup-plugin-typescript2": "^0.21.1",
     "rollup-plugin-uglify": "^6.0.0",
     "ts-jest": "^24.0.0",
     "tslint": "^5.11.0",
