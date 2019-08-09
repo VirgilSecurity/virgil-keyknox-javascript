@@ -7,8 +7,10 @@ export interface KeyknoxValue {
   keyknoxHash: Buffer;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DecryptedKeyknoxValue extends KeyknoxValue {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EncryptedKeyknoxValue extends KeyknoxValue {}
 
 export interface CloudEntry {

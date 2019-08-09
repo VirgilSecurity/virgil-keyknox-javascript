@@ -11,7 +11,7 @@ interface KeyknoxData {
   version: string;
 }
 
-const DEFAULT_BASE_URL: string = 'https://api-stg.virgilsecurity.com';
+const DEFAULT_BASE_URL = 'https://api-stg.virgilsecurity.com';
 
 export default class KeyknoxClient implements IKeyknoxClient {
   private static readonly AUTHORIZATION_PREFIX = 'Virgil';

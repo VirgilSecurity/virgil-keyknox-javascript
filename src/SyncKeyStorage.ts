@@ -31,7 +31,7 @@ export default class SyncKeyStorage {
     accessTokenProvider: IAccessTokenProvider;
     privateKey: VirgilPrivateKey;
     publicKeys: VirgilPublicKey | VirgilPublicKey[];
-    virgilCrypto: VirgilCrypto,
+    virgilCrypto: VirgilCrypto;
     keyEntryStorage: IKeyEntryStorage;
   }): SyncKeyStorage {
     const { virgilCrypto, identity, accessTokenProvider, privateKey, publicKeys } = options;

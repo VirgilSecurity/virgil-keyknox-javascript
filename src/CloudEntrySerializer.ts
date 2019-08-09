@@ -17,8 +17,10 @@ export function serialize(cloudEntries: Map<string, CloudEntry>): Buffer {
     entries[key] = {
       data: value.data.toString('base64'),
       meta: value.meta,
+      // eslint-disable-next-line @typescript-eslint/camelcase
       creation_date: Number(value.creationDate),
       name: value.name,
+      // eslint-disable-next-line @typescript-eslint/camelcase
       modification_date: Number(value.modificationDate),
     };
     if (entries[key].meta === null) {

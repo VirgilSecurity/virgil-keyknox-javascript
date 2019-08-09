@@ -1,9 +1,4 @@
-import {
-  IKeyEntry,
-  IKeyEntryStorage,
-  ISaveKeyEntryParams,
-  IUpdateKeyEntryParams,
-} from './types';
+import { IKeyEntry, IKeyEntryStorage, ISaveKeyEntryParams, IUpdateKeyEntryParams } from './types';
 
 export default class KeyEntryStorageWrapper {
   private readonly prefix: string;

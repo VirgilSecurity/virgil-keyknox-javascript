@@ -34,11 +34,7 @@ describe('KeyknoxManager', () => {
     return keyPairs;
   }
 
-  function getPublicKeys(
-    keyPairs: VirgilKeyPair[],
-    start: number,
-    end: number,
-  ): VirgilPublicKey[] {
+  function getPublicKeys(keyPairs: VirgilKeyPair[], start: number, end: number): VirgilPublicKey[] {
     return keyPairs.slice(start, end).map(keyPair => keyPair.publicKey);
   }
 
@@ -247,16 +243,8 @@ describe('KeyknoxManager', () => {
     const identity = uuid();
     const value = NodeBuffer.from('value');
     const [keyPair1, keyPair2] = generateKeyPairs(2);
-    const keyknoxManager1 = createKeyknoxManager(
-      keyPair1.privateKey,
-      keyPair1.publicKey,
-      identity,
-    );
-    const keyknoxManager2 = createKeyknoxManager(
-      keyPair2.privateKey,
-      keyPair2.publicKey,
-      identity,
-    );
+    const keyknoxManager1 = createKeyknoxManager(keyPair1.privateKey, keyPair1.publicKey, identity);
+    const keyknoxManager2 = createKeyknoxManager(keyPair2.privateKey, keyPair2.publicKey, identity);
     await keyknoxManager1.pushValue(value);
     const decryptedKeyknoxValue = await keyknoxManager2.resetValue();
     expect(decryptedKeyknoxValue.version).to.equal('2.0');

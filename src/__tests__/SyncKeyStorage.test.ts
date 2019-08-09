@@ -4,12 +4,7 @@ import { expect } from 'chai';
 import { join } from 'path';
 import uuid from 'uuid/v4';
 import { initCrypto, VirgilCrypto, VirgilAccessTokenSigner } from 'virgil-crypto';
-import {
-  IKeyEntry,
-  KeyEntryStorage,
-  JwtGenerator,
-  GeneratorJwtProvider,
-} from 'virgil-sdk';
+import { IKeyEntry, KeyEntryStorage, JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
 
 import KeyknoxCrypto from '../cryptos/KeyknoxCrypto';
 import CloudKeyStorage from '../CloudKeyStorage';
