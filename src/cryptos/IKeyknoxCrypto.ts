@@ -1,18 +1,17 @@
-import { VirgilPrivateKey, VirgilPublicKey } from 'virgil-crypto';
-
 import { DecryptedKeyknoxValue, EncryptedKeyknoxValue } from '../entities';
+import { IPrivateKey, IPublicKey } from '../types';
 
 export default interface IKeyknoxCrypto {
   decrypt(
     encryptedKeyknoxValue: EncryptedKeyknoxValue,
-    privateKey: VirgilPrivateKey,
-    publicKeys: VirgilPublicKey | VirgilPublicKey[],
+    privateKey: IPrivateKey,
+    publicKeys: IPublicKey | IPublicKey[],
   ): DecryptedKeyknoxValue;
 
   encrypt(
     data: Buffer,
-    privateKey: VirgilPrivateKey,
-    publicKeys: VirgilPublicKey | VirgilPublicKey[],
+    privateKey: IPrivateKey,
+    publicKeys: IPublicKey | IPublicKey[],
   ): {
     encryptedData: Buffer;
     metadata: Buffer;

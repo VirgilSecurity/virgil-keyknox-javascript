@@ -1,6 +1,5 @@
-import { IKeyEntry } from 'virgil-sdk';
-
 import { CloudEntry } from './entities';
+import { IKeyEntry } from './types';
 
 export const creationDateKey = 'k_cda';
 export const modificationDateKey = 'k_mda';

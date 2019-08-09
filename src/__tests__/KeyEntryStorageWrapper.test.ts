@@ -1,10 +1,13 @@
+import { Buffer as NodeBuffer } from 'buffer';
+import { expect } from 'chai';
+
 import { join } from 'path';
-import { IKeyEntry, ISaveKeyEntryParams, IUpdateKeyEntryParams, KeyEntryStorage } from 'virgil-sdk';
-import * as uuid from 'uuid/v4';
+import uuid from 'uuid/v4';
+import { KeyEntryStorage } from 'virgil-sdk';
 
 import KeyEntryStorageWrapper from '../KeyEntryStorageWrapper';
 
-describe('KeyEntrySotrageWrapper', () => {
+describe('KeyEntryStorageWrapper', () => {
   let keyEntryStorage: KeyEntryStorage;
   let keyEntryStorageWrapper: KeyEntryStorageWrapper;
 
@@ -15,161 +18,149 @@ describe('KeyEntrySotrageWrapper', () => {
   });
 
   describe('save', () => {
-    it("should store entry in 'KeyEntryStorage'", async () => {
-      expect.assertions(1);
-      await keyEntryStorageWrapper.save({ name: 'name', value: Buffer.from('value') });
+    it('stores entry in `KeyEntryStorage`', async () => {
+      await keyEntryStorageWrapper.save({ name: 'name', value: NodeBuffer.from('value') });
       const keyEntries = await keyEntryStorage.list();
-      expect(keyEntries).toHaveLength(1);
+      expect(keyEntries).to.have.length(1);
     });
 
-    it("should store correct values in 'KeyEntryStorage'", async () => {
-      expect.assertions(4);
+    it('stores correct values in `KeyEntryStorage`', async () => {
       const keyEntry = await keyEntryStorageWrapper.save({
         name: 'name',
-        value: Buffer.from('value'),
+        value: NodeBuffer.from('value'),
         meta: {
           key: 'value',
         },
       });
       const [storedKeyEntry] = await keyEntryStorage.list();
-      expect(storedKeyEntry.value).toEqual(keyEntry.value);
-      expect(storedKeyEntry.meta).toEqual(keyEntry.meta);
-      expect(storedKeyEntry.creationDate).toEqual(keyEntry.creationDate);
-      expect(storedKeyEntry.modificationDate).toEqual(keyEntry.modificationDate);
+      expect(storedKeyEntry.value.equals(keyEntry.value)).to.be.true;
+      expect(storedKeyEntry.meta).to.eql(keyEntry.meta);
+      expect(storedKeyEntry.creationDate).to.eql(keyEntry.creationDate);
+      expect(storedKeyEntry.modificationDate).to.eql(keyEntry.modificationDate);
     });
 
-    it('should store entries in separate namespace', async () => {
-      expect.assertions(1);
+    it('stores entries in separate namespace', async () => {
       const params1 = {
         name: 'name',
-        value: Buffer.from('value1'),
+        value: NodeBuffer.from('value1'),
       };
       const params2 = {
         name: params1.name,
-        value: Buffer.from('value2'),
+        value: NodeBuffer.from('value2'),
       };
       await keyEntryStorage.save(params1);
       await keyEntryStorageWrapper.save(params2);
       const keyEntries = await keyEntryStorage.list();
-      expect(keyEntries).toHaveLength(2);
+      expect(keyEntries).to.have.length(2);
     });
   });
 
   describe('load', () => {
-    it("should return an 'IKeyEntry' object if entry exists", async () => {
-      expect.assertions(1);
+    it('returns an `IKeyEntry` object if entry exists', async () => {
       const params = {
         name: 'name',
-        value: Buffer.from('value'),
+        value: NodeBuffer.from('value'),
       };
       await keyEntryStorageWrapper.save(params);
       const keyEntry = await keyEntryStorageWrapper.load(params.name);
-      expect(keyEntry).toBeDefined();
+      expect(keyEntry).not.to.be.undefined;
     });
 
-    it("should return an 'IKeyEntry' object with correct values", async () => {
-      expect.assertions(3);
+    it('returns an `IKeyEntry` object with correct values', async () => {
       const params = {
         name: 'name',
-        value: Buffer.from('value'),
+        value: NodeBuffer.from('value'),
         meta: {
           key: 'value',
         },
       };
       await keyEntryStorageWrapper.save(params);
       const keyEntry = await keyEntryStorageWrapper.load(params.name);
-      expect(keyEntry!.name).toBe(params.name);
-      expect(keyEntry!.value).toEqual(params.value);
-      expect(keyEntry!.meta).toEqual(params.meta);
+      expect(keyEntry!.name).to.equal(params.name);
+      expect(keyEntry!.value.equals(params.value)).to.be.true;
+      expect(keyEntry!.meta).to.eql(params.meta);
     });
 
-    it("should return 'null' if entry does not exist", async () => {
-      expect.assertions(1);
+    it('returns `null` if entry does not exist', async () => {
       const keyEntry = await keyEntryStorageWrapper.load('name');
-      expect(keyEntry).toBeNull();
+      expect(keyEntry).to.be.null;
     });
   });
 
   describe('exists', () => {
-    it("should return 'true' if entry exists", async () => {
-      expect.assertions(1);
+    it('returns `true` if entry exists', async () => {
       const params = {
         name: 'name',
-        value: Buffer.from('value'),
+        value: NodeBuffer.from('value'),
       };
       await keyEntryStorageWrapper.save(params);
       const result = await keyEntryStorageWrapper.exists(params.name);
-      expect(result).toBeTruthy();
+      expect(result).to.be.true;
     });
 
-    it("should return 'false' if entry does not exist", async () => {
-      expect.assertions(1);
+    it('return `false` if entry does not exist', async () => {
       const result = await keyEntryStorageWrapper.exists('name');
-      expect(result).toBeFalsy();
+      expect(result).to.be.false;
     });
   });
 
   describe('remove', () => {
-    it("should not remove entries created outside of 'KeyEntryStorageWrapper'", async () => {
-      expect.assertions(1);
+    it('should not remove entries created outside of `KeyEntryStorageWrapper`', async () => {
       const params1 = {
         name: 'name',
-        value: Buffer.from('value1'),
+        value: NodeBuffer.from('value1'),
       };
       const params2 = {
         name: params1.name,
-        value: Buffer.from('value2'),
+        value: NodeBuffer.from('value2'),
       };
       await keyEntryStorage.save(params1);
       await keyEntryStorageWrapper.save(params2);
       await keyEntryStorage.remove(params2.name);
       const keyEntries = await keyEntryStorage.list();
-      expect(keyEntries).toHaveLength(1);
+      expect(keyEntries).to.have.length(1);
     });
   });
 
   describe('list', () => {
-    it("should return entries except ones created outside of 'KeyEntryStorageWrapper'", async () => {
-      expect.assertions(1);
-      await keyEntryStorage.save({ name: 'name', value: Buffer.from('value') });
-      await keyEntryStorageWrapper.save({ name: 'name1', value: Buffer.from('value1') });
-      await keyEntryStorageWrapper.save({ name: 'name2', value: Buffer.from('value2') });
+    it('returns entries except ones created outside of `KeyEntryStorageWrapper`', async () => {
+      await keyEntryStorage.save({ name: 'name', value: NodeBuffer.from('value') });
+      await keyEntryStorageWrapper.save({ name: 'name1', value: NodeBuffer.from('value1') });
+      await keyEntryStorageWrapper.save({ name: 'name2', value: NodeBuffer.from('value2') });
       const keyEntries = await keyEntryStorageWrapper.list();
-      expect(keyEntries).toHaveLength(2);
+      expect(keyEntries).to.have.length(2);
     });
   });
 
   describe('update', () => {
-    it('should update existing entry', async () => {
-      expect.assertions(3);
+    it('updates existing entry', async () => {
       const params1 = {
         name: 'name',
-        value: Buffer.from('value1'),
+        value: NodeBuffer.from('value1'),
       };
       const params2 = {
         name: params1.name,
-        value: Buffer.from('value2'),
+        value: NodeBuffer.from('value2'),
         meta: {
           key: 'value',
         },
       };
       await keyEntryStorageWrapper.save(params1);
       const keyEntry = await keyEntryStorageWrapper.update(params2);
-      expect(keyEntry.name).toBe(params1.name);
-      expect(keyEntry.value).toEqual(params2.value);
-      expect(keyEntry.meta).toEqual(params2.meta);
+      expect(keyEntry.name).to.equal(params1.name);
+      expect(keyEntry.value.equals(params2.value)).to.be.true;
+      expect(keyEntry.meta).to.eql(params2.meta);
     });
   });
 
   describe('clear', () => {
-    it("should delete entries except ones created outside of 'KeyEntryStorageWrapper'", async () => {
-      expect.assertions(1);
-      await keyEntryStorage.save({ name: 'name', value: Buffer.from('value') });
-      await keyEntryStorageWrapper.save({ name: 'name1', value: Buffer.from('value1') });
-      await keyEntryStorageWrapper.save({ name: 'name2', value: Buffer.from('value2') });
+    it('deletes entries except ones created outside of `KeyEntryStorageWrapper`', async () => {
+      await keyEntryStorage.save({ name: 'name', value: NodeBuffer.from('value') });
+      await keyEntryStorageWrapper.save({ name: 'name1', value: NodeBuffer.from('value1') });
+      await keyEntryStorageWrapper.save({ name: 'name2', value: NodeBuffer.from('value2') });
       await keyEntryStorageWrapper.clear();
       const keyEntries = await keyEntryStorage.list();
-      expect(keyEntries).toHaveLength(1);
+      expect(keyEntries).to.have.length(1);
     });
   });
 });

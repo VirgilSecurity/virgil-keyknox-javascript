@@ -1,15 +1,18 @@
+import { Buffer as NodeBuffer } from 'buffer';
+import { expect } from 'chai';
+
 import { serialize, deserialize } from '../CloudEntrySerializer';
 import { CloudEntry } from '../entities';
-import * as cloudData from './Cloud.json';
+import cloudData from './Cloud.json';
 
 describe('CloudEntrySerializer', () => {
-  test('KTC-17', () => {
+  it('KTC-17', () => {
     const cloudEntries = new Map<string, CloudEntry>([
       [
         cloudData.kName1,
         {
           name: cloudData.kName1,
-          data: Buffer.from(cloudData.kData1, 'base64'),
+          data: NodeBuffer.from(cloudData.kData1, 'base64'),
           creationDate: new Date(cloudData.kCreationDate1),
           modificationDate: new Date(cloudData.kModificationDate1),
           meta: cloudData.kMeta1,
@@ -19,7 +22,7 @@ describe('CloudEntrySerializer', () => {
         cloudData.kName2,
         {
           name: cloudData.kName2,
-          data: Buffer.from(cloudData.kData2, 'base64'),
+          data: NodeBuffer.from(cloudData.kData2, 'base64'),
           creationDate: new Date(cloudData.kCreationDate2),
           modificationDate: new Date(cloudData.kModificationDate2),
           meta: cloudData.kMeta2,
@@ -27,14 +30,14 @@ describe('CloudEntrySerializer', () => {
       ],
     ]);
     const serialized1 = serialize(cloudEntries);
-    const expectedSerialized1 = Buffer.from(cloudData.kExpectedResult, 'base64');
-    expect(serialized1).toEqual(expectedSerialized1);
+    const expectedSerialized1 = NodeBuffer.from(cloudData.kExpectedResult, 'base64');
+    expect(serialized1.equals(expectedSerialized1)).to.be.true;
     const deserialized = deserialize(expectedSerialized1);
-    expect(deserialized).toEqual(cloudEntries);
+    expect(deserialized).to.eql(cloudEntries);
   });
 
-  test('KTC-18', () => {
-    const result = deserialize(Buffer.alloc(0));
-    expect(result).toEqual(new Map());
+  it('KTC-18', () => {
+    const result = deserialize(NodeBuffer.alloc(0));
+    expect(result).to.eql(new Map());
   });
 });

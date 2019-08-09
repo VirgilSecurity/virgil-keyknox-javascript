@@ -3,7 +3,7 @@ import {
   IKeyEntryStorage,
   ISaveKeyEntryParams,
   IUpdateKeyEntryParams,
-} from 'virgil-sdk';
+} from './types';
 
 export default class KeyEntryStorageWrapper {
   private readonly prefix: string;

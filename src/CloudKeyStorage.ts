@@ -1,5 +1,4 @@
-import { IAccessTokenProvider } from 'virgil-sdk';
-
+import KeyknoxCrypto from './cryptos/KeyknoxCrypto';
 import { CloudEntry, DecryptedKeyknoxValue, KeyEntry } from './entities';
 import {
   CloudKeyStorageOutOfSyncError,
@@ -8,7 +7,13 @@ import {
 } from './errors';
 import KeyknoxManager from './KeyknoxManager';
 import { serialize, deserialize } from './CloudEntrySerializer';
-import { Meta, VirgilPrivateKey, VirgilPublicKey } from './types';
+import {
+  Meta,
+  VirgilCrypto,
+  VirgilPrivateKey,
+  VirgilPublicKey,
+  IAccessTokenProvider,
+} from './types';
 
 export default class CloudKeyStorage {
   private readonly keyknoxManager: KeyknoxManager;
@@ -25,11 +30,13 @@ export default class CloudKeyStorage {
     accessTokenProvider: IAccessTokenProvider;
     privateKey: VirgilPrivateKey;
     publicKeys: VirgilPublicKey | VirgilPublicKey[];
+    virgilCrypto: VirgilCrypto,
   }): CloudKeyStorage {
     const keyknoxManager = new KeyknoxManager(
       options.accessTokenProvider,
       options.privateKey,
       options.publicKeys,
+      new KeyknoxCrypto(options.virgilCrypto),
     );
     return new CloudKeyStorage(keyknoxManager);
   }

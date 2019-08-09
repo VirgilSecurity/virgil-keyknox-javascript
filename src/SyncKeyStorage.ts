@@ -1,11 +1,17 @@
-import { IAccessTokenProvider, IKeyEntry, IKeyEntryStorage } from 'virgil-sdk';
-
 import CloudKeyStorage from './CloudKeyStorage';
 import { KeyEntry, CloudEntry } from './entities';
 import { KeyEntryExistsError, KeyEntryDoesntExistError } from './errors';
 import KeyEntryStorageWrapper from './KeyEntryStorageWrapper';
 import { createKeyEntry, extractDate } from './KeyEntryUtils';
-import { Meta, VirgilPrivateKey, VirgilPublicKey } from './types';
+import {
+  Meta,
+  VirgilCrypto,
+  VirgilPrivateKey,
+  VirgilPublicKey,
+  IAccessTokenProvider,
+  IKeyEntry,
+  IKeyEntryStorage,
+} from './types';
 
 export default class SyncKeyStorage {
   private readonly cloudKeyStorage: CloudKeyStorage;
@@ -25,10 +31,16 @@ export default class SyncKeyStorage {
     accessTokenProvider: IAccessTokenProvider;
     privateKey: VirgilPrivateKey;
     publicKeys: VirgilPublicKey | VirgilPublicKey[];
+    virgilCrypto: VirgilCrypto,
     keyEntryStorage: IKeyEntryStorage;
   }): SyncKeyStorage {
-    const { identity, accessTokenProvider, privateKey, publicKeys } = options;
-    const cloudKeyStorage = CloudKeyStorage.create({ accessTokenProvider, privateKey, publicKeys });
+    const { virgilCrypto, identity, accessTokenProvider, privateKey, publicKeys } = options;
+    const cloudKeyStorage = CloudKeyStorage.create({
+      accessTokenProvider,
+      privateKey,
+      publicKeys,
+      virgilCrypto,
+    });
     return new SyncKeyStorage(identity, cloudKeyStorage, options.keyEntryStorage);
   }
 
