@@ -37,6 +37,7 @@ initCrypto().then(() => {
   const syncKeyStorage = SyncKeyStorage.create({
     accessTokenProvider,
     keyEntryStorage,
+    virgilCrypto,
     identity: config.identity,
     privateKey: keyPair.privateKey,
     publicKeys: keyPair.publicKey,

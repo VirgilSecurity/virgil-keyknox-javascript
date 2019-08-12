@@ -9,7 +9,7 @@ dotenv.config();
 initCrypto().then(() => {
   const virgilCrypto = new VirgilCrypto();
   const accessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
-  const apiKey = virgilCrypto.importPrivateKey(process.env.API_KEY);
+  const apiKey = virgilCrypto.importPrivateKey({ value: process.env.API_KEY, encoding: 'base64' });
   const jwtGenerator = new JwtGenerator({
     apiKey,
     accessTokenSigner,
