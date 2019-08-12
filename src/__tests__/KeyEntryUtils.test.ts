@@ -41,7 +41,7 @@ describe('KeyEntryUtils', () => {
   });
 
   describe('extractDate', () => {
-    it('throw it `meta` not found', () => {
+    it('throws it `meta` not found', () => {
       const keyEntry = {
         name: 'name',
         value: NodeBuffer.from('value'),

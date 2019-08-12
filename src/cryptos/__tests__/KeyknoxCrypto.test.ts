@@ -9,8 +9,11 @@ describe('KeyknoxCrypto', () => {
   let keyknoxCrypto: KeyknoxCrypto;
   let virgilCrypto: VirgilCrypto;
 
-  beforeEach(async () => {
+  before(async () => {
     await initCrypto();
+  });
+
+  beforeEach(() => {
     virgilCrypto = new VirgilCrypto();
     keyknoxCrypto = new KeyknoxCrypto(virgilCrypto);
   });

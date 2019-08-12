@@ -98,7 +98,7 @@ describe('KeyEntryStorageWrapper', () => {
       expect(result).to.be.true;
     });
 
-    it('return `false` if entry does not exist', async () => {
+    it('returns `false` if entry does not exist', async () => {
       const result = await keyEntryStorageWrapper.exists('name');
       expect(result).to.be.false;
     });

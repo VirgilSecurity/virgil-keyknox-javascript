@@ -32,8 +32,11 @@ describe('SyncKeyStorage', () => {
   let keyEntryStorageWrapper: KeyEntryStorageWrapper;
   let syncKeyStorage: SyncKeyStorage;
 
-  beforeEach(async () => {
+  before(async () => {
     await initCrypto();
+  });
+
+  beforeEach(() => {
     const virgilCrypto = new VirgilCrypto();
     const virgilAccessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
     const apiKey = virgilCrypto.importPrivateKey({

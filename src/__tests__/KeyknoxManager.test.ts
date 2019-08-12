@@ -56,8 +56,11 @@ describe('KeyknoxManager', () => {
     );
   }
 
-  beforeEach(async () => {
+  before(async () => {
     await initCrypto();
+  });
+
+  beforeEach(() => {
     virgilCrypto = new VirgilCrypto();
     const virgilAccessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
     const apiKey = virgilCrypto.importPrivateKey({

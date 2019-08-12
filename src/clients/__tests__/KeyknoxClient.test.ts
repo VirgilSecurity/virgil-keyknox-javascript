@@ -11,8 +11,11 @@ describe('KeyknoxClient', () => {
   let client: KeyknoxClient;
   let jwt: Jwt;
 
-  beforeEach(async () => {
+  before(async () => {
     await initCrypto();
+  });
+
+  beforeEach(() => {
     client = new KeyknoxClient();
     const virgilCrypto = new VirgilCrypto();
     const virgilAccessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
