@@ -1,125 +1,146 @@
+import { Buffer as NodeBuffer } from 'buffer';
+import { expect } from 'chai';
+
+import uuid from 'uuid/v4';
 import {
-  VirgilKeyPair,
+  initCrypto,
+  VirgilCrypto,
   VirgilPrivateKey,
   VirgilPublicKey,
-  VirgilCrypto,
+  VirgilKeyPair,
   VirgilAccessTokenSigner,
 } from 'virgil-crypto';
 import { JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
-import * as uuid from 'uuid/v4';
 
 import KeyknoxClient from '../clients/KeyknoxClient';
+import KeyknoxCrypto from '../cryptos/KeyknoxCrypto';
 import KeyknoxManager from '../KeyknoxManager';
 
-const virgilCrypto = new VirgilCrypto();
-const virgilAccessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
-const apiKey = virgilCrypto.importPrivateKey(process.env.API_KEY!);
-const jwtGenerator = new JwtGenerator({
-  apiKey,
-  appId: process.env.APP_ID!,
-  apiKeyId: process.env.API_KEY_ID!,
-  accessTokenSigner: virgilAccessTokenSigner,
-});
-const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
-
-function getRandomInRange(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min) + min);
-}
-
-function generateKeyPairs(amount: number) {
-  const virgilCrypto = new VirgilCrypto();
-  const keyPairs = [];
-  for (let i = 0; i < amount; i += 1) {
-    keyPairs.push(virgilCrypto.generateKeys());
-  }
-  return keyPairs;
-}
-
-function getPublicKeys(keyPairs: VirgilKeyPair[], start: number, end: number): VirgilPublicKey[] {
-  return keyPairs.slice(start, end).map(keyPair => keyPair.publicKey);
-}
-
-function createKeyknoxManager(
-  privateKey: VirgilPrivateKey,
-  publicKey: VirgilPublicKey | VirgilPublicKey[],
-  identity?: string,
-): KeyknoxManager {
-  const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, identity || uuid());
-  return new KeyknoxManager(accessTokenProvider, privateKey, publicKey);
-}
-
 describe('KeyknoxManager', () => {
+  let virgilCrypto: VirgilCrypto;
+  let jwtGenerator: JwtGenerator;
   let keyknoxManager: KeyknoxManager;
   let keyPair: VirgilKeyPair;
 
+  function getRandomInRange(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min) + min);
+  }
+
+  function generateKeyPairs(amount: number) {
+    const keyPairs = [];
+    for (let i = 0; i < amount; i += 1) {
+      keyPairs.push(virgilCrypto.generateKeys());
+    }
+    return keyPairs;
+  }
+
+  function getPublicKeys(keyPairs: VirgilKeyPair[], start: number, end: number): VirgilPublicKey[] {
+    return keyPairs.slice(start, end).map(keyPair => keyPair.publicKey);
+  }
+
+  function createKeyknoxManager(
+    privateKey: VirgilPrivateKey,
+    publicKey: VirgilPublicKey | VirgilPublicKey[],
+    identity?: string,
+  ): KeyknoxManager {
+    const accessTokenProvider = new GeneratorJwtProvider(
+      jwtGenerator,
+      undefined,
+      identity || uuid(),
+    );
+    return new KeyknoxManager(
+      accessTokenProvider,
+      privateKey,
+      publicKey,
+      new KeyknoxCrypto(virgilCrypto),
+    );
+  }
+
+  before(async () => {
+    await initCrypto();
+  });
+
   beforeEach(() => {
-    const virgilCrypto = new VirgilCrypto();
+    virgilCrypto = new VirgilCrypto();
+    const virgilAccessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
+    const apiKey = virgilCrypto.importPrivateKey({
+      value: process.env.API_KEY!,
+      encoding: 'base64',
+    });
+    jwtGenerator = new JwtGenerator({
+      apiKey,
+      appId: process.env.APP_ID!,
+      apiKeyId: process.env.API_KEY_ID!,
+      accessTokenSigner: virgilAccessTokenSigner,
+    });
     keyPair = virgilCrypto.generateKeys();
     keyknoxManager = createKeyknoxManager(keyPair.privateKey, keyPair.publicKey);
   });
 
-  test('KTC-6', async () => {
-    expect.assertions(1);
-    const value = Buffer.from('value');
+  it('KTC-6', async () => {
+    const value = NodeBuffer.from('value');
     const decryptedKeyknoxValue = await keyknoxManager.pushValue(value);
-    expect(decryptedKeyknoxValue.value).toEqual(value);
+    expect(decryptedKeyknoxValue.value.equals(value)).to.be.true;
   });
 
-  test('KTC-7', async () => {
-    expect.assertions(1);
-    const value = Buffer.from('value');
+  it('KTC-7', async () => {
+    const value = NodeBuffer.from('value');
     await keyknoxManager.pushValue(value);
     const decryptedKeyknoxValue = await keyknoxManager.pullValue();
-    expect(decryptedKeyknoxValue.value).toEqual(value);
+    expect(decryptedKeyknoxValue.value.equals(value)).to.be.true;
   });
 
-  test('KTC-8', async () => {
-    expect.assertions(3);
+  it('KTC-8', async () => {
     const decryptedKeyknoxValue = await keyknoxManager.pullValue();
-    expect(decryptedKeyknoxValue.meta.byteLength).toBe(0);
-    expect(decryptedKeyknoxValue.value.byteLength).toBe(0);
-    expect(decryptedKeyknoxValue.version).toBe('1.0');
+    expect(decryptedKeyknoxValue.meta.byteLength).to.equal(0);
+    expect(decryptedKeyknoxValue.value.byteLength).to.equal(0);
+    expect(decryptedKeyknoxValue.version).to.equal('1.0');
   });
 
-  test('KTC-9', async () => {
-    expect.assertions(2);
+  it('KTC-9', async () => {
     const identity = uuid();
-    const value = Buffer.from('value');
+    const value = NodeBuffer.from('value');
     const keyPairs = generateKeyPairs(50);
     let publicKeys = getPublicKeys(keyPairs, 0, 25);
     const keyknoxManager1 = createKeyknoxManager(keyPairs[0].privateKey, publicKeys, identity);
     await keyknoxManager1.pushValue(value);
     const decryptedKeyknoxValue = await keyknoxManager1.pullValue();
-    expect(decryptedKeyknoxValue.value).toEqual(value);
+    expect(decryptedKeyknoxValue.value.equals(value)).to.be.true;
     publicKeys = getPublicKeys(keyPairs, 25, 50);
     const keyknoxManager2 = createKeyknoxManager(keyPairs[0].privateKey, publicKeys, identity);
-    await expect(keyknoxManager2.pullValue()).rejects.toThrow();
+    try {
+      await keyknoxManager2.pullValue();
+    } catch (error) {
+      expect(error).not.to.be.undefined;
+    }
   });
 
-  test('KTC-10', async () => {
-    expect.assertions(3);
+  it('KTC-10', async () => {
     const identity = uuid();
-    const value = Buffer.from('value');
+    const value = NodeBuffer.from('value');
     const keyPairs = generateKeyPairs(50);
     let privateKey = keyPairs[getRandomInRange(0, 25)].privateKey;
     const publicKeys = getPublicKeys(keyPairs, 0, 25);
     const keyknoxManager1 = createKeyknoxManager(privateKey, publicKeys, identity);
     await keyknoxManager1.pushValue(value);
     let decryptedKeyknoxValue = await keyknoxManager1.pullValue();
-    expect(decryptedKeyknoxValue.value).toEqual(value);
+    expect(decryptedKeyknoxValue.value.equals(value)).to.be.true;
     privateKey = keyPairs[getRandomInRange(0, 25)].privateKey;
     const keyknoxManager2 = createKeyknoxManager(privateKey, publicKeys, identity);
     decryptedKeyknoxValue = await keyknoxManager2.pullValue();
-    expect(decryptedKeyknoxValue.value).toEqual(value);
+    expect(decryptedKeyknoxValue.value.equals(value)).to.be.true;
     privateKey = keyPairs[getRandomInRange(25, 50)].privateKey;
     const keyknoxManager3 = createKeyknoxManager(privateKey, publicKeys, identity);
-    await expect(keyknoxManager3.pullValue()).rejects.toThrow();
+    try {
+      await keyknoxManager3.pullValue();
+    } catch (error) {
+      expect(error).not.to.be.undefined;
+    }
   });
 
-  test('KTC-11', async () => {
-    expect.assertions(6);
+  it('KTC-11', async () => {
     const identity = uuid();
-    const value = Buffer.from('value');
+    const value = NodeBuffer.from('value');
     const keyPairs = generateKeyPairs(50);
     let privateKey = keyPairs[getRandomInRange(0, 25)].privateKey;
     let publicKeys = getPublicKeys(keyPairs, 0, 25);
@@ -132,27 +153,34 @@ describe('KeyknoxManager', () => {
       newPrivateKey: privateKey,
       newPublicKeys: publicKeys,
     });
-    expect(keyknoxManager2.privateKey).toBe(privateKey);
-    expect(keyknoxManager2.publicKeys).toBe(publicKeys);
-    expect(decryptedKeyknoxValue.value).toEqual(value);
+    expect(keyknoxManager2.privateKey).to.equal(privateKey);
+    expect(keyknoxManager2.publicKeys).to.equal(publicKeys);
+    expect(decryptedKeyknoxValue.value.equals(value)).to.be.true;
     privateKey = keyPairs[getRandomInRange(25, 50)].privateKey;
     const keyknoxManager3 = createKeyknoxManager(privateKey, publicKeys, identity);
     decryptedKeyknoxValue = await keyknoxManager3.pullValue();
-    expect(decryptedKeyknoxValue.value).toEqual(value);
+    expect(decryptedKeyknoxValue.value.equals(value)).to.be.true;
     privateKey = keyPairs[getRandomInRange(0, 25)].privateKey;
     const keyknoxManager4 = createKeyknoxManager(privateKey, publicKeys, identity);
-    await expect(keyknoxManager4.pullValue()).rejects.toThrow();
+    try {
+      await keyknoxManager4.pullValue();
+    } catch (error) {
+      expect(error).not.to.be.undefined;
+    }
     privateKey = keyPairs[getRandomInRange(25, 50)].privateKey;
     publicKeys = getPublicKeys(keyPairs, 0, 25);
     const keyknoxManager5 = createKeyknoxManager(privateKey, publicKeys, identity);
-    await expect(keyknoxManager5.pullValue()).rejects.toThrow();
+    try {
+      await keyknoxManager5.pullValue();
+    } catch (error) {
+      expect(error).not.to.be.undefined;
+    }
   });
 
-  test('KTC-12', async () => {
-    expect.assertions(6);
+  it('KTC-12', async () => {
     const identity = uuid();
-    const value = Buffer.from('value');
-    const updatedValue = Buffer.from('updatedValue');
+    const value = NodeBuffer.from('value');
+    const updatedValue = NodeBuffer.from('updatedValue');
     const keyPairs = generateKeyPairs(50);
     let privateKey = keyPairs[getRandomInRange(0, 25)].privateKey;
     let publicKeys = getPublicKeys(keyPairs, 0, 25);
@@ -167,24 +195,31 @@ describe('KeyknoxManager', () => {
       newPrivateKey: privateKey,
       newPublicKeys: publicKeys,
     });
-    expect(keyknoxManager2.privateKey).toBe(privateKey);
-    expect(keyknoxManager2.publicKeys).toBe(publicKeys);
-    expect(decryptedKeyknoxValue.value).toEqual(value);
+    expect(keyknoxManager2.privateKey).to.equal(privateKey);
+    expect(keyknoxManager2.publicKeys).to.equal(publicKeys);
+    expect(decryptedKeyknoxValue.value.equals(value)).to.be.true;
     privateKey = keyPairs[getRandomInRange(25, 50)].privateKey;
     const keyknoxManager3 = createKeyknoxManager(privateKey, publicKeys, identity);
     decryptedKeyknoxValue = await keyknoxManager3.pullValue();
-    expect(decryptedKeyknoxValue.value).toEqual(value);
+    expect(decryptedKeyknoxValue.value.equals(value)).to.be.true;
     privateKey = keyPairs[getRandomInRange(0, 25)].privateKey;
     const keyknoxManager4 = createKeyknoxManager(privateKey, publicKeys, identity);
-    await expect(keyknoxManager4.pullValue()).rejects.toThrow();
+    try {
+      await keyknoxManager4.pullValue();
+    } catch (error) {
+      expect(error).not.to.be.undefined;
+    }
     privateKey = keyPairs[getRandomInRange(25, 50)].privateKey;
     publicKeys = getPublicKeys(keyPairs, 0, 25);
     const keyknoxManager5 = createKeyknoxManager(privateKey, publicKeys, identity);
-    await expect(keyknoxManager5.pullValue()).rejects.toThrow();
+    try {
+      await keyknoxManager5.pullValue();
+    } catch (error) {
+      expect(error).not.to.be.undefined;
+    }
   });
 
-  test('KTC-13', async () => {
-    expect.assertions(3);
+  it('KTC-13', async () => {
     const keyPairs = generateKeyPairs(50);
     let privateKey = keyPairs[0].privateKey;
     let publicKeys = getPublicKeys(keyPairs, 0, 25);
@@ -195,36 +230,36 @@ describe('KeyknoxManager', () => {
       newPrivateKey: privateKey,
       newPublicKeys: publicKeys,
     });
-    expect(decryptedKeyknoxValue.meta.byteLength).toBe(0);
-    expect(decryptedKeyknoxValue.value.byteLength).toBe(0);
-    expect(decryptedKeyknoxValue.version).toBe('1.0');
+    expect(decryptedKeyknoxValue.meta.byteLength).to.equal(0);
+    expect(decryptedKeyknoxValue.value.byteLength).to.equal(0);
+    expect(decryptedKeyknoxValue.version).to.equal('1.0');
   });
 
-  test('KTC-14', async () => {
-    expect.assertions(1);
-    const value = Buffer.from('value');
+  it('KTC-14', async () => {
+    const value = NodeBuffer.from('value');
     await keyknoxManager.pushValue(value);
     const decryptedKeyknoxValue = await keyknoxManager.resetValue();
-    expect(decryptedKeyknoxValue.version).toBe('2.0');
+    expect(decryptedKeyknoxValue.version).to.equal('2.0');
   });
 
-  test('KTC-15', async () => {
-    expect.assertions(1);
+  it('KTC-15', async () => {
     const identity = uuid();
-    const value = Buffer.from('value');
+    const value = NodeBuffer.from('value');
     const [keyPair1, keyPair2] = generateKeyPairs(2);
     const keyknoxManager1 = createKeyknoxManager(keyPair1.privateKey, keyPair1.publicKey, identity);
     const keyknoxManager2 = createKeyknoxManager(keyPair2.privateKey, keyPair2.publicKey, identity);
     await keyknoxManager1.pushValue(value);
     const decryptedKeyknoxValue = await keyknoxManager2.resetValue();
-    expect(decryptedKeyknoxValue.version).toBe('2.0');
+    expect(decryptedKeyknoxValue.version).to.equal('2.0');
   });
 
-  test('KTC-16', async () => {
-    expect.assertions(1);
+  it('KTC-16', async () => {
     const virgilCrypto = new VirgilCrypto();
     const virgilAccessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
-    const apiKey = virgilCrypto.importPrivateKey(process.env.API_KEY!);
+    const apiKey = virgilCrypto.importPrivateKey({
+      value: process.env.API_KEY!,
+      encoding: 'base64',
+    });
     const jwtGenerator = new JwtGenerator({
       apiKey,
       appId: process.env.APP_ID!,
@@ -238,11 +273,12 @@ describe('KeyknoxManager', () => {
       accessTokenProvider,
       keyPair.privateKey,
       keyPair.publicKey,
+      new KeyknoxCrypto(virgilCrypto),
       keyknoxClient,
     );
-    const value = Buffer.from('value');
+    const value = NodeBuffer.from('value');
     await keyknoxManager.pushValue(value);
-    const token = await accessTokenProvider.getToken({ operation: 'get' });
+    const token = await accessTokenProvider.getToken({ service: 'keyknox', operation: 'get' });
     const encryptedKeyknoxValue = await keyknoxClient.pullValue(token.toString());
     const decryptedData = virgilCrypto.decryptThenVerifyDetached(
       encryptedKeyknoxValue.value,
@@ -250,6 +286,6 @@ describe('KeyknoxManager', () => {
       keyPair.privateKey,
       keyPair.publicKey,
     );
-    expect(decryptedData).toEqual(value);
+    expect(decryptedData.equals(value)).to.be.true;
   });
 });

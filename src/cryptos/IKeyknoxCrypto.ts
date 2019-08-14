@@ -1,18 +1,18 @@
-import { VirgilPrivateKey, VirgilPublicKey } from 'virgil-crypto';
-
 import { DecryptedKeyknoxValue, EncryptedKeyknoxValue } from '../entities';
+import { IPrivateKey, IPublicKey } from '../types';
 
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export default interface IKeyknoxCrypto {
   decrypt(
     encryptedKeyknoxValue: EncryptedKeyknoxValue,
-    privateKey: VirgilPrivateKey,
-    publicKeys: VirgilPublicKey | VirgilPublicKey[],
+    privateKey: IPrivateKey,
+    publicKeys: IPublicKey | IPublicKey[],
   ): DecryptedKeyknoxValue;
 
   encrypt(
     data: Buffer,
-    privateKey: VirgilPrivateKey,
-    publicKeys: VirgilPublicKey | VirgilPublicKey[],
+    privateKey: IPrivateKey,
+    publicKeys: IPublicKey | IPublicKey[],
   ): {
     encryptedData: Buffer;
     metadata: Buffer;

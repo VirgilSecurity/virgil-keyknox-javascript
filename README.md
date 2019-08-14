@@ -1,3 +1,5 @@
+> This README is for Keyknox v0.3.x. Check the [v0.2.x branch](https://github.com/VirgilSecurity/virgil-keyknox-javascript/tree/v0.2.x) for Keyknox v0.2.x docs.
+
 # Virgil Keyknox JavaScript SDK
 
 [![npm](https://img.shields.io/npm/v/@virgilsecurity/keyknox.svg)](https://www.npmjs.com/package/@virgilsecurity/keyknox)
@@ -23,24 +25,24 @@ You can install this module from npm. Another option is to add it via `script` t
 ### npm
 You will need to install `@virgilsecurity/keyknox`.
 ```sh
-npm install @virgilsecurity/keyknox
+npm install @virgilsecurity/keyknox@next
 ```
 
 You will also need to install `virgil-crypto` and `virgil-sdk` from npm.
 ```sh
-npm install virgil-crypto virgil-sdk
+npm install virgil-crypto@next virgil-sdk
 ```
-> Note that minimum supported version of `virgil-crypto` is `3.0.0` and minimum supported version of `virgil-sdk` is `5.0.0`.
+> Note that minimum supported version of `virgil-crypto` is `4.0.0-alpha.0` and minimum supported version of `virgil-sdk` is `5.3.0`.
 
 ### In browser via `script` tag
 You will need to add `@virgilsecurity/keyknox` script.
 ```html
-<script src="https://unpkg.com/@virgilsecurity/keyknox/dist/keyknox.browser.umd.min.js"></script>
+<script src="https://unpkg.com/@virgilsecurity/keyknox@next/dist/keyknox.umd.js"></script>
 ```
 
 You will also need to add `virgil-crypto` and `virgil-sdk` scripts.
 ```html
-<script src="https://unpkg.com/virgil-crypto/dist/virgil-crypto.browser.umd.min.js"></script>
+<script src="https://unpkg.com/virgil-crypto@next/dist/browser.umd.js"></script>
 <script src="https://unpkg.com/virgil-sdk/dist/virgil-sdk.browser.umd.min.js"></script>
 ```
 
@@ -53,33 +55,41 @@ To begin using Virgil Keyknox SDK you'll need to initialize `SyncKeyStorage` cla
 - `keyEntryStorage` to store data locally
 - `privateKey` of current device/user
 - `publicKeys` of all devices/users that should have access to data
+- `virgilCrypto` to perform all cryptographic operations
 
 ```js
 const { SyncKeyStorage } = require('@virgilsecurity/keyknox');
+const { initCrypto, VirgilCrypto } = require('virgil-crypto');
 
-// Identity of the user
-const identity = ...;
+initCrypto().then(() => {
+  // Identity of the user
+  const identity = ...;
 
-// Setup Access Token provider to provide access token for Virgil services
-// Check https://github.com/VirgilSecurity/virgil-sdk-javascript
-const accessTokenProvider = ...;
+  // Setup Access Token provider to provide access token for Virgil services
+  // Check https://github.com/VirgilSecurity/virgil-sdk-javascript
+  const accessTokenProvider = ...;
 
-// Setup Key Entry Storage to store data locally
-// Check https://github.com/VirgilSecurity/virgil-sdk-javascript
-const keyEntryStorage = ...;
+  // Setup Key Entry Storage to store data locally
+  // Check https://github.com/VirgilSecurity/virgil-sdk-javascript
+  const keyEntryStorage = ...;
 
-// Public keys of users that should have access to data
-const publicKeys = ...;
+  // Public keys of users that should have access to data
+  const publicKeys = ...;
 
-// Private key of current user
-const privateKey = ...;
+  // Private key of current user
+  const privateKey = ...;
 
-const syncKeyStorage = SyncKeyStorage.create({
-  identity,
-  accessTokenProvider,
-  keyEntryStorage,
-  privateKey,
-  publicKeys,
+  // An instance of `VirgilCrypto` class
+  const virgilCrypto = new VirgilCrypto();
+
+  const syncKeyStorage = SyncKeyStorage.create({
+    identity,
+    accessTokenProvider,
+    keyEntryStorage,
+    privateKey,
+    publicKeys,
+    virgilCrypto,
+  });
 });
 ```
 You can find a complete example of simple client-server application [here](example).

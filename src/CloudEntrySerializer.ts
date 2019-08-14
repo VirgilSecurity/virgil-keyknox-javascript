@@ -1,3 +1,5 @@
+import { Buffer as NodeBuffer } from 'buffer';
+
 import { CloudEntry } from './entities';
 import { Meta } from './types';
 
@@ -15,15 +17,17 @@ export function serialize(cloudEntries: Map<string, CloudEntry>): Buffer {
     entries[key] = {
       data: value.data.toString('base64'),
       meta: value.meta,
+      // eslint-disable-next-line @typescript-eslint/camelcase
       creation_date: Number(value.creationDate),
       name: value.name,
+      // eslint-disable-next-line @typescript-eslint/camelcase
       modification_date: Number(value.modificationDate),
     };
     if (entries[key].meta === null) {
       delete entries[key].meta;
     }
   });
-  return Buffer.from(JSON.stringify(entries));
+  return NodeBuffer.from(JSON.stringify(entries));
 }
 
 export function deserialize(data: Buffer): Map<string, CloudEntry> {
@@ -35,7 +39,7 @@ export function deserialize(data: Buffer): Map<string, CloudEntry> {
     const serializedEntry = serializedEntries[key];
     result.set(key, {
       name: serializedEntry.name,
-      data: Buffer.from(serializedEntry.data, 'base64'),
+      data: NodeBuffer.from(serializedEntry.data, 'base64'),
       creationDate: new Date(serializedEntry.creation_date),
       modificationDate: new Date(serializedEntry.modification_date),
       meta: typeof serializedEntry.meta === 'undefined' ? null : serializedEntry.meta,

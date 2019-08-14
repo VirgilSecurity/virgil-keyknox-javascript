@@ -1,5 +1,6 @@
 import { EncryptedKeyknoxValue, DecryptedKeyknoxValue } from '../entities';
 
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export default interface IKeyknoxClient {
   pushValue(
     meta: Buffer,

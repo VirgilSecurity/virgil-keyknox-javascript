@@ -1,3 +1,5 @@
+import { expect } from 'chai';
+
 import {
   KeyknoxError,
   KeyknoxClientError,
@@ -10,131 +12,131 @@ import {
 
 describe('errors', () => {
   describe('KeyknoxError', () => {
-    it('should contain fields', () => {
+    it('contains fields', () => {
       const message = 'message';
       const error = new KeyknoxError(message);
-      expect(error.message).toBe(message);
+      expect(error.message).to.equal(message);
     });
 
-    it('should adjust the prototype', () => {
+    it('adjusts the prototype', () => {
       const error = new KeyknoxError('message');
-      expect(error).toBeInstanceOf(KeyknoxError);
+      expect(error).to.be.instanceOf(KeyknoxError);
     });
   });
 
   describe('KeyknoxClientError', () => {
-    it('should contain fields', () => {
+    it('contains fields', () => {
       const message = 'message';
       const status = 123;
       const code = 123;
       const error = new KeyknoxClientError(message, status, code);
-      expect(error.message).toBe(message);
-      expect(error.status).toBe(status);
-      expect(error.code).toBe(code);
+      expect(error.message).to.equal(message);
+      expect(error.status).to.equal(status);
+      expect(error.code).to.equal(code);
     });
 
-    it('should extend KeyknoxError', () => {
+    it('extends KeyknoxError', () => {
       const error = new KeyknoxClientError('message');
-      expect(error).toBeInstanceOf(KeyknoxError);
+      expect(error).to.be.instanceOf(KeyknoxError);
     });
 
-    it('should adjust the prototype', () => {
+    it('adjusts the prototype', () => {
       const error = new KeyknoxClientError('message');
-      expect(error).toBeInstanceOf(KeyknoxClientError);
+      expect(error).to.be.instanceOf(KeyknoxClientError);
     });
   });
 
   describe('CloudKeyStorageOutOfSyncError', () => {
-    it('should contain fields', () => {
+    it('contains fields', () => {
       const message = 'message';
       const error = new KeyknoxError(message);
-      expect(error.message).toBe(message);
+      expect(error.message).to.equal(message);
     });
 
-    it('should extend KeyknoxError', () => {
+    it('extends KeyknoxError', () => {
       const error = new CloudKeyStorageOutOfSyncError();
-      expect(error).toBeInstanceOf(KeyknoxError);
+      expect(error).to.be.instanceOf(KeyknoxError);
     });
 
-    it('should adjust the prototype', () => {
+    it('adjusts the prototype', () => {
       const error = new CloudKeyStorageOutOfSyncError();
-      expect(error).toBeInstanceOf(CloudKeyStorageOutOfSyncError);
+      expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
     });
   });
 
   describe('CloudEntryExistsError', () => {
-    it('should contain fields', () => {
+    it('contains fields', () => {
       const cloudEntryName = 'cloudEntryName';
       const error = new CloudEntryExistsError(cloudEntryName);
-      expect(error.cloudEntryName).toBe(cloudEntryName);
-      expect(typeof error.message === 'string').toBeTruthy();
+      expect(error.cloudEntryName).to.equal(cloudEntryName);
+      expect(typeof error.message === 'string').to.be.true;
     });
 
-    it('should extend KeyknoxError', () => {
+    it('extends KeyknoxError', () => {
       const error = new CloudEntryExistsError('cloudEntry');
-      expect(error).toBeInstanceOf(KeyknoxError);
+      expect(error).to.be.instanceOf(KeyknoxError);
     });
 
-    it('should adjust the prototype', () => {
+    it('adjusts the prototype', () => {
       const error = new CloudEntryExistsError('cloudEntry');
-      expect(error).toBeInstanceOf(CloudEntryExistsError);
+      expect(error).to.be.instanceOf(CloudEntryExistsError);
     });
   });
 
   describe('CloudEntryDoesntExistError', () => {
-    it('should contain fields', () => {
+    it('contains fields', () => {
       const cloudEntryName = 'cloudEntryName';
       const error = new CloudEntryDoesntExistError(cloudEntryName);
-      expect(error.cloudEntryName).toBe(cloudEntryName);
-      expect(typeof error.message === 'string').toBeTruthy();
+      expect(error.cloudEntryName).to.equal(cloudEntryName);
+      expect(typeof error.message === 'string').to.be.true;
     });
 
-    it('should extend KeyknoxError', () => {
+    it('extends KeyknoxError', () => {
       const error = new CloudEntryDoesntExistError('cloudEntry');
-      expect(error).toBeInstanceOf(KeyknoxError);
+      expect(error).to.be.instanceOf(KeyknoxError);
     });
 
-    it('should adjust the prototype', () => {
+    it('adjusts the prototype', () => {
       const error = new CloudEntryDoesntExistError('cloudEntry');
-      expect(error).toBeInstanceOf(CloudEntryDoesntExistError);
+      expect(error).to.be.instanceOf(CloudEntryDoesntExistError);
     });
   });
 
   describe('KeyEntryExistsError', () => {
-    it('should contain fields', () => {
+    it('contains fields', () => {
       const keyEntryName = 'keyEntryName';
       const error = new KeyEntryExistsError(keyEntryName);
-      expect(error.keyEntryName).toBe(keyEntryName);
-      expect(typeof error.message === 'string').toBeTruthy();
+      expect(error.keyEntryName).to.equal(keyEntryName);
+      expect(typeof error.message === 'string').to.be.true;
     });
 
-    it('should extend KeyknoxError', () => {
+    it('extends KeyknoxError', () => {
       const error = new KeyEntryExistsError('keyEntry');
-      expect(error).toBeInstanceOf(KeyknoxError);
+      expect(error).to.be.instanceOf(KeyknoxError);
     });
 
-    it('should adjust the prototype', () => {
+    it('adjusts the prototype', () => {
       const error = new KeyEntryExistsError('keyEntry');
-      expect(error).toBeInstanceOf(KeyEntryExistsError);
+      expect(error).to.be.instanceOf(KeyEntryExistsError);
     });
   });
 
   describe('KeyEntryDoesntExistError', () => {
-    it('should contain fields', () => {
+    it('contains fields', () => {
       const keyEntryName = 'keyEntryName';
       const error = new KeyEntryDoesntExistError(keyEntryName);
-      expect(error.keyEntryName).toBe(keyEntryName);
-      expect(typeof error.message === 'string').toBeTruthy();
+      expect(error.keyEntryName).to.equal(keyEntryName);
+      expect(typeof error.message === 'string').to.be.true;
     });
 
-    it('should extend KeyknoxError', () => {
+    it('extends KeyknoxError', () => {
       const error = new KeyEntryDoesntExistError('keyEntry');
-      expect(error).toBeInstanceOf(KeyknoxError);
+      expect(error).to.be.instanceOf(KeyknoxError);
     });
 
-    it('should adjust the prototype', () => {
+    it('adjusts the prototype', () => {
       const error = new KeyEntryDoesntExistError('keyEntry');
-      expect(error).toBeInstanceOf(KeyEntryDoesntExistError);
+      expect(error).to.be.instanceOf(KeyEntryDoesntExistError);
     });
   });
 });

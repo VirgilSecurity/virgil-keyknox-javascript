@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { Buffer as NodeBuffer } from 'buffer';
 
 import { EncryptedKeyknoxValue, DecryptedKeyknoxValue, KeyknoxValue } from '../entities';
 import { KeyknoxClientError } from '../errors';
@@ -10,7 +11,7 @@ interface KeyknoxData {
   version: string;
 }
 
-const DEFAULT_BASE_URL: string = 'https://api.virgilsecurity.com';
+const DEFAULT_BASE_URL = 'https://api.virgilsecurity.com';
 
 export default class KeyknoxClient implements IKeyknoxClient {
   private static readonly AUTHORIZATION_PREFIX = 'Virgil';
@@ -67,10 +68,10 @@ export default class KeyknoxClient implements IKeyknoxClient {
   private static getKeyknoxValue(response: AxiosResponse<KeyknoxData>): KeyknoxValue {
     const { data, headers } = response;
     return {
-      meta: Buffer.from(data.meta, 'base64'),
-      value: Buffer.from(data.value, 'base64'),
+      meta: NodeBuffer.from(data.meta, 'base64'),
+      value: NodeBuffer.from(data.value, 'base64'),
       version: data.version,
-      keyknoxHash: Buffer.from(headers['virgil-keyknox-hash'], 'base64'),
+      keyknoxHash: NodeBuffer.from(headers['virgil-keyknox-hash'], 'base64'),
     };
   }
 

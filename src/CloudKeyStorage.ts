@@ -1,5 +1,4 @@
-import { IAccessTokenProvider } from 'virgil-sdk';
-
+import KeyknoxCrypto from './cryptos/KeyknoxCrypto';
 import { CloudEntry, DecryptedKeyknoxValue, KeyEntry } from './entities';
 import {
   CloudKeyStorageOutOfSyncError,
@@ -8,7 +7,13 @@ import {
 } from './errors';
 import KeyknoxManager from './KeyknoxManager';
 import { serialize, deserialize } from './CloudEntrySerializer';
-import { Meta, VirgilPrivateKey, VirgilPublicKey } from './types';
+import {
+  Meta,
+  VirgilCrypto,
+  VirgilPrivateKey,
+  VirgilPublicKey,
+  IAccessTokenProvider,
+} from './types';
 
 export default class CloudKeyStorage {
   private readonly keyknoxManager: KeyknoxManager;
@@ -25,11 +30,13 @@ export default class CloudKeyStorage {
     accessTokenProvider: IAccessTokenProvider;
     privateKey: VirgilPrivateKey;
     publicKeys: VirgilPublicKey | VirgilPublicKey[];
+    virgilCrypto: VirgilCrypto;
   }): CloudKeyStorage {
     const keyknoxManager = new KeyknoxManager(
       options.accessTokenProvider,
       options.privateKey,
       options.publicKeys,
+      new KeyknoxCrypto(options.virgilCrypto),
     );
     return new CloudKeyStorage(keyknoxManager);
   }
@@ -41,6 +48,7 @@ export default class CloudKeyStorage {
       this.cache.set(keyEntry.name, CloudKeyStorage.createCloudEntry(keyEntry));
     });
     await this.pushCacheEntries();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return keyEntries.map(keyEntry => this.cache.get(keyEntry.name)!);
   }
 
@@ -54,6 +62,7 @@ export default class CloudKeyStorage {
     this.throwUnlessCloudEntryExists(name);
     const cloudEntry = CloudKeyStorage.createCloudEntry(
       { name, data, meta },
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.cache.get(name)!.creationDate,
     );
     this.cache.set(name, cloudEntry);
@@ -64,6 +73,7 @@ export default class CloudKeyStorage {
   retrieveEntry(name: string): CloudEntry {
     this.throwUnlessSyncWasCalled();
     this.throwUnlessCloudEntryExists(name);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this.cache.get(name)!;
   }
 
@@ -136,6 +146,7 @@ export default class CloudKeyStorage {
     const value = serialize(this.cache);
     this.decryptedKeyknoxValue = await this.keyknoxManager.pushValue(
       value,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.decryptedKeyknoxValue!.keyknoxHash,
     );
     this.cache = deserialize(this.decryptedKeyknoxValue.value);

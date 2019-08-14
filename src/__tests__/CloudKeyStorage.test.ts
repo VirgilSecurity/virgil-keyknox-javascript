@@ -1,12 +1,17 @@
+import { Buffer as NodeBuffer } from 'buffer';
+import { expect } from 'chai';
+
+import uuid from 'uuid/v4';
 import {
+  initCrypto,
   VirgilCrypto,
-  VirgilAccessTokenSigner,
   VirgilPublicKey,
   VirgilPrivateKey,
+  VirgilAccessTokenSigner,
 } from 'virgil-crypto';
 import { JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
-import * as uuid from 'uuid/v4';
 
+import KeyknoxCrypto from '../cryptos/KeyknoxCrypto';
 import {
   CloudKeyStorageOutOfSyncError,
   CloudEntryExistsError,
@@ -21,7 +26,7 @@ function generateKeyEntries(amount: number): KeyEntry[] {
   for (let i = 0; i < amount; i += 1) {
     keyEntries.push({
       name: uuid(),
-      data: Buffer.from(`data${i}`),
+      data: NodeBuffer.from(`data${i}`),
       meta: { meta: `meta${i}` },
     });
   }
@@ -36,10 +41,17 @@ describe('CloudKeyStorage', () => {
     privateKey: VirgilPrivateKey;
   };
 
+  before(async () => {
+    await initCrypto();
+  });
+
   beforeEach(() => {
     const virgilCrypto = new VirgilCrypto();
     const virgilAccessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
-    const apiKey = virgilCrypto.importPrivateKey(process.env.API_KEY!);
+    const apiKey = virgilCrypto.importPrivateKey({
+      value: process.env.API_KEY!,
+      encoding: 'base64',
+    });
     const jwtGenerator = new JwtGenerator({
       apiKey,
       appId: process.env.APP_ID!,
@@ -50,53 +62,50 @@ describe('CloudKeyStorage', () => {
     keyPair = virgilCrypto.generateKeys();
     cloudKeyStorage = CloudKeyStorage.create({
       accessTokenProvider,
+      virgilCrypto,
       privateKey: keyPair.privateKey,
       publicKeys: keyPair.publicKey,
     });
   });
 
-  test('KTC-19', async () => {
-    expect.assertions(1);
+  it('KTC-19', async () => {
     await cloudKeyStorage.retrieveCloudEntries();
-    expect(cloudKeyStorage.retrieveAllEntries().length).toBe(0);
+    expect(cloudKeyStorage.retrieveAllEntries()).to.have.length(0);
   });
 
-  test('KTC-20', async () => {
-    expect.assertions(6);
+  it('KTC-20', async () => {
     const [keyEntry] = generateKeyEntries(1);
     await cloudKeyStorage.retrieveCloudEntries();
     await cloudKeyStorage.storeEntry(keyEntry.name, keyEntry.data, keyEntry.meta);
     let cloudEntry = cloudKeyStorage.retrieveEntry(keyEntry.name);
-    expect(cloudEntry.name).toBe(keyEntry.name);
-    expect(cloudEntry.data).toEqual(keyEntry.data);
-    expect(cloudEntry.meta).toEqual(keyEntry.meta);
+    expect(cloudEntry.name).to.equal(keyEntry.name);
+    expect(cloudEntry.data.equals(keyEntry.data)).to.be.true;
+    expect(cloudEntry.meta).to.eql(keyEntry.meta);
     await cloudKeyStorage.retrieveCloudEntries();
     cloudEntry = cloudKeyStorage.retrieveEntry(keyEntry.name);
-    expect(cloudEntry.name).toBe(keyEntry.name);
-    expect(cloudEntry.data).toEqual(keyEntry.data);
-    expect(cloudEntry.meta).toEqual(keyEntry.meta);
+    expect(cloudEntry.name).to.equal(keyEntry.name);
+    expect(cloudEntry.data.equals(keyEntry.data)).to.be.true;
+    expect(cloudEntry.meta).to.eql(keyEntry.meta);
   });
 
-  test('KTC-21', async () => {
-    expect.assertions(4);
+  it('KTC-21', async () => {
     const [keyEntry] = generateKeyEntries(1);
     await cloudKeyStorage.retrieveCloudEntries();
     await cloudKeyStorage.storeEntry(keyEntry.name, keyEntry.data, keyEntry.meta);
-    expect(cloudKeyStorage.existsEntry(keyEntry.name)).toBeTruthy();
-    expect(cloudKeyStorage.existsEntry('name1')).toBeFalsy();
+    expect(cloudKeyStorage.existsEntry(keyEntry.name)).to.be.true;
+    expect(cloudKeyStorage.existsEntry('name1')).to.be.false;
     await cloudKeyStorage.retrieveCloudEntries();
-    expect(cloudKeyStorage.existsEntry(keyEntry.name)).toBeTruthy();
-    expect(cloudKeyStorage.existsEntry('name1')).toBeFalsy();
+    expect(cloudKeyStorage.existsEntry(keyEntry.name)).to.be.true;
+    expect(cloudKeyStorage.existsEntry('name1')).to.be.false;
   });
 
-  test('KTC-22', async () => {
-    const compareAssertions = 3;
+  it('KTC-22', async () => {
     function compare(cloudEntries: CloudEntry[], keyEntries: { [key: string]: KeyEntry }): void {
       cloudEntries.forEach(cloudEntry => {
         const keyEntry = keyEntries[cloudEntry.name];
-        expect(keyEntry).toBeDefined();
-        expect(cloudEntry.data).toEqual(keyEntry.data);
-        expect(cloudEntry.meta).toEqual(keyEntry.meta);
+        expect(keyEntry).not.to.be.undefined;
+        expect(cloudEntry.data.equals(keyEntry.data)).to.be.true;
+        expect(cloudEntry.meta).to.eql(keyEntry.meta);
       });
     }
 
@@ -108,78 +117,73 @@ describe('CloudKeyStorage', () => {
       return result;
     }, {});
 
-    expect.assertions(4 + 2 * 99 * compareAssertions + 2 * 100 * compareAssertions);
     await cloudKeyStorage.retrieveCloudEntries();
     await cloudKeyStorage.storeEntry(keyEntry1.name, keyEntry1.data, keyEntry1.meta);
     const keyEntries98 = keyEntries.slice(1, 99);
     await cloudKeyStorage.storeEntries(keyEntries98);
     let cloudEntries = cloudKeyStorage.retrieveAllEntries();
-    expect(cloudEntries).toHaveLength(99);
+    expect(cloudEntries).to.have.length(99);
     compare(cloudEntries, keyEntriesMap);
     await cloudKeyStorage.retrieveCloudEntries();
     cloudEntries = cloudKeyStorage.retrieveAllEntries();
-    expect(cloudEntries).toHaveLength(99);
+    expect(cloudEntries).to.have.length(99);
     compare(cloudEntries, keyEntriesMap);
     await cloudKeyStorage.storeEntry(lastEntry.name, lastEntry.data, lastEntry.meta);
     cloudEntries = cloudKeyStorage.retrieveAllEntries();
-    expect(cloudEntries).toHaveLength(100);
+    expect(cloudEntries).to.have.length(100);
     compare(cloudEntries, keyEntriesMap);
     await cloudKeyStorage.retrieveCloudEntries();
     cloudEntries = cloudKeyStorage.retrieveAllEntries();
-    expect(cloudEntries).toHaveLength(100);
+    expect(cloudEntries).to.have.length(100);
     compare(cloudEntries, keyEntriesMap);
   });
 
-  test('KTC-23', async () => {
-    expect.assertions(2);
+  it('KTC-23', async () => {
     const keyEntries = generateKeyEntries(100);
     await cloudKeyStorage.retrieveCloudEntries();
     await cloudKeyStorage.storeEntries(keyEntries);
     await cloudKeyStorage.deleteAllEntries();
-    expect(cloudKeyStorage.retrieveAllEntries()).toHaveLength(0);
+    expect(cloudKeyStorage.retrieveAllEntries()).to.have.length(0);
     await cloudKeyStorage.retrieveCloudEntries();
-    expect(cloudKeyStorage.retrieveAllEntries()).toHaveLength(0);
+    expect(cloudKeyStorage.retrieveAllEntries()).to.have.length(0);
   });
 
-  test('KTC-24', async () => {
-    expect.assertions(2);
+  it('KTC-24', async () => {
     await cloudKeyStorage.retrieveCloudEntries();
     await cloudKeyStorage.deleteAllEntries();
-    expect(cloudKeyStorage.retrieveAllEntries()).toHaveLength(0);
+    expect(cloudKeyStorage.retrieveAllEntries()).to.have.length(0);
     await cloudKeyStorage.retrieveCloudEntries();
-    expect(cloudKeyStorage.retrieveAllEntries()).toHaveLength(0);
+    expect(cloudKeyStorage.retrieveAllEntries()).to.have.length(0);
   });
 
-  test('KTC-25', async () => {
-    expect.assertions(10);
+  it('KTC-25', async () => {
     const keyEntries = generateKeyEntries(10);
     const [keyEntry1, keyEntry2, keyEntry3] = keyEntries;
     await cloudKeyStorage.retrieveCloudEntries();
     await cloudKeyStorage.storeEntries(keyEntries);
     await cloudKeyStorage.deleteEntry(keyEntry1.name);
     let cloudEntries = cloudKeyStorage.retrieveAllEntries();
-    expect(cloudKeyStorage.existsEntry(keyEntry1.name)).toBeFalsy();
-    expect(cloudEntries).toHaveLength(9);
+    expect(cloudKeyStorage.existsEntry(keyEntry1.name)).to.be.false;
+    expect(cloudEntries).to.have.length(9);
     await cloudKeyStorage.deleteEntries([keyEntry2.name, keyEntry3.name]);
     cloudEntries = cloudKeyStorage.retrieveAllEntries();
-    expect(cloudKeyStorage.existsEntry(keyEntry1.name)).toBeFalsy();
-    expect(cloudKeyStorage.existsEntry(keyEntry2.name)).toBeFalsy();
-    expect(cloudKeyStorage.existsEntry(keyEntry3.name)).toBeFalsy();
-    expect(cloudEntries).toHaveLength(7);
+    expect(cloudKeyStorage.existsEntry(keyEntry1.name)).to.be.false;
+    expect(cloudKeyStorage.existsEntry(keyEntry2.name)).to.be.false;
+    expect(cloudKeyStorage.existsEntry(keyEntry3.name)).to.be.false;
+    expect(cloudEntries).to.have.length(7);
     await cloudKeyStorage.retrieveCloudEntries();
     cloudEntries = cloudKeyStorage.retrieveAllEntries();
-    expect(cloudKeyStorage.existsEntry(keyEntry1.name)).toBeFalsy();
-    expect(cloudKeyStorage.existsEntry(keyEntry2.name)).toBeFalsy();
-    expect(cloudKeyStorage.existsEntry(keyEntry3.name)).toBeFalsy();
-    expect(cloudEntries).toHaveLength(7);
+    expect(cloudKeyStorage.existsEntry(keyEntry1.name)).to.be.false;
+    expect(cloudKeyStorage.existsEntry(keyEntry2.name)).to.be.false;
+    expect(cloudKeyStorage.existsEntry(keyEntry3.name)).to.be.false;
+    expect(cloudEntries).to.have.length(7);
   });
 
-  test('KTC-26', async () => {
-    expect.assertions(6);
+  it('KTC-26', async () => {
     const keyEntries = generateKeyEntries(10);
     const updatedKeyEntry = {
       ...keyEntries[0],
-      data: Buffer.from('newData'),
+      data: NodeBuffer.from('newData'),
       meta: { meta: 'newMeta' },
     };
     await cloudKeyStorage.retrieveCloudEntries();
@@ -190,23 +194,22 @@ describe('CloudKeyStorage', () => {
       updatedKeyEntry.meta,
     );
     let cloudEntry = cloudKeyStorage.retrieveEntry(updatedKeyEntry.name);
-    expect(cloudEntry.name).toBe(updatedKeyEntry.name);
-    expect(cloudEntry.data).toEqual(updatedKeyEntry.data);
-    expect(cloudEntry.meta).toEqual(updatedKeyEntry.meta);
+    expect(cloudEntry.name).to.equal(updatedKeyEntry.name);
+    expect(cloudEntry.data.equals(updatedKeyEntry.data)).to.be.true;
+    expect(cloudEntry.meta).to.eql(updatedKeyEntry.meta);
     await cloudKeyStorage.retrieveCloudEntries();
     cloudEntry = cloudKeyStorage.retrieveEntry(updatedKeyEntry.name);
-    expect(cloudEntry.name).toBe(updatedKeyEntry.name);
-    expect(cloudEntry.data).toEqual(updatedKeyEntry.data);
-    expect(cloudEntry.meta).toEqual(updatedKeyEntry.meta);
+    expect(cloudEntry.name).to.equal(updatedKeyEntry.name);
+    expect(cloudEntry.data.equals(updatedKeyEntry.data)).to.be.true;
+    expect(cloudEntry.meta).to.eql(updatedKeyEntry.meta);
   });
 
-  test('KTC-27', async () => {
-    expect.assertions(2);
+  it('KTC-27', async () => {
     const keyEntries = generateKeyEntries(10);
     await cloudKeyStorage.retrieveCloudEntries();
     await cloudKeyStorage.storeEntries(keyEntries);
     let cloudEntries = cloudKeyStorage.retrieveAllEntries();
-    expect(cloudEntries).toHaveLength(keyEntries.length);
+    expect(cloudEntries).to.have.length(keyEntries.length);
     const virgilCrypto = new VirgilCrypto();
     const { privateKey: newPrivateKey, publicKey: newPublicKey } = virgilCrypto.generateKeys();
     await cloudKeyStorage.updateRecipients({
@@ -215,11 +218,10 @@ describe('CloudKeyStorage', () => {
     });
     await cloudKeyStorage.retrieveCloudEntries();
     cloudEntries = cloudKeyStorage.retrieveAllEntries();
-    expect(cloudEntries).toHaveLength(keyEntries.length);
+    expect(cloudEntries).to.have.length(keyEntries.length);
   });
 
-  test('KTC-28', async () => {
-    expect.assertions(9);
+  it('KTC-28', async () => {
     const keyEntries = generateKeyEntries(10);
     const [keyEntry1, keyEntry2] = keyEntries;
     const virgilCrypto = new VirgilCrypto();
@@ -227,34 +229,51 @@ describe('CloudKeyStorage', () => {
     const error1 = () => cloudKeyStorage.retrieveAllEntries();
     const error2 = () => cloudKeyStorage.retrieveEntry('name');
     const error3 = () => cloudKeyStorage.existsEntry('name');
-    expect(error1).toThrow(CloudKeyStorageOutOfSyncError);
-    expect(error2).toThrow(CloudKeyStorageOutOfSyncError);
-    expect(error3).toThrow(CloudKeyStorageOutOfSyncError);
-    await expect(
-      cloudKeyStorage.storeEntry(keyEntry1.name, keyEntry1.data, keyEntry1.meta),
-    ).rejects.toThrow(CloudKeyStorageOutOfSyncError);
-    await expect(cloudKeyStorage.storeEntries(keyEntries)).rejects.toThrow(
-      CloudKeyStorageOutOfSyncError,
-    );
-    await expect(
-      cloudKeyStorage.updateEntry(keyEntry1.name, keyEntry1.data, keyEntry1.meta),
-    ).rejects.toThrow(CloudKeyStorageOutOfSyncError);
-    await expect(cloudKeyStorage.deleteEntry(keyEntry1.name)).rejects.toThrow(
-      CloudKeyStorageOutOfSyncError,
-    );
-    await expect(cloudKeyStorage.deleteEntries([keyEntry1.name, keyEntry2.name])).rejects.toThrow(
-      CloudKeyStorageOutOfSyncError,
-    );
-    await expect(
-      cloudKeyStorage.updateRecipients({ newPrivateKey: privateKey, newPublicKeys: publicKey }),
-    ).rejects.toThrow(CloudKeyStorageOutOfSyncError);
+    expect(error1).to.throw(CloudKeyStorageOutOfSyncError);
+    expect(error2).to.throw(CloudKeyStorageOutOfSyncError);
+    expect(error3).to.throw(CloudKeyStorageOutOfSyncError);
+    try {
+      await cloudKeyStorage.storeEntry(keyEntry1.name, keyEntry1.data, keyEntry1.meta);
+    } catch (error) {
+      expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
+    }
+    try {
+      await cloudKeyStorage.storeEntries(keyEntries);
+    } catch (error) {
+      expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
+    }
+    try {
+      await cloudKeyStorage.updateEntry(keyEntry1.name, keyEntry1.data, keyEntry1.meta);
+    } catch (error) {
+      expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
+    }
+    try {
+      await cloudKeyStorage.deleteEntry(keyEntry1.name);
+    } catch (error) {
+      expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
+    }
+    try {
+      await cloudKeyStorage.deleteEntries([keyEntry1.name, keyEntry2.name]);
+    } catch (error) {
+      expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
+    }
+    try {
+      await cloudKeyStorage.updateRecipients({
+        newPrivateKey: privateKey,
+        newPublicKeys: publicKey,
+      });
+    } catch (error) {
+      expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
+    }
   });
 
-  test('KTC-41', async () => {
-    expect.assertions(2);
+  it('KTC-41', async () => {
     const virgilCrypto = new VirgilCrypto();
     const virgilAccessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
-    const apiKey = virgilCrypto.importPrivateKey(process.env.API_KEY!);
+    const apiKey = virgilCrypto.importPrivateKey({
+      value: process.env.API_KEY!,
+      encoding: 'base64',
+    });
     const jwtGenerator = new JwtGenerator({
       apiKey,
       appId: process.env.APP_ID!,
@@ -267,44 +286,54 @@ describe('CloudKeyStorage', () => {
       accessTokenProvider,
       keyPair.privateKey,
       keyPair.publicKey,
+      new KeyknoxCrypto(virgilCrypto),
     );
     cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
-    await keyknoxManager.pushValue(Buffer.from(uuid()));
+    await keyknoxManager.pushValue(NodeBuffer.from(uuid()));
     await cloudKeyStorage.deleteAllEntries();
     await cloudKeyStorage.retrieveCloudEntries();
     let entries = cloudKeyStorage.retrieveAllEntries();
-    expect(entries).toHaveLength(0);
+    expect(entries).to.have.length(0);
     const [keyEntry] = generateKeyEntries(1);
     await cloudKeyStorage.storeEntry(keyEntry.name, keyEntry.data, keyEntry.meta);
     entries = cloudKeyStorage.retrieveAllEntries();
-    expect(entries).toHaveLength(1);
+    expect(entries).to.have.length(1);
   });
 
-  it("should throw 'CloudEntryExistsError' if we try to store entry with name that's already in use", async () => {
-    expect.assertions(2);
+  it('throws `CloudEntryExistsError` if we try to store entry with name that is already in use', async () => {
     const [keyEntry1, keyEntry2] = generateKeyEntries(2);
     keyEntry2.name = keyEntry1.name;
     await cloudKeyStorage.retrieveCloudEntries();
     await cloudKeyStorage.storeEntry(keyEntry1.name, keyEntry1.data, keyEntry1.meta);
-    await expect(cloudKeyStorage.storeEntries([keyEntry2])).rejects.toThrow(CloudEntryExistsError);
-    await expect(
-      cloudKeyStorage.storeEntry(keyEntry2.name, keyEntry2.data, keyEntry2.meta),
-    ).rejects.toThrow(CloudEntryExistsError);
+    try {
+      await cloudKeyStorage.storeEntries([keyEntry2]);
+    } catch (error) {
+      expect(error).to.be.instanceOf(CloudEntryExistsError);
+    }
+    try {
+      await cloudKeyStorage.storeEntry(keyEntry2.name, keyEntry2.data, keyEntry2.meta);
+    } catch (error) {
+      expect(error).to.be.instanceOf(CloudEntryExistsError);
+    }
   });
 
-  it("should throw 'CloudEntryDoesntExistError' if we try to retrieve non-existent entry", async () => {
-    expect.assertions(1);
+  it('throws `CloudEntryDoesntExistError` if we try to retrieve non-existent entry', async () => {
     await cloudKeyStorage.retrieveCloudEntries();
     const retrieve = () => cloudKeyStorage.retrieveEntry('123');
-    expect(retrieve).toThrow(CloudEntryDoesntExistError);
+    expect(retrieve).to.throw(CloudEntryDoesntExistError);
   });
 
-  it("should throw 'CloudEntryDoesntExistError' if we try to delete non-existent entry", async () => {
-    expect.assertions(2);
+  it('throws `CloudEntryDoesntExistError` if we try to delete non-existent entry', async () => {
     await cloudKeyStorage.retrieveCloudEntries();
-    await expect(cloudKeyStorage.deleteEntry('123')).rejects.toThrow(CloudEntryDoesntExistError);
-    await expect(cloudKeyStorage.deleteEntries(['123', '456'])).rejects.toThrow(
-      CloudEntryDoesntExistError,
-    );
+    try {
+      await cloudKeyStorage.deleteEntry('123');
+    } catch (error) {
+      expect(error).to.be.instanceOf(CloudEntryDoesntExistError);
+    }
+    try {
+      await cloudKeyStorage.deleteEntries(['123', '456']);
+    } catch (error) {
+      expect(error).to.be.instanceOf(CloudEntryDoesntExistError);
+    }
   });
 });
