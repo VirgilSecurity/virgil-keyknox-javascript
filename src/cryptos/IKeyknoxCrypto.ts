@@ -10,11 +10,11 @@ export default interface IKeyknoxCrypto {
   ): DecryptedKeyknoxValue;
 
   encrypt(
-    data: Buffer,
+    data: string,
     privateKey: IPrivateKey,
     publicKeys: IPublicKey | IPublicKey[],
   ): {
-    encryptedData: Buffer;
-    metadata: Buffer;
+    encryptedData: string;
+    metadata: string;
   };
 }

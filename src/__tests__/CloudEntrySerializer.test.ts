@@ -1,4 +1,3 @@
-import { Buffer as NodeBuffer } from 'buffer';
 import { expect } from 'chai';
 
 import { serialize, deserialize } from '../CloudEntrySerializer';
@@ -12,7 +11,7 @@ describe('CloudEntrySerializer', () => {
         cloudData.kName1,
         {
           name: cloudData.kName1,
-          data: NodeBuffer.from(cloudData.kData1, 'base64'),
+          data: cloudData.kData1,
           creationDate: new Date(cloudData.kCreationDate1),
           modificationDate: new Date(cloudData.kModificationDate1),
           meta: cloudData.kMeta1,
@@ -22,7 +21,7 @@ describe('CloudEntrySerializer', () => {
         cloudData.kName2,
         {
           name: cloudData.kName2,
-          data: NodeBuffer.from(cloudData.kData2, 'base64'),
+          data: cloudData.kData2,
           creationDate: new Date(cloudData.kCreationDate2),
           modificationDate: new Date(cloudData.kModificationDate2),
           meta: cloudData.kMeta2,
@@ -30,14 +29,13 @@ describe('CloudEntrySerializer', () => {
       ],
     ]);
     const serialized1 = serialize(cloudEntries);
-    const expectedSerialized1 = NodeBuffer.from(cloudData.kExpectedResult, 'base64');
-    expect(serialized1.equals(expectedSerialized1)).to.be.true;
-    const deserialized = deserialize(expectedSerialized1);
+    expect(serialized1).to.equal(cloudData.kExpectedResult);
+    const deserialized = deserialize(cloudData.kExpectedResult);
     expect(deserialized).to.eql(cloudEntries);
   });
 
   it('KTC-18', () => {
-    const result = deserialize(NodeBuffer.alloc(0));
+    const result = deserialize('');
     expect(result).to.eql(new Map());
   });
 });

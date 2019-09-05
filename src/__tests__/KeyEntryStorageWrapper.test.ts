@@ -1,4 +1,3 @@
-import { Buffer as NodeBuffer } from 'buffer';
 import { expect } from 'chai';
 
 import { join } from 'path';
@@ -19,7 +18,7 @@ describe('KeyEntryStorageWrapper', () => {
 
   describe('save', () => {
     it('stores entry in `KeyEntryStorage`', async () => {
-      await keyEntryStorageWrapper.save({ name: 'name', value: NodeBuffer.from('value') });
+      await keyEntryStorageWrapper.save({ name: 'name', value: 'dmFsdWU=' });
       const keyEntries = await keyEntryStorage.list();
       expect(keyEntries).to.have.length(1);
     });
@@ -27,13 +26,13 @@ describe('KeyEntryStorageWrapper', () => {
     it('stores correct values in `KeyEntryStorage`', async () => {
       const keyEntry = await keyEntryStorageWrapper.save({
         name: 'name',
-        value: NodeBuffer.from('value'),
+        value: 'dmFsdWU=',
         meta: {
           key: 'value',
         },
       });
       const [storedKeyEntry] = await keyEntryStorage.list();
-      expect(storedKeyEntry.value.equals(keyEntry.value)).to.be.true;
+      expect(storedKeyEntry.value).to.equal(keyEntry.value);
       expect(storedKeyEntry.meta).to.eql(keyEntry.meta);
       expect(storedKeyEntry.creationDate).to.eql(keyEntry.creationDate);
       expect(storedKeyEntry.modificationDate).to.eql(keyEntry.modificationDate);
@@ -42,11 +41,11 @@ describe('KeyEntryStorageWrapper', () => {
     it('stores entries in separate namespace', async () => {
       const params1 = {
         name: 'name',
-        value: NodeBuffer.from('value1'),
+        value: 'dmFsdWUx',
       };
       const params2 = {
         name: params1.name,
-        value: NodeBuffer.from('value2'),
+        value: 'dmFsdWUy',
       };
       await keyEntryStorage.save(params1);
       await keyEntryStorageWrapper.save(params2);
@@ -59,7 +58,7 @@ describe('KeyEntryStorageWrapper', () => {
     it('returns an `IKeyEntry` object if entry exists', async () => {
       const params = {
         name: 'name',
-        value: NodeBuffer.from('value'),
+        value: 'dmFsdWU=',
       };
       await keyEntryStorageWrapper.save(params);
       const keyEntry = await keyEntryStorageWrapper.load(params.name);
@@ -69,7 +68,7 @@ describe('KeyEntryStorageWrapper', () => {
     it('returns an `IKeyEntry` object with correct values', async () => {
       const params = {
         name: 'name',
-        value: NodeBuffer.from('value'),
+        value: 'dmFsdWU=',
         meta: {
           key: 'value',
         },
@@ -77,7 +76,7 @@ describe('KeyEntryStorageWrapper', () => {
       await keyEntryStorageWrapper.save(params);
       const keyEntry = await keyEntryStorageWrapper.load(params.name);
       expect(keyEntry!.name).to.equal(params.name);
-      expect(keyEntry!.value.equals(params.value)).to.be.true;
+      expect(keyEntry!.value).to.equal(params.value);
       expect(keyEntry!.meta).to.eql(params.meta);
     });
 
@@ -91,7 +90,7 @@ describe('KeyEntryStorageWrapper', () => {
     it('returns `true` if entry exists', async () => {
       const params = {
         name: 'name',
-        value: NodeBuffer.from('value'),
+        value: 'dmFsdWU=',
       };
       await keyEntryStorageWrapper.save(params);
       const result = await keyEntryStorageWrapper.exists(params.name);
@@ -108,11 +107,11 @@ describe('KeyEntryStorageWrapper', () => {
     it('should not remove entries created outside of `KeyEntryStorageWrapper`', async () => {
       const params1 = {
         name: 'name',
-        value: NodeBuffer.from('value1'),
+        value: 'dmFsdWUx',
       };
       const params2 = {
         name: params1.name,
-        value: NodeBuffer.from('value2'),
+        value: 'dmFsdWUy',
       };
       await keyEntryStorage.save(params1);
       await keyEntryStorageWrapper.save(params2);
@@ -124,9 +123,9 @@ describe('KeyEntryStorageWrapper', () => {
 
   describe('list', () => {
     it('returns entries except ones created outside of `KeyEntryStorageWrapper`', async () => {
-      await keyEntryStorage.save({ name: 'name', value: NodeBuffer.from('value') });
-      await keyEntryStorageWrapper.save({ name: 'name1', value: NodeBuffer.from('value1') });
-      await keyEntryStorageWrapper.save({ name: 'name2', value: NodeBuffer.from('value2') });
+      await keyEntryStorage.save({ name: 'name', value: 'dmFsdWU=' });
+      await keyEntryStorageWrapper.save({ name: 'name1', value: 'dmFsdWUx' });
+      await keyEntryStorageWrapper.save({ name: 'name2', value: 'dmFsdWUy' });
       const keyEntries = await keyEntryStorageWrapper.list();
       expect(keyEntries).to.have.length(2);
     });
@@ -136,11 +135,11 @@ describe('KeyEntryStorageWrapper', () => {
     it('updates existing entry', async () => {
       const params1 = {
         name: 'name',
-        value: NodeBuffer.from('value1'),
+        value: 'dmFsdWUx',
       };
       const params2 = {
         name: params1.name,
-        value: NodeBuffer.from('value2'),
+        value: 'dmFsdWUy',
         meta: {
           key: 'value',
         },
@@ -148,16 +147,16 @@ describe('KeyEntryStorageWrapper', () => {
       await keyEntryStorageWrapper.save(params1);
       const keyEntry = await keyEntryStorageWrapper.update(params2);
       expect(keyEntry.name).to.equal(params1.name);
-      expect(keyEntry.value.equals(params2.value)).to.be.true;
+      expect(keyEntry.value).to.equal(params2.value);
       expect(keyEntry.meta).to.eql(params2.meta);
     });
   });
 
   describe('clear', () => {
     it('deletes entries except ones created outside of `KeyEntryStorageWrapper`', async () => {
-      await keyEntryStorage.save({ name: 'name', value: NodeBuffer.from('value') });
-      await keyEntryStorageWrapper.save({ name: 'name1', value: NodeBuffer.from('value1') });
-      await keyEntryStorageWrapper.save({ name: 'name2', value: NodeBuffer.from('value2') });
+      await keyEntryStorage.save({ name: 'name', value: 'dmFsdWU=' });
+      await keyEntryStorageWrapper.save({ name: 'name1', value: 'dmFsdWUx' });
+      await keyEntryStorageWrapper.save({ name: 'name2', value: 'dmFsdWUy' });
       await keyEntryStorageWrapper.clear();
       const keyEntries = await keyEntryStorage.list();
       expect(keyEntries).to.have.length(1);

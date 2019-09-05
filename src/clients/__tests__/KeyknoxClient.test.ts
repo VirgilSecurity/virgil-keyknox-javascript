@@ -1,4 +1,3 @@
-import { Buffer as NodeBuffer } from 'buffer';
 import { expect } from 'chai';
 
 import { initCrypto, VirgilCrypto, VirgilAccessTokenSigner } from 'virgil-crypto';
@@ -33,57 +32,56 @@ describe('KeyknoxClient', () => {
   });
 
   it('KTC-1', async () => {
-    const value = NodeBuffer.from('value');
-    const meta = NodeBuffer.from('meta');
+    const value = 'dmFsdWU=';
+    const meta = 'bWV0YQ==';
     const token = jwt.toString();
     const response1 = await client.pushValue(meta, value, token);
     const response2 = await client.pullValue(token);
-    expect(response1.meta.equals(meta)).to.be.true;
-    expect(response1.value.equals(value)).to.be.true;
+    expect(response1.meta).to.equal(meta);
+    expect(response1.value).to.equal(value);
     expect(response1.version).to.equal('1.0');
     expect(response1.keyknoxHash).not.to.be.undefined;
-    expect(response2.meta.equals(meta)).to.be.true;
-    expect(response2.value.equals(value)).to.be.true;
+    expect(response2.meta).to.equal(meta);
+    expect(response2.value).to.equal(value);
     expect(response2.version).to.equal('1.0');
-    expect(response2.keyknoxHash.equals(response1.keyknoxHash)).to.be.true;
+    expect(response2.keyknoxHash).to.equal(response1.keyknoxHash);
   });
 
   it('KTC-2', async () => {
-    const value1 = NodeBuffer.from('value1');
-    const meta1 = NodeBuffer.from('meta1');
-    const value2 = NodeBuffer.from('value2');
-    const meta2 = NodeBuffer.from('meta2');
+    const value1 = 'dmFsdWUx';
+    const meta1 = 'bWV0YTE=';
+    const value2 = 'dmFsdWUy';
+    const meta2 = 'bWV0YTI=';
     const token = jwt.toString();
     const response1 = await client.pushValue(meta1, value1, token);
     const response2 = await client.pushValue(meta2, value2, token, response1.keyknoxHash);
-    expect(response2.meta.equals(meta2)).to.be.true;
-    expect(response2.value.equals(value2)).to.be.true;
+    expect(response2.meta).to.equal(meta2);
+    expect(response2.value).to.equal(value2);
     expect(response2.version).to.equal('2.0');
     expect(response2.keyknoxHash).not.to.be.undefined;
   });
 
   it('KTC-3', async () => {
     const response = await client.pullValue(jwt.toString());
-    expect(response.meta.byteLength).to.equal(0);
-    expect(response.value.byteLength).to.equal(0);
+    expect(response.meta.length).to.equal(0);
     expect(response.version).to.equal('1.0');
   });
 
   it('KTC-4', async () => {
-    const value1 = NodeBuffer.from('value1');
-    const meta1 = NodeBuffer.from('meta1');
+    const value1 = 'dmFsdWUx';
+    const meta1 = 'bWV0YTE=';
     const token = jwt.toString();
     await client.pushValue(meta1, value1, token);
     const response2 = await client.resetValue(token);
-    expect(response2.meta.byteLength).to.equal(0);
-    expect(response2.value.byteLength).to.equal(0);
+    expect(response2.meta.length).to.equal(0);
+    expect(response2.value.length).to.equal(0);
     expect(response2.version).to.equal('2.0');
   });
 
   it('KTC-5', async () => {
     const response = await client.resetValue(jwt.toString());
-    expect(response.meta.byteLength).to.equal(0);
-    expect(response.value.byteLength).to.equal(0);
+    expect(response.meta.length).to.equal(0);
+    expect(response.value.length).to.equal(0);
     expect(response.version).to.equal('1.0');
   });
 });

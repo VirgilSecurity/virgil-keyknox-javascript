@@ -1,4 +1,3 @@
-import { Buffer as NodeBuffer } from 'buffer';
 import { expect } from 'chai';
 
 import { join } from 'path';
@@ -21,7 +20,7 @@ import SyncKeyStorage from '../SyncKeyStorage';
 function generateKeyEntries(amount: number): KeyEntry[] {
   const keyEntries = [];
   for (let i = 0; i < amount; i += 1) {
-    keyEntries.push({ name: uuid(), data: NodeBuffer.from('data') });
+    keyEntries.push({ name: uuid(), data: 'ZGF0YQ==' });
   }
   return keyEntries;
 }
@@ -67,7 +66,7 @@ describe('SyncKeyStorage', () => {
   it('KTC-29', async () => {
     function compare(storedKeyEntry: IKeyEntry, keyEntry: KeyEntry): void {
       expect(storedKeyEntry.name).to.equal(keyEntry.name);
-      expect(storedKeyEntry.value.equals(keyEntry.data)).to.be.true;
+      expect(storedKeyEntry.value).to.equal(keyEntry.data);
     }
 
     const keyEntries = generateKeyEntries(2);
@@ -112,7 +111,7 @@ describe('SyncKeyStorage', () => {
     expect(storedKeyEntries).to.have.length(1);
     compare(storedKeyEntry1, keyEntry2);
 
-    const updatedEntry = { name: keyEntry2.name, data: NodeBuffer.from('newData') };
+    const updatedEntry = { name: keyEntry2.name, data: 'bmV3RGF0YQ==' };
     await cloudKeyStorage.updateEntry(updatedEntry.name, updatedEntry.data);
     await syncKeyStorage.sync();
     storedKeyEntries = await keyEntryStorageWrapper.list();
@@ -134,11 +133,11 @@ describe('SyncKeyStorage', () => {
     const cloudEntry = cloudKeyStorage.retrieveEntry(keyEntry.name);
     const storageKeyEntry = await keyEntryStorageWrapper.load(keyEntry.name);
     expect(entry.name).to.equal(keyEntry.name);
-    expect(entry.value.equals(keyEntry.data)).to.be.true;
+    expect(entry.value).to.equal(keyEntry.data);
     expect(cloudEntry.name).to.equal(keyEntry.name);
-    expect(cloudEntry.data.equals(keyEntry.data)).to.be.true;
+    expect(cloudEntry.data).to.equal(keyEntry.data);
     expect(storageKeyEntry!.name).to.equal(keyEntry.name);
-    expect(storageKeyEntry!.value.equals(keyEntry.data)).to.be.true;
+    expect(storageKeyEntry!.value).to.equal(keyEntry.data);
   });
 
   it('KTC-31', async () => {
@@ -157,7 +156,7 @@ describe('SyncKeyStorage', () => {
 
   it('KTC-32', async () => {
     const [keyEntry] = generateKeyEntries(1);
-    const newData = NodeBuffer.from('newData');
+    const newData = 'bmV3RGF0YQ==';
     await syncKeyStorage.sync();
     await syncKeyStorage.storeEntry(keyEntry.name, keyEntry.data);
     await syncKeyStorage.updateEntry(keyEntry.name, newData);
@@ -165,11 +164,11 @@ describe('SyncKeyStorage', () => {
     const cloudEntry = cloudKeyStorage.retrieveEntry(keyEntry.name);
     const storageKeyEntry = await keyEntryStorageWrapper.load(keyEntry.name);
     expect(entry.name).to.equal(keyEntry.name);
-    expect(entry.value.equals(newData)).to.be.true;
+    expect(entry.value).to.equal(newData);
     expect(cloudEntry.name).to.equal(keyEntry.name);
-    expect(cloudEntry.data.equals(newData)).to.be.true;
+    expect(cloudEntry.data).to.equal(newData);
     expect(storageKeyEntry!.name).to.equal(keyEntry.name);
-    expect(storageKeyEntry!.value.equals(newData)).to.be.true;
+    expect(storageKeyEntry!.value).to.equal(newData);
   });
 
   it('KTC-33', async () => {
@@ -202,19 +201,19 @@ describe('SyncKeyStorage', () => {
     entries.forEach(keyEntry => {
       const myKeyEntry = keyEntriesMap[keyEntry.name];
       expect(keyEntry.name).to.equal(myKeyEntry.name);
-      expect(keyEntry.value.equals(myKeyEntry.data)).to.be.true;
+      expect(keyEntry.value).to.equal(myKeyEntry.data);
     });
     expect(cloudEntries).to.have.length(totalEntries);
     cloudEntries.forEach(cloudEntry => {
       const myKeyEntry = keyEntriesMap[cloudEntry.name];
       expect(cloudEntry.name).to.equal(myKeyEntry.name);
-      expect(cloudEntry.data.equals(myKeyEntry.data)).to.be.true;
+      expect(cloudEntry.data).to.equal(myKeyEntry.data);
     });
     expect(storageKeyEntries).to.have.length(totalEntries);
     storageKeyEntries.forEach(keyEntry => {
       const myKeyEntry = keyEntriesMap[keyEntry.name];
       expect(keyEntry.name).to.equal(myKeyEntry.name);
-      expect(keyEntry.value.equals(myKeyEntry.data)).to.be.true;
+      expect(keyEntry.value).to.equal(myKeyEntry.data);
     });
   });
 
@@ -228,11 +227,11 @@ describe('SyncKeyStorage', () => {
     const cloudEntry = cloudKeyStorage.retrieveEntry(keyEntry3.name);
     const storageKeyEntry = await keyEntryStorageWrapper.load(keyEntry3.name);
     expect(keyEntry.name).to.equal(keyEntry3.name);
-    expect(keyEntry.value.equals(keyEntry3.data)).to.be.true;
+    expect(keyEntry.value).to.equal(keyEntry3.data);
     expect(cloudEntry.name).to.equal(keyEntry3.name);
-    expect(cloudEntry.data.equals(keyEntry3.data)).to.be.true;
+    expect(cloudEntry.data).to.equal(keyEntry3.data);
     expect(storageKeyEntry!.name).to.equal(keyEntry3.name);
-    expect(storageKeyEntry!.value.equals(keyEntry3.data)).to.be.true;
+    expect(storageKeyEntry!.value).to.equal(keyEntry3.data);
   });
 
   it('KTC-36', async () => {
@@ -241,7 +240,7 @@ describe('SyncKeyStorage', () => {
     await syncKeyStorage.storeEntries(keyEntries);
     const myKeyEntries = keyEntries.map(keyEntry => ({
       name: keyEntry.name,
-      value: NodeBuffer.from('value'),
+      value: 'dmFsdWU=',
     }));
     const [keyEntry1, keyEntry2] = myKeyEntries;
     const myKeyEntriesMap = {
@@ -257,10 +256,10 @@ describe('SyncKeyStorage', () => {
     expect(entries).to.have.length(2);
     let entry = myKeyEntriesMap[entry1.name];
     expect(entry1.name).to.equal(entry.name);
-    expect(entry1.value.equals(entry.value)).to.be.true;
+    expect(entry1.value).to.equal(entry.value);
     entry = myKeyEntriesMap[entry2.name];
     expect(entry2.name).to.equal(entry.name);
-    expect(entry2.value.equals(entry.value)).to.be.true;
+    expect(entry2.value).to.equal(entry.value);
   });
 
   it('KTC-37', async () => {
@@ -298,7 +297,7 @@ describe('SyncKeyStorage', () => {
   });
 
   it('KTC-40', async () => {
-    const keyEntry = { name: uuid(), value: NodeBuffer.from('value') };
+    const keyEntry = { name: uuid(), value: 'dmFsdWU=' };
     await keyEntryStorageWrapper.save(keyEntry);
     try {
       await syncKeyStorage.deleteEntry(keyEntry.name);
@@ -329,7 +328,7 @@ describe('SyncKeyStorage', () => {
     const entry = await syncKeyStorage.retrieveEntry(keyEntry.name);
     expect(entry).not.to.be.undefined;
     try {
-      await syncKeyStorage.updateEntry(keyEntry.name, NodeBuffer.from('newData'));
+      await syncKeyStorage.updateEntry(keyEntry.name, 'bmV3RGF0YQ==');
     } catch (error) {
       expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
     }

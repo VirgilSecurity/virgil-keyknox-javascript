@@ -1,4 +1,3 @@
-import { Buffer as NodeBuffer } from 'buffer';
 import { expect } from 'chai';
 
 import { initCrypto, VirgilCrypto } from 'virgil-crypto';
@@ -19,23 +18,25 @@ describe('KeyknoxCrypto', () => {
   });
 
   it('encrypts and decrypts successfully', () => {
-    const data = NodeBuffer.from('data');
+    const data = 'ZGF0YQ==';
+    const version = '1.0';
+    const keyknoxHash = 'a2V5a25veEhhc2g=';
     const { privateKey, publicKey } = virgilCrypto.generateKeys();
     const { encryptedData, metadata } = keyknoxCrypto.encrypt(data, privateKey, publicKey);
     const encryptedKeyknoxValue = {
+      version,
+      keyknoxHash,
       meta: metadata,
       value: encryptedData,
-      version: '1.0',
-      keyknoxHash: NodeBuffer.from('keyknoxHash'),
     };
     const decryptedKeyknoxValue = keyknoxCrypto.decrypt(
       encryptedKeyknoxValue,
       privateKey,
       publicKey,
     );
-    expect(decryptedKeyknoxValue.meta.equals(encryptedKeyknoxValue.meta)).to.be.true;
-    expect(decryptedKeyknoxValue.value.equals(data)).to.be.true;
-    expect(decryptedKeyknoxValue.version).to.equal('1.0');
-    expect(decryptedKeyknoxValue.keyknoxHash.equals(encryptedKeyknoxValue.keyknoxHash)).to.be.true;
+    expect(decryptedKeyknoxValue.meta).to.equal(encryptedKeyknoxValue.meta);
+    expect(decryptedKeyknoxValue.value).to.equal(data);
+    expect(decryptedKeyknoxValue.version).to.equal(encryptedKeyknoxValue.version);
+    expect(decryptedKeyknoxValue.keyknoxHash).to.equal(encryptedKeyknoxValue.keyknoxHash);
   });
 });

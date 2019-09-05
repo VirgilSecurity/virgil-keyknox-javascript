@@ -1,10 +1,10 @@
 import { Meta } from './types';
 
 export interface KeyknoxValue {
-  meta: Buffer;
-  value: Buffer;
+  meta: string;
+  value: string;
   version: string;
-  keyknoxHash: Buffer;
+  keyknoxHash: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -15,7 +15,7 @@ export interface EncryptedKeyknoxValue extends KeyknoxValue {}
 
 export interface CloudEntry {
   name: string;
-  data: Buffer;
+  data: string;
   creationDate: Date;
   modificationDate: Date;
   meta: Meta;
@@ -23,6 +23,6 @@ export interface CloudEntry {
 
 export interface KeyEntry {
   name: string;
-  data: Buffer;
+  data: string;
   meta?: Meta;
 }

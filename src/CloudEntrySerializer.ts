@@ -1,4 +1,4 @@
-import { Buffer as NodeBuffer } from 'buffer';
+import base64 from 'base-64';
 
 import { CloudEntry } from './entities';
 import { Meta } from './types';
@@ -11,11 +11,11 @@ interface SerializedCloudEntry {
   meta?: Meta | null;
 }
 
-export function serialize(cloudEntries: Map<string, CloudEntry>): Buffer {
+export function serialize(cloudEntries: Map<string, CloudEntry>) {
   const entries: { [key: string]: SerializedCloudEntry } = {};
   cloudEntries.forEach((value, key) => {
     entries[key] = {
-      data: value.data.toString('base64'),
+      data: value.data,
       meta: value.meta,
       // eslint-disable-next-line @typescript-eslint/camelcase
       creation_date: Number(value.creationDate),
@@ -27,19 +27,20 @@ export function serialize(cloudEntries: Map<string, CloudEntry>): Buffer {
       delete entries[key].meta;
     }
   });
-  return NodeBuffer.from(JSON.stringify(entries));
+  return base64.encode(JSON.stringify(entries));
 }
 
-export function deserialize(data: Buffer): Map<string, CloudEntry> {
-  if (!data.byteLength) {
+export function deserialize(data: string): Map<string, CloudEntry> {
+  const myData = base64.decode(data);
+  if (!myData.length) {
     return new Map();
   }
-  const serializedEntries: { [key: string]: SerializedCloudEntry } = JSON.parse(data.toString());
+  const serializedEntries: { [key: string]: SerializedCloudEntry } = JSON.parse(myData);
   return Object.keys(serializedEntries).reduce<Map<string, CloudEntry>>((result, key) => {
     const serializedEntry = serializedEntries[key];
     result.set(key, {
       name: serializedEntry.name,
-      data: NodeBuffer.from(serializedEntry.data, 'base64'),
+      data: serializedEntry.data,
       creationDate: new Date(serializedEntry.creation_date),
       modificationDate: new Date(serializedEntry.modification_date),
       meta: typeof serializedEntry.meta === 'undefined' ? null : serializedEntry.meta,

@@ -3,10 +3,10 @@ import { EncryptedKeyknoxValue, DecryptedKeyknoxValue } from '../entities';
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export default interface IKeyknoxClient {
   pushValue(
-    meta: Buffer,
-    value: Buffer,
+    meta: string,
+    value: string,
     token: string,
-    previousHash?: Buffer,
+    previousHash?: string,
   ): Promise<EncryptedKeyknoxValue>;
 
   pullValue(token: string): Promise<EncryptedKeyknoxValue>;

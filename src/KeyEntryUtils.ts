@@ -8,7 +8,7 @@ export function createKeyEntry(
   cloudEntry: CloudEntry,
 ): {
   name: string;
-  value: Buffer;
+  value: string;
   meta: { [key: string]: string };
 } {
   return {
