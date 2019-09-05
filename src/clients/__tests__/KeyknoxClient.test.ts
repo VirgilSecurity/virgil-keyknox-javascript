@@ -15,7 +15,7 @@ describe('KeyknoxClient', () => {
   });
 
   beforeEach(() => {
-    client = new KeyknoxClient();
+    client = new KeyknoxClient(process.env.API_URL);
     const virgilCrypto = new VirgilCrypto();
     const virgilAccessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
     const apiKey = virgilCrypto.importPrivateKey({

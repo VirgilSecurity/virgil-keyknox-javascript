@@ -5,6 +5,7 @@ import uuid from 'uuid/v4';
 import { initCrypto, VirgilCrypto, VirgilAccessTokenSigner } from 'virgil-crypto';
 import { IKeyEntry, KeyEntryStorage, JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
 
+import KeyknoxClient from '../clients/KeyknoxClient';
 import KeyknoxCrypto from '../cryptos/KeyknoxCrypto';
 import CloudKeyStorage from '../CloudKeyStorage';
 import { KeyEntry } from '../entities';
@@ -57,6 +58,7 @@ describe('SyncKeyStorage', () => {
       keyPair.privateKey,
       keyPair.publicKey,
       new KeyknoxCrypto(virgilCrypto),
+      new KeyknoxClient(process.env.API_URL),
     );
     cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
     keyEntryStorageWrapper = new KeyEntryStorageWrapper(identity, keyEntryStorage);

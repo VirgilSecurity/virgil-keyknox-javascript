@@ -52,6 +52,7 @@ describe('KeyknoxManager', () => {
       privateKey,
       publicKey,
       new KeyknoxCrypto(virgilCrypto),
+      new KeyknoxClient(process.env.API_URL),
     );
   }
 
@@ -267,7 +268,7 @@ describe('KeyknoxManager', () => {
     });
     const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
     const [keyPair] = generateKeyPairs(1);
-    const keyknoxClient = new KeyknoxClient();
+    const keyknoxClient = new KeyknoxClient(process.env.API_URL);
     const keyknoxManager = new KeyknoxManager(
       accessTokenProvider,
       keyPair.privateKey,
