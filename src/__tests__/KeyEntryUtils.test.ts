@@ -1,4 +1,3 @@
-import { Buffer as NodeBuffer } from 'buffer';
 import { expect } from 'chai';
 
 import {
@@ -24,14 +23,14 @@ describe('KeyEntryUtils', () => {
     it('returns `IKeyEntry`', () => {
       const cloudEntry = {
         name: 'name',
-        data: NodeBuffer.from('data'),
+        data: 'ZGF0YQ==',
         creationDate: new Date(),
         modificationDate: new Date(),
         meta: { meta: 'meta' },
       };
       const keyEntry = createKeyEntry(cloudEntry);
       expect(keyEntry.name).to.equal(cloudEntry.name);
-      expect(keyEntry.value.equals(cloudEntry.data)).to.be.true;
+      expect(keyEntry.value).to.equal(cloudEntry.data);
       expect(keyEntry.meta).to.eql({
         ...cloudEntry.meta,
         [creationDateKey]: dateToStringValue,
@@ -44,7 +43,7 @@ describe('KeyEntryUtils', () => {
     it('throws it `meta` not found', () => {
       const keyEntry = {
         name: 'name',
-        value: NodeBuffer.from('value'),
+        value: 'dmFsdWU=',
         creationDate: new Date(),
         modificationDate: new Date(),
       };
@@ -57,7 +56,7 @@ describe('KeyEntryUtils', () => {
       const date2 = new Date(1);
       const keyEntry = {
         name: 'name',
-        value: NodeBuffer.from('value'),
+        value: 'dmFsdWU=',
         meta: {
           [creationDateKey]: date1.toISOString(),
           [modificationDateKey]: date2.toISOString(),

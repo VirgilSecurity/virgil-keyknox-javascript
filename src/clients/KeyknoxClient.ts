@@ -1,8 +1,8 @@
-import axios, { AxiosInstance, AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { Buffer as NodeBuffer } from 'buffer';
+import axios, { AxiosResponse } from 'axios';
 
 import { EncryptedKeyknoxValue, DecryptedKeyknoxValue, KeyknoxValue } from '../entities';
 import { KeyknoxClientError } from '../errors';
+import { AxiosInstance, AxiosError, AxiosRequestConfig } from '../types';
 import IKeyknoxClient from './IKeyknoxClient';
 
 interface KeyknoxData {
@@ -24,14 +24,14 @@ export default class KeyknoxClient implements IKeyknoxClient {
   }
 
   async pushValue(
-    meta: Buffer,
-    value: Buffer,
+    meta: string,
+    value: string,
     token: string,
-    previousHash?: Buffer,
+    previousHash?: string,
   ): Promise<EncryptedKeyknoxValue> {
     const payload = {
-      meta: meta.toString('base64'),
-      value: value.toString('base64'),
+      meta,
+      value,
     };
     const config: AxiosRequestConfig = {
       headers: {
@@ -39,7 +39,7 @@ export default class KeyknoxClient implements IKeyknoxClient {
       },
     };
     if (previousHash) {
-      config.headers['Virgil-Keyknox-Previous-Hash'] = previousHash.toString('base64');
+      config.headers['Virgil-Keyknox-Previous-Hash'] = previousHash;
     }
     const response = await this.axios.put<KeyknoxData>('/keyknox/v1', payload, config);
     return KeyknoxClient.getKeyknoxValue(response);
@@ -68,10 +68,10 @@ export default class KeyknoxClient implements IKeyknoxClient {
   private static getKeyknoxValue(response: AxiosResponse<KeyknoxData>): KeyknoxValue {
     const { data, headers } = response;
     return {
-      meta: NodeBuffer.from(data.meta, 'base64'),
-      value: NodeBuffer.from(data.value, 'base64'),
+      meta: data.meta,
+      value: data.value,
       version: data.version,
-      keyknoxHash: NodeBuffer.from(headers['virgil-keyknox-hash'], 'base64'),
+      keyknoxHash: headers['virgil-keyknox-hash'],
     };
   }
 

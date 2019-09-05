@@ -7,13 +7,7 @@ import {
 } from './errors';
 import KeyknoxManager from './KeyknoxManager';
 import { serialize, deserialize } from './CloudEntrySerializer';
-import {
-  Meta,
-  VirgilCrypto,
-  VirgilPrivateKey,
-  VirgilPublicKey,
-  IAccessTokenProvider,
-} from './types';
+import { Meta, ICrypto, IPrivateKey, IPublicKey, IAccessTokenProvider } from './types';
 
 export default class CloudKeyStorage {
   private readonly keyknoxManager: KeyknoxManager;
@@ -28,9 +22,9 @@ export default class CloudKeyStorage {
 
   static create(options: {
     accessTokenProvider: IAccessTokenProvider;
-    privateKey: VirgilPrivateKey;
-    publicKeys: VirgilPublicKey | VirgilPublicKey[];
-    virgilCrypto: VirgilCrypto;
+    privateKey: IPrivateKey;
+    publicKeys: IPublicKey | IPublicKey[];
+    virgilCrypto: ICrypto;
   }): CloudKeyStorage {
     const keyknoxManager = new KeyknoxManager(
       options.accessTokenProvider,
@@ -52,12 +46,12 @@ export default class CloudKeyStorage {
     return keyEntries.map(keyEntry => this.cache.get(keyEntry.name)!);
   }
 
-  async storeEntry(name: string, data: Buffer, meta?: Meta): Promise<CloudEntry> {
+  async storeEntry(name: string, data: string, meta?: Meta): Promise<CloudEntry> {
     const [cloudEntry] = await this.storeEntries([{ name, data, meta }]);
     return cloudEntry;
   }
 
-  async updateEntry(name: string, data: Buffer, meta?: Meta): Promise<CloudEntry> {
+  async updateEntry(name: string, data: string, meta?: Meta): Promise<CloudEntry> {
     this.throwUnlessSyncWasCalled();
     this.throwUnlessCloudEntryExists(name);
     const cloudEntry = CloudKeyStorage.createCloudEntry(
@@ -106,8 +100,8 @@ export default class CloudKeyStorage {
   }
 
   async updateRecipients(options: {
-    newPrivateKey?: VirgilPrivateKey;
-    newPublicKeys?: VirgilPublicKey | VirgilPublicKey[];
+    newPrivateKey?: IPrivateKey;
+    newPublicKeys?: IPublicKey | IPublicKey[];
   }): Promise<void> {
     this.throwUnlessSyncWasCalled();
     const { newPrivateKey, newPublicKeys } = options;

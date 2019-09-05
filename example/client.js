@@ -54,21 +54,21 @@ initCrypto().then(() => {
     .then(allEntries => {
       console.log('all entries:', allEntries);
       console.log('storing new entry...');
-      return syncKeyStorage.storeEntry('entry', Buffer.from('data'));
+      return syncKeyStorage.storeEntry('entry', 'ZGF0YQ==');
     })
     .then(storedEntry => {
       console.log('stored entry:', storedEntry);
       console.log('storing new entries...');
       return syncKeyStorage.storeEntries([
-        { name: 'entry1', data: Buffer.from('data1') },
-        { name: 'entry2', data: Buffer.from('data2') },
-        { name: 'entry3', data: Buffer.from('data3') },
+        { name: 'entry1', data: 'ZGF0YTE=' },
+        { name: 'entry2', data: 'ZGF0YTI=' },
+        { name: 'entry3', data: 'ZGF0YTM=' },
       ]);
     })
     .then(storedEntries => {
       console.log('stored entries:', storedEntries);
       console.log('updating entry1...');
-      return syncKeyStorage.updateEntry('entry1', Buffer.from('data1Updated'));
+      return syncKeyStorage.updateEntry('entry1', 'ZGF0YTFVcGRhdGVk');
     })
     .then(() => {
       console.log('entry1 updated...');

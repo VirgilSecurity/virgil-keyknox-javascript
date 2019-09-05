@@ -1,41 +1,54 @@
 import { EncryptedKeyknoxValue, DecryptedKeyknoxValue } from '../entities';
-import { VirgilCrypto, VirgilPrivateKey, VirgilPublicKey } from '../types';
+import { ICrypto, IPrivateKey, IPublicKey } from '../types';
 import IKeyknoxCrypto from './IKeyknoxCrypto';
 
 export default class KeyknoxCrypto implements IKeyknoxCrypto {
-  private readonly crypto: VirgilCrypto;
+  private readonly crypto: ICrypto;
 
-  constructor(crypto: VirgilCrypto) {
+  constructor(crypto: ICrypto) {
     this.crypto = crypto;
   }
 
   decrypt(
     encryptedKeyknoxValue: EncryptedKeyknoxValue,
-    privateKey: VirgilPrivateKey,
-    publicKeys: VirgilPublicKey | VirgilPublicKey[],
+    privateKey: IPrivateKey,
+    publicKeys: IPublicKey | IPublicKey[],
   ): DecryptedKeyknoxValue {
     const { value, meta } = encryptedKeyknoxValue;
-    if (!value.byteLength || !meta.byteLength) {
-      if (value.byteLength || meta.byteLength) {
+    if (!value.length || !meta.length) {
+      if (value.length || meta.length) {
         throw new TypeError("'EncryptedKeyknoxValue' is invalid");
       }
       return encryptedKeyknoxValue;
     }
-    const decrypted = this.crypto.decryptThenVerifyDetached(value, meta, privateKey, publicKeys);
+    const decrypted = this.crypto.decryptThenVerifyDetached(
+      { value: value, encoding: 'base64' },
+      { value: meta, encoding: 'base64' },
+      privateKey,
+      publicKeys,
+    );
     return {
       ...encryptedKeyknoxValue,
-      value: decrypted,
+      value: decrypted.toString('base64'),
     };
   }
 
   encrypt(
-    data: Buffer,
-    privateKey: VirgilPrivateKey,
-    publicKeys: VirgilPublicKey | VirgilPublicKey[],
+    data: string,
+    privateKey: IPrivateKey,
+    publicKeys: IPublicKey | IPublicKey[],
   ): {
-    encryptedData: Buffer;
-    metadata: Buffer;
+    encryptedData: string;
+    metadata: string;
   } {
-    return this.crypto.signThenEncryptDetached(data, privateKey, publicKeys);
+    const { metadata, encryptedData } = this.crypto.signThenEncryptDetached(
+      { value: data, encoding: 'base64' },
+      privateKey,
+      publicKeys,
+    );
+    return {
+      metadata: metadata.toString('base64'),
+      encryptedData: encryptedData.toString('base64'),
+    };
   }
 }

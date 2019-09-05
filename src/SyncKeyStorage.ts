@@ -5,9 +5,9 @@ import KeyEntryStorageWrapper from './KeyEntryStorageWrapper';
 import { createKeyEntry, extractDate } from './KeyEntryUtils';
 import {
   Meta,
-  VirgilCrypto,
-  VirgilPrivateKey,
-  VirgilPublicKey,
+  ICrypto,
+  IPrivateKey,
+  IPublicKey,
   IAccessTokenProvider,
   IKeyEntry,
   IKeyEntryStorage,
@@ -29,9 +29,9 @@ export default class SyncKeyStorage {
   static create(options: {
     identity: string;
     accessTokenProvider: IAccessTokenProvider;
-    privateKey: VirgilPrivateKey;
-    publicKeys: VirgilPublicKey | VirgilPublicKey[];
-    virgilCrypto: VirgilCrypto;
+    privateKey: IPrivateKey;
+    publicKeys: IPublicKey | IPublicKey[];
+    virgilCrypto: ICrypto;
     keyEntryStorage: IKeyEntryStorage;
   }): SyncKeyStorage {
     const { virgilCrypto, identity, accessTokenProvider, privateKey, publicKeys } = options;
@@ -55,12 +55,12 @@ export default class SyncKeyStorage {
     return Promise.all(storeRequests);
   }
 
-  async storeEntry(name: string, data: Buffer, meta?: Meta): Promise<IKeyEntry> {
+  async storeEntry(name: string, data: string, meta?: Meta): Promise<IKeyEntry> {
     const [keyEntry] = await this.storeEntries([{ name, data, meta }]);
     return keyEntry;
   }
 
-  async updateEntry(name: string, data: Buffer, meta?: Meta): Promise<void> {
+  async updateEntry(name: string, data: string, meta?: Meta): Promise<void> {
     await this.throwUnlessKeyEntryExists(name);
     const cloudEntry = await this.cloudKeyStorage.updateEntry(name, data, meta);
     const keyEntry = createKeyEntry(cloudEntry);
@@ -96,8 +96,8 @@ export default class SyncKeyStorage {
   }
 
   async updateRecipients(options: {
-    newPrivateKey?: VirgilPrivateKey;
-    newPublicKeys?: VirgilPublicKey | VirgilPublicKey[];
+    newPrivateKey?: IPrivateKey;
+    newPublicKeys?: IPublicKey | IPublicKey[];
   }): Promise<void> {
     const { newPrivateKey, newPublicKeys } = options;
     return this.cloudKeyStorage.updateRecipients({ newPrivateKey, newPublicKeys });

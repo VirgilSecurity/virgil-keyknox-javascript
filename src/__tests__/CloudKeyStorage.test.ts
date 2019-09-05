@@ -1,4 +1,3 @@
-import { Buffer as NodeBuffer } from 'buffer';
 import { expect } from 'chai';
 
 import uuid from 'uuid/v4';
@@ -11,6 +10,7 @@ import {
 } from 'virgil-crypto';
 import { JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
 
+import KeyknoxClient from '../clients/KeyknoxClient';
 import KeyknoxCrypto from '../cryptos/KeyknoxCrypto';
 import {
   CloudKeyStorageOutOfSyncError,
@@ -26,8 +26,8 @@ function generateKeyEntries(amount: number): KeyEntry[] {
   for (let i = 0; i < amount; i += 1) {
     keyEntries.push({
       name: uuid(),
-      data: NodeBuffer.from(`data${i}`),
-      meta: { meta: `meta${i}` },
+      data: 'ZGF0YQ==',
+      meta: { meta: 'meta' },
     });
   }
   return keyEntries;
@@ -60,12 +60,14 @@ describe('CloudKeyStorage', () => {
     });
     accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
     keyPair = virgilCrypto.generateKeys();
-    cloudKeyStorage = CloudKeyStorage.create({
+    const keyknoxManager = new KeyknoxManager(
       accessTokenProvider,
-      virgilCrypto,
-      privateKey: keyPair.privateKey,
-      publicKeys: keyPair.publicKey,
-    });
+      keyPair.privateKey,
+      keyPair.publicKey,
+      new KeyknoxCrypto(virgilCrypto),
+      new KeyknoxClient(process.env.API_URL),
+    );
+    cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
   });
 
   it('KTC-19', async () => {
@@ -79,12 +81,12 @@ describe('CloudKeyStorage', () => {
     await cloudKeyStorage.storeEntry(keyEntry.name, keyEntry.data, keyEntry.meta);
     let cloudEntry = cloudKeyStorage.retrieveEntry(keyEntry.name);
     expect(cloudEntry.name).to.equal(keyEntry.name);
-    expect(cloudEntry.data.equals(keyEntry.data)).to.be.true;
+    expect(cloudEntry.data).to.equal(keyEntry.data);
     expect(cloudEntry.meta).to.eql(keyEntry.meta);
     await cloudKeyStorage.retrieveCloudEntries();
     cloudEntry = cloudKeyStorage.retrieveEntry(keyEntry.name);
     expect(cloudEntry.name).to.equal(keyEntry.name);
-    expect(cloudEntry.data.equals(keyEntry.data)).to.be.true;
+    expect(cloudEntry.data).to.equal(keyEntry.data);
     expect(cloudEntry.meta).to.eql(keyEntry.meta);
   });
 
@@ -104,7 +106,7 @@ describe('CloudKeyStorage', () => {
       cloudEntries.forEach(cloudEntry => {
         const keyEntry = keyEntries[cloudEntry.name];
         expect(keyEntry).not.to.be.undefined;
-        expect(cloudEntry.data.equals(keyEntry.data)).to.be.true;
+        expect(cloudEntry.data).to.equal(keyEntry.data);
         expect(cloudEntry.meta).to.eql(keyEntry.meta);
       });
     }
@@ -183,7 +185,7 @@ describe('CloudKeyStorage', () => {
     const keyEntries = generateKeyEntries(10);
     const updatedKeyEntry = {
       ...keyEntries[0],
-      data: NodeBuffer.from('newData'),
+      data: 'bmV3RGF0YQ==',
       meta: { meta: 'newMeta' },
     };
     await cloudKeyStorage.retrieveCloudEntries();
@@ -195,12 +197,12 @@ describe('CloudKeyStorage', () => {
     );
     let cloudEntry = cloudKeyStorage.retrieveEntry(updatedKeyEntry.name);
     expect(cloudEntry.name).to.equal(updatedKeyEntry.name);
-    expect(cloudEntry.data.equals(updatedKeyEntry.data)).to.be.true;
+    expect(cloudEntry.data).to.equal(updatedKeyEntry.data);
     expect(cloudEntry.meta).to.eql(updatedKeyEntry.meta);
     await cloudKeyStorage.retrieveCloudEntries();
     cloudEntry = cloudKeyStorage.retrieveEntry(updatedKeyEntry.name);
     expect(cloudEntry.name).to.equal(updatedKeyEntry.name);
-    expect(cloudEntry.data.equals(updatedKeyEntry.data)).to.be.true;
+    expect(cloudEntry.data).to.equal(updatedKeyEntry.data);
     expect(cloudEntry.meta).to.eql(updatedKeyEntry.meta);
   });
 
@@ -287,9 +289,10 @@ describe('CloudKeyStorage', () => {
       keyPair.privateKey,
       keyPair.publicKey,
       new KeyknoxCrypto(virgilCrypto),
+      new KeyknoxClient(process.env.API_URL),
     );
     cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
-    await keyknoxManager.pushValue(NodeBuffer.from(uuid()));
+    await keyknoxManager.pushValue(uuid());
     await cloudKeyStorage.deleteAllEntries();
     await cloudKeyStorage.retrieveCloudEntries();
     let entries = cloudKeyStorage.retrieveAllEntries();

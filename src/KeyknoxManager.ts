@@ -2,31 +2,31 @@ import IKeyknoxClient from './clients/IKeyknoxClient';
 import KeyknoxClient from './clients/KeyknoxClient';
 import IKeyknoxCrypto from './cryptos/IKeyknoxCrypto';
 import { DecryptedKeyknoxValue } from './entities';
-import { VirgilPrivateKey, VirgilPublicKey, IAccessTokenProvider } from './types';
+import { IPrivateKey, IPublicKey, IAccessTokenProvider } from './types';
 
 export default class KeyknoxManager {
   private readonly SERVICE_NAME = 'keyknox';
 
   private readonly accessTokenProvider: IAccessTokenProvider;
 
-  private myPrivateKey: VirgilPrivateKey;
-  private myPublicKeys: VirgilPublicKey | VirgilPublicKey[];
+  private myPrivateKey: IPrivateKey;
+  private myPublicKeys: IPublicKey | IPublicKey[];
 
   private readonly keyknoxClient: IKeyknoxClient;
   private readonly keyknoxCrypto: IKeyknoxCrypto;
 
-  get privateKey(): VirgilPrivateKey {
+  get privateKey(): IPrivateKey {
     return this.myPrivateKey;
   }
 
-  get publicKeys(): VirgilPublicKey | VirgilPublicKey[] {
+  get publicKeys(): IPublicKey | IPublicKey[] {
     return this.myPublicKeys;
   }
 
   constructor(
     accessTokenProvider: IAccessTokenProvider,
-    privateKey: VirgilPrivateKey,
-    publicKeys: VirgilPublicKey | VirgilPublicKey[],
+    privateKey: IPrivateKey,
+    publicKeys: IPublicKey | IPublicKey[],
     keyknoxCrypto: IKeyknoxCrypto,
     keyknoxClient?: IKeyknoxClient,
   ) {
@@ -37,7 +37,7 @@ export default class KeyknoxManager {
     this.keyknoxClient = keyknoxClient || new KeyknoxClient();
   }
 
-  async pushValue(value: Buffer, previousHash?: Buffer): Promise<DecryptedKeyknoxValue> {
+  async pushValue(value: string, previousHash?: string): Promise<DecryptedKeyknoxValue> {
     const token = await this.accessTokenProvider.getToken({
       service: this.SERVICE_NAME,
       operation: 'put',
@@ -74,10 +74,10 @@ export default class KeyknoxManager {
   }
 
   async updateValue(options: {
-    value: Buffer;
-    previousHash: Buffer;
-    newPrivateKey?: VirgilPrivateKey;
-    newPublicKeys?: VirgilPublicKey | VirgilPublicKey[];
+    value: string;
+    previousHash: string;
+    newPrivateKey?: IPrivateKey;
+    newPublicKeys?: IPublicKey | IPublicKey[];
   }): Promise<DecryptedKeyknoxValue> {
     const { value, previousHash, newPrivateKey, newPublicKeys } = options;
     if (!newPrivateKey && !newPublicKeys) {
@@ -109,12 +109,12 @@ export default class KeyknoxManager {
   }
 
   async updateRecipients(options: {
-    newPrivateKey?: VirgilPrivateKey;
-    newPublicKeys?: VirgilPublicKey | VirgilPublicKey[];
+    newPrivateKey?: IPrivateKey;
+    newPublicKeys?: IPublicKey | IPublicKey[];
   }): Promise<DecryptedKeyknoxValue> {
     const { newPrivateKey, newPublicKeys } = options;
     const decryptedKeyknoxValue = await this.pullValue();
-    if (!decryptedKeyknoxValue.meta.byteLength && !decryptedKeyknoxValue.value.byteLength) {
+    if (!decryptedKeyknoxValue.meta.length && !decryptedKeyknoxValue.value.length) {
       return decryptedKeyknoxValue;
     }
     if (newPrivateKey) {
