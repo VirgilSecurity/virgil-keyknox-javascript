@@ -14,7 +14,7 @@ export default class CloudKeyStorage {
 
   private decryptedKeyknoxValue?: DecryptedKeyknoxValue;
   private cache: Map<string, CloudEntry> = new Map();
-  private syncWasCalled: boolean = false;
+  private syncWasCalled = false;
 
   constructor(keyknoxManager: KeyknoxManager) {
     this.keyknoxManager = keyknoxManager;
