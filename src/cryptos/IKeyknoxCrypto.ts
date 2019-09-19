@@ -2,7 +2,7 @@ import { DecryptedKeyknoxValue, EncryptedKeyknoxValue } from '../entities';
 import { IPrivateKey, IPublicKey } from '../types';
 
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
-export default interface IKeyknoxCrypto {
+export interface IKeyknoxCrypto {
   decrypt(
     encryptedKeyknoxValue: EncryptedKeyknoxValue,
     privateKey: IPrivateKey,

@@ -1,8 +1,8 @@
 import { EncryptedKeyknoxValue, DecryptedKeyknoxValue } from '../entities';
 import { ICrypto, IPrivateKey, IPublicKey } from '../types';
-import IKeyknoxCrypto from './IKeyknoxCrypto';
+import { IKeyknoxCrypto } from './IKeyknoxCrypto';
 
-export default class KeyknoxCrypto implements IKeyknoxCrypto {
+export class KeyknoxCrypto implements IKeyknoxCrypto {
   private readonly crypto: ICrypto;
 
   constructor(crypto: ICrypto) {

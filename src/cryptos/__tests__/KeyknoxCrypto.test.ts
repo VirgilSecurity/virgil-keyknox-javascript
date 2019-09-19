@@ -2,7 +2,7 @@ import { expect } from 'chai';
 
 import { initCrypto, VirgilCrypto } from 'virgil-crypto';
 
-import KeyknoxCrypto from '../KeyknoxCrypto';
+import { KeyknoxCrypto } from '../KeyknoxCrypto';
 
 describe('KeyknoxCrypto', () => {
   let keyknoxCrypto: KeyknoxCrypto;

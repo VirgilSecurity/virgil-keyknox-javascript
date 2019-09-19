@@ -11,9 +11,9 @@ import {
 } from 'virgil-crypto';
 import { JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
 
-import KeyknoxCrypto from '../cryptos/KeyknoxCrypto';
+import { KeyknoxCrypto } from '../cryptos/KeyknoxCrypto';
 import { KeyknoxClient } from '../KeyknoxClient';
-import KeyknoxManager from '../KeyknoxManager';
+import { KeyknoxManager } from '../KeyknoxManager';
 
 describe('KeyknoxManager', () => {
   let virgilCrypto: VirgilCrypto;

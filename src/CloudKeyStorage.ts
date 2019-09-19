@@ -1,15 +1,15 @@
-import KeyknoxCrypto from './cryptos/KeyknoxCrypto';
+import { KeyknoxCrypto } from './cryptos/KeyknoxCrypto';
 import { CloudEntry, DecryptedKeyknoxValue, KeyEntry } from './entities';
 import {
   CloudKeyStorageOutOfSyncError,
   CloudEntryExistsError,
   CloudEntryDoesntExistError,
 } from './errors';
-import KeyknoxManager from './KeyknoxManager';
+import { KeyknoxManager } from './KeyknoxManager';
 import { serialize, deserialize } from './CloudEntrySerializer';
 import { Meta, ICrypto, IPrivateKey, IPublicKey, IAccessTokenProvider } from './types';
 
-export default class CloudKeyStorage {
+export class CloudKeyStorage {
   private readonly keyknoxManager: KeyknoxManager;
 
   private decryptedKeyknoxValue?: DecryptedKeyknoxValue;

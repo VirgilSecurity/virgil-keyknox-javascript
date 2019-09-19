@@ -1,7 +1,7 @@
-import CloudKeyStorage from './CloudKeyStorage';
+import { CloudKeyStorage } from './CloudKeyStorage';
 import { KeyEntry, CloudEntry } from './entities';
 import { KeyEntryExistsError, KeyEntryDoesntExistError } from './errors';
-import KeyEntryStorageWrapper from './KeyEntryStorageWrapper';
+import { KeyEntryStorageWrapper } from './KeyEntryStorageWrapper';
 import { createKeyEntry, extractDate } from './KeyEntryUtils';
 import {
   Meta,
@@ -13,7 +13,7 @@ import {
   IKeyEntryStorage,
 } from './types';
 
-export default class SyncKeyStorage {
+export class SyncKeyStorage {
   private readonly cloudKeyStorage: CloudKeyStorage;
   private readonly keyEntryStorageWrapper: KeyEntryStorageWrapper;
 

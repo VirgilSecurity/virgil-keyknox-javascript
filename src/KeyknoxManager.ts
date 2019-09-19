@@ -1,8 +1,8 @@
-import IKeyknoxCrypto from './cryptos/IKeyknoxCrypto';
+import { IKeyknoxCrypto } from './cryptos/IKeyknoxCrypto';
 import { KeyknoxClient } from './KeyknoxClient';
 import { IPrivateKey, IPublicKey, IAccessTokenProvider } from './types';
 
-export default class KeyknoxManager {
+export class KeyknoxManager {
   private myPrivateKey: IPrivateKey;
   private myPublicKeys: IPublicKey | IPublicKey[];
 

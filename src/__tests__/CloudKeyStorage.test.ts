@@ -10,16 +10,16 @@ import {
 } from 'virgil-crypto';
 import { JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
 
-import KeyknoxCrypto from '../cryptos/KeyknoxCrypto';
+import { KeyknoxCrypto } from '../cryptos/KeyknoxCrypto';
 import {
   CloudKeyStorageOutOfSyncError,
   CloudEntryExistsError,
   CloudEntryDoesntExistError,
 } from '../errors';
-import CloudKeyStorage from '../CloudKeyStorage';
+import { CloudKeyStorage } from '../CloudKeyStorage';
 import { CloudEntry, KeyEntry } from '../entities';
 import { KeyknoxClient } from '../KeyknoxClient';
-import KeyknoxManager from '../KeyknoxManager';
+import { KeyknoxManager } from '../KeyknoxManager';
 
 function generateKeyEntries(amount: number): KeyEntry[] {
   const keyEntries = [];
