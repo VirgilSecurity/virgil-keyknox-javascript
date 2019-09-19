@@ -1,11 +1,12 @@
-import { expect } from 'chai';
-
 import { join } from 'path';
+
+import { expect } from 'chai';
 import uuid from 'uuid/v4';
+
 import { initCrypto, VirgilCrypto, VirgilAccessTokenSigner } from 'virgil-crypto';
 import { IKeyEntry, KeyEntryStorage, JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
 
-import KeyknoxClient from '../clients/KeyknoxClient';
+import { KeyknoxClient } from '../KeyknoxClient';
 import KeyknoxCrypto from '../cryptos/KeyknoxCrypto';
 import CloudKeyStorage from '../CloudKeyStorage';
 import { KeyEntry } from '../entities';
@@ -54,11 +55,10 @@ describe('SyncKeyStorage', () => {
     const keyPair = virgilCrypto.generateKeys();
     const keyEntryStorage = new KeyEntryStorage(join(process.env.KEY_ENTRIES_FOLDER!, identity));
     keyknoxManager = new KeyknoxManager(
-      accessTokenProvider,
       keyPair.privateKey,
       keyPair.publicKey,
       new KeyknoxCrypto(virgilCrypto),
-      new KeyknoxClient(process.env.API_URL),
+      new KeyknoxClient(accessTokenProvider, process.env.API_URL),
     );
     cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
     keyEntryStorageWrapper = new KeyEntryStorageWrapper(identity, keyEntryStorage);

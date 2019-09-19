@@ -10,7 +10,6 @@ import {
 } from 'virgil-crypto';
 import { JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
 
-import KeyknoxClient from '../clients/KeyknoxClient';
 import KeyknoxCrypto from '../cryptos/KeyknoxCrypto';
 import {
   CloudKeyStorageOutOfSyncError,
@@ -19,6 +18,7 @@ import {
 } from '../errors';
 import CloudKeyStorage from '../CloudKeyStorage';
 import { CloudEntry, KeyEntry } from '../entities';
+import { KeyknoxClient } from '../KeyknoxClient';
 import KeyknoxManager from '../KeyknoxManager';
 
 function generateKeyEntries(amount: number): KeyEntry[] {
@@ -61,11 +61,10 @@ describe('CloudKeyStorage', () => {
     accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
     keyPair = virgilCrypto.generateKeys();
     const keyknoxManager = new KeyknoxManager(
-      accessTokenProvider,
       keyPair.privateKey,
       keyPair.publicKey,
       new KeyknoxCrypto(virgilCrypto),
-      new KeyknoxClient(process.env.API_URL),
+      new KeyknoxClient(accessTokenProvider, process.env.API_URL),
     );
     cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
   });
@@ -285,11 +284,10 @@ describe('CloudKeyStorage', () => {
     const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
     const keyPair = virgilCrypto.generateKeys();
     const keyknoxManager = new KeyknoxManager(
-      accessTokenProvider,
       keyPair.privateKey,
       keyPair.publicKey,
       new KeyknoxCrypto(virgilCrypto),
-      new KeyknoxClient(process.env.API_URL),
+      new KeyknoxClient(accessTokenProvider, process.env.API_URL),
     );
     cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
     await keyknoxManager.pushValue(uuid());

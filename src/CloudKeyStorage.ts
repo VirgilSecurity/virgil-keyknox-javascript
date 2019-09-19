@@ -26,7 +26,7 @@ export default class CloudKeyStorage {
     publicKeys: IPublicKey | IPublicKey[];
     virgilCrypto: ICrypto;
   }): CloudKeyStorage {
-    const keyknoxManager = new KeyknoxManager(
+    const keyknoxManager = KeyknoxManager.create(
       options.accessTokenProvider,
       options.privateKey,
       options.publicKeys,

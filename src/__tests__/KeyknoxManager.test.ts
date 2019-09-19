@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-
 import uuid from 'uuid/v4';
+
 import {
   initCrypto,
   VirgilCrypto,
@@ -11,8 +11,8 @@ import {
 } from 'virgil-crypto';
 import { JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
 
-import KeyknoxClient from '../clients/KeyknoxClient';
 import KeyknoxCrypto from '../cryptos/KeyknoxCrypto';
+import { KeyknoxClient } from '../KeyknoxClient';
 import KeyknoxManager from '../KeyknoxManager';
 
 describe('KeyknoxManager', () => {
@@ -48,11 +48,10 @@ describe('KeyknoxManager', () => {
       identity || uuid(),
     );
     return new KeyknoxManager(
-      accessTokenProvider,
       privateKey,
       publicKey,
       new KeyknoxCrypto(virgilCrypto),
-      new KeyknoxClient(process.env.API_URL),
+      new KeyknoxClient(accessTokenProvider, process.env.API_URL),
     );
   }
 
@@ -268,9 +267,8 @@ describe('KeyknoxManager', () => {
     });
     const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
     const [keyPair] = generateKeyPairs(1);
-    const keyknoxClient = new KeyknoxClient(process.env.API_URL);
+    const keyknoxClient = new KeyknoxClient(accessTokenProvider, process.env.API_URL);
     const keyknoxManager = new KeyknoxManager(
-      accessTokenProvider,
       keyPair.privateKey,
       keyPair.publicKey,
       new KeyknoxCrypto(virgilCrypto),
@@ -278,8 +276,7 @@ describe('KeyknoxManager', () => {
     );
     const value = 'dmFsdWUK';
     await keyknoxManager.pushValue(value);
-    const token = await accessTokenProvider.getToken({ service: 'keyknox', operation: 'get' });
-    const encryptedKeyknoxValue = await keyknoxClient.pullValue(token.toString());
+    const encryptedKeyknoxValue = await keyknoxClient.v1Pull();
     const decryptedData = virgilCrypto.decryptThenVerifyDetached(
       encryptedKeyknoxValue.value,
       encryptedKeyknoxValue.meta,
