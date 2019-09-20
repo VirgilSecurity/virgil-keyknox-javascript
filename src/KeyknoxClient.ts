@@ -47,7 +47,7 @@ export class KeyknoxClient {
     this.axios = axiosInstance || axios.create({ baseURL: apiUrl || KeyknoxClient.API_URL });
   }
 
-  async v1Push(meta: string, value: string, previousHash?: string) {
+  async v1Push(meta: string, value: string, keyknoxHash?: string) {
     const data = {
       meta,
       value,
@@ -61,8 +61,8 @@ export class KeyknoxClient {
         Authorization: KeyknoxClient.getAuthorizationHeader(token),
       },
     };
-    if (previousHash) {
-      requestConfig.headers['Virgil-Keyknox-Previous-Hash'] = previousHash;
+    if (keyknoxHash) {
+      requestConfig.headers['Virgil-Keyknox-Previous-Hash'] = keyknoxHash;
     }
     const response = await this.axios.put<KeyknoxDataV1>('/keyknox/v1', data, requestConfig);
     return KeyknoxClient.getKeyknoxValueV1(response) as EncryptedKeyknoxValueV1;
@@ -107,9 +107,9 @@ export class KeyknoxClient {
     identities?: string[];
     meta?: string;
     value?: string;
-    previousHash?: string;
+    keyknoxHash?: string;
   }) {
-    const { root, path, key, identities, meta, value, previousHash } = options;
+    const { root, path, key, identities, meta, value, keyknoxHash } = options;
     const data = {
       root,
       path,
@@ -127,8 +127,8 @@ export class KeyknoxClient {
         Authorization: KeyknoxClient.getAuthorizationHeader(token),
       },
     };
-    if (previousHash) {
-      requestConfig.headers['Virgil-Keyknox-Previous-Hash'] = previousHash;
+    if (keyknoxHash) {
+      requestConfig.headers['Virgil-Keyknox-Previous-Hash'] = keyknoxHash;
     }
     const response = await this.axios.post('/keyknox/v2/push', data, requestConfig);
     return KeyknoxClient.getKeyknoxValueV2(response) as EncryptedKeyknoxValueV2;

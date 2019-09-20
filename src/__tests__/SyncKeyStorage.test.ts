@@ -7,9 +7,8 @@ import { initCrypto, VirgilCrypto, VirgilAccessTokenSigner } from 'virgil-crypto
 import { IKeyEntry, KeyEntryStorage, JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
 
 import { KeyknoxClient } from '../KeyknoxClient';
-import { KeyknoxCrypto } from '../cryptos/KeyknoxCrypto';
+import { KeyknoxCrypto } from '../KeyknoxCrypto';
 import { CloudKeyStorage } from '../CloudKeyStorage';
-import { KeyEntry } from '../entities';
 import {
   CloudKeyStorageOutOfSyncError,
   KeyEntryExistsError,
@@ -18,6 +17,7 @@ import {
 import { KeyEntryStorageWrapper } from '../KeyEntryStorageWrapper';
 import { KeyknoxManager } from '../KeyknoxManager';
 import { SyncKeyStorage } from '../SyncKeyStorage';
+import { KeyEntry } from '../types';
 
 function generateKeyEntries(amount: number): KeyEntry[] {
   const keyEntries = [];

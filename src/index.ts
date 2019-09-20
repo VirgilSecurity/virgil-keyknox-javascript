@@ -1,7 +1,7 @@
 export { KeyknoxClient } from './KeyknoxClient';
 
-export { IKeyknoxCrypto } from './cryptos/IKeyknoxCrypto';
-export { KeyknoxCrypto } from './cryptos/KeyknoxCrypto';
+export { IKeyknoxCrypto } from './IKeyknoxCrypto';
+export { KeyknoxCrypto } from './KeyknoxCrypto';
 
 export * from './errors';
 

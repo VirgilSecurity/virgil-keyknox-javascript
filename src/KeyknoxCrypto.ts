@@ -1,6 +1,5 @@
-import { EncryptedKeyknoxValue, DecryptedKeyknoxValue } from '../entities';
-import { ICrypto, IPrivateKey, IPublicKey } from '../types';
 import { IKeyknoxCrypto } from './IKeyknoxCrypto';
+import { ICrypto, IPrivateKey, IPublicKey } from './types';
 
 export class KeyknoxCrypto implements IKeyknoxCrypto {
   private readonly crypto: ICrypto;
@@ -10,37 +9,31 @@ export class KeyknoxCrypto implements IKeyknoxCrypto {
   }
 
   decrypt(
-    encryptedKeyknoxValue: EncryptedKeyknoxValue,
+    metadata: string,
+    encryptedData: string,
     privateKey: IPrivateKey,
     publicKeys: IPublicKey | IPublicKey[],
-  ): DecryptedKeyknoxValue {
-    const { value, meta } = encryptedKeyknoxValue;
-    if (!value.length || !meta.length) {
-      if (value.length || meta.length) {
-        throw new TypeError("'EncryptedKeyknoxValue' is invalid");
+  ) {
+    if (!encryptedData.length || !metadata.length) {
+      if (encryptedData.length || metadata.length) {
+        throw new TypeError("'metadata' or 'encryptedData' is empty");
       }
-      return encryptedKeyknoxValue;
+      return encryptedData;
     }
     const decrypted = this.crypto.decryptThenVerifyDetached(
-      { value: value, encoding: 'base64' },
-      { value: meta, encoding: 'base64' },
+      { value: encryptedData, encoding: 'base64' },
+      { value: metadata, encoding: 'base64' },
       privateKey,
       publicKeys,
     );
-    return {
-      ...encryptedKeyknoxValue,
-      value: decrypted.toString('base64'),
-    };
+    return decrypted.toString('base64');
   }
 
   encrypt(
     data: string,
     privateKey: IPrivateKey,
     publicKeys: IPublicKey | IPublicKey[],
-  ): {
-    encryptedData: string;
-    metadata: string;
-  } {
+  ) {
     const { metadata, encryptedData } = this.crypto.signThenEncryptDetached(
       { value: data, encoding: 'base64' },
       privateKey,

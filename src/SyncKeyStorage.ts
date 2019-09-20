@@ -1,16 +1,17 @@
 import { CloudKeyStorage } from './CloudKeyStorage';
-import { KeyEntry, CloudEntry } from './entities';
 import { KeyEntryExistsError, KeyEntryDoesntExistError } from './errors';
 import { KeyEntryStorageWrapper } from './KeyEntryStorageWrapper';
 import { createKeyEntry, extractDate } from './KeyEntryUtils';
 import {
-  Meta,
   ICrypto,
   IPrivateKey,
   IPublicKey,
   IAccessTokenProvider,
   IKeyEntry,
   IKeyEntryStorage,
+  Meta,
+  CloudEntry,
+  KeyEntry,
 } from './types';
 
 export class SyncKeyStorage {

@@ -1,7 +1,6 @@
 import base64 from 'base-64';
 
-import { CloudEntry } from './entities';
-import { Meta } from './types';
+import { Meta, CloudEntry } from './types';
 
 interface SerializedCloudEntry {
   name: string;

@@ -1,5 +1,4 @@
-import { CloudEntry } from './entities';
-import { IKeyEntry } from './types';
+import { IKeyEntry, CloudEntry } from './types';
 
 export const creationDateKey = 'k_cda';
 export const modificationDateKey = 'k_mda';

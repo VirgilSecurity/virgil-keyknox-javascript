@@ -1,5 +1,4 @@
-import { KeyknoxCrypto } from './cryptos/KeyknoxCrypto';
-import { CloudEntry, DecryptedKeyknoxValue, KeyEntry } from './entities';
+import { KeyknoxCrypto } from './KeyknoxCrypto';
 import {
   CloudKeyStorageOutOfSyncError,
   CloudEntryExistsError,
@@ -7,12 +6,21 @@ import {
 } from './errors';
 import { KeyknoxManager } from './KeyknoxManager';
 import { serialize, deserialize } from './CloudEntrySerializer';
-import { Meta, ICrypto, IPrivateKey, IPublicKey, IAccessTokenProvider } from './types';
+import {
+  ICrypto,
+  IPrivateKey,
+  IPublicKey,
+  IAccessTokenProvider,
+  Meta,
+  DecryptedKeyknoxValueV1,
+  CloudEntry,
+  KeyEntry,
+} from './types';
 
 export class CloudKeyStorage {
   private readonly keyknoxManager: KeyknoxManager;
 
-  private decryptedKeyknoxValue?: DecryptedKeyknoxValue;
+  private decryptedKeyknoxValue?: DecryptedKeyknoxValueV1;
   private cache: Map<string, CloudEntry> = new Map();
   private syncWasCalled = false;
 
@@ -96,7 +104,7 @@ export class CloudKeyStorage {
 
   async deleteAllEntries(): Promise<void> {
     this.cache.clear();
-    this.decryptedKeyknoxValue = await this.keyknoxManager.resetValue();
+    this.decryptedKeyknoxValue = await this.keyknoxManager.v1Reset();
   }
 
   async updateRecipients(options: {
@@ -105,7 +113,7 @@ export class CloudKeyStorage {
   }): Promise<void> {
     this.throwUnlessSyncWasCalled();
     const { newPrivateKey, newPublicKeys } = options;
-    this.decryptedKeyknoxValue = await this.keyknoxManager.updateRecipients({
+    this.decryptedKeyknoxValue = await this.keyknoxManager.v1UpdateRecipients({
       newPrivateKey,
       newPublicKeys,
     });
@@ -113,7 +121,7 @@ export class CloudKeyStorage {
   }
 
   async retrieveCloudEntries(): Promise<void> {
-    this.decryptedKeyknoxValue = await this.keyknoxManager.pullValue();
+    this.decryptedKeyknoxValue = await this.keyknoxManager.v1Pull();
     this.cache = deserialize(this.decryptedKeyknoxValue.value);
     this.syncWasCalled = true;
   }
@@ -138,7 +146,7 @@ export class CloudKeyStorage {
 
   private async pushCacheEntries(): Promise<void> {
     const value = serialize(this.cache);
-    this.decryptedKeyknoxValue = await this.keyknoxManager.pushValue(
+    this.decryptedKeyknoxValue = await this.keyknoxManager.v1Push(
       value,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.decryptedKeyknoxValue!.keyknoxHash,

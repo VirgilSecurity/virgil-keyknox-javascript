@@ -1,5 +1,3 @@
-export type Meta = { [key: string]: string } | null;
-
 export type AxiosInstance = import('axios').AxiosInstance;
 export type AxiosError = import('axios').AxiosError;
 export type AxiosRequestConfig = import('axios').AxiosRequestConfig;
@@ -14,6 +12,8 @@ export type IKeyEntry = import('virgil-sdk').IKeyEntry;
 export type IKeyEntryStorage = import('virgil-sdk').IKeyEntryStorage;
 export type ISaveKeyEntryParams = import('virgil-sdk').ISaveKeyEntryParams;
 export type IUpdateKeyEntryParams = import('virgil-sdk').IUpdateKeyEntryParams;
+
+export type Meta = { [key: string]: string } | null;
 
 export interface KeyknoxValueV1 {
   meta: string;
@@ -45,3 +45,17 @@ export interface DecryptedKeyknoxValueV2 extends KeyknoxValueV2 {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EncryptedKeyknoxValueV2 extends KeyknoxValueV2 {}
+
+export interface CloudEntry {
+  name: string;
+  data: string;
+  creationDate: Date;
+  modificationDate: Date;
+  meta: Meta;
+}
+
+export interface KeyEntry {
+  name: string;
+  data: string;
+  meta?: Meta;
+}
