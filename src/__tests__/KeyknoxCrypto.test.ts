@@ -21,12 +21,7 @@ describe('KeyknoxCrypto', () => {
     const metadata = '';
     const encryptedData = '';
     const { privateKey, publicKey } = virgilCrypto.generateKeys();
-    const decryptedValue = keyknoxCrypto.decrypt(
-      metadata,
-      encryptedData,
-      privateKey,
-      publicKey,
-    );
+    const decryptedValue = keyknoxCrypto.decrypt(metadata, encryptedData, privateKey, publicKey);
     expect(decryptedValue).to.equal(encryptedData);
   });
 
@@ -44,12 +39,7 @@ describe('KeyknoxCrypto', () => {
     const data = 'ZGF0YQ==';
     const { privateKey, publicKey } = virgilCrypto.generateKeys();
     const { encryptedData, metadata } = keyknoxCrypto.encrypt(data, privateKey, publicKey);
-    const decryptedValue = keyknoxCrypto.decrypt(
-      metadata,
-      encryptedData,
-      privateKey,
-      publicKey,
-    );
+    const decryptedValue = keyknoxCrypto.decrypt(metadata, encryptedData, privateKey, publicKey);
     expect(decryptedValue).to.equal(data);
   });
 });

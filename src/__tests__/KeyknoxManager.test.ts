@@ -68,19 +68,29 @@ describe('KeyknoxManager', () => {
 
   it('KTC-6', async () => {
     const value = 'dmFsdWUK';
-    const decryptedKeyknoxValue = await keyknoxManager.v1Push(value, keyPair.privateKey, keyPair.publicKey);
+    const decryptedKeyknoxValue = await keyknoxManager.v1Push(
+      value,
+      keyPair.privateKey,
+      keyPair.publicKey,
+    );
     expect(decryptedKeyknoxValue.value).to.equal(value);
   });
 
   it('KTC-7', async () => {
     const value = 'dmFsdWUK';
     await keyknoxManager.v1Push(value, keyPair.privateKey, keyPair.publicKey);
-    const decryptedKeyknoxValue = await keyknoxManager.v1Pull(keyPair.privateKey, keyPair.publicKey);
+    const decryptedKeyknoxValue = await keyknoxManager.v1Pull(
+      keyPair.privateKey,
+      keyPair.publicKey,
+    );
     expect(decryptedKeyknoxValue.value).to.equal(value);
   });
 
   it('KTC-8', async () => {
-    const decryptedKeyknoxValue = await keyknoxManager.v1Pull(keyPair.privateKey, keyPair.publicKey);
+    const decryptedKeyknoxValue = await keyknoxManager.v1Pull(
+      keyPair.privateKey,
+      keyPair.publicKey,
+    );
     expect(decryptedKeyknoxValue.meta.length).to.equal(0);
     expect(decryptedKeyknoxValue.value.length).to.equal(0);
     expect(decryptedKeyknoxValue.version).to.equal('1.0');
@@ -260,10 +270,7 @@ describe('KeyknoxManager', () => {
     const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
     const [keyPair] = generateKeyPairs(1);
     const keyknoxClient = new KeyknoxClient(accessTokenProvider, process.env.API_URL);
-    const keyknoxManager = new KeyknoxManager(
-      new KeyknoxCrypto(virgilCrypto),
-      keyknoxClient,
-    );
+    const keyknoxManager = new KeyknoxManager(new KeyknoxCrypto(virgilCrypto), keyknoxClient);
     const value = 'dmFsdWUK';
     await keyknoxManager.v1Push(value, keyPair.privateKey, keyPair.publicKey);
     const encryptedKeyknoxValue = await keyknoxClient.v1Pull();

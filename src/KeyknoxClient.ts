@@ -173,7 +173,11 @@ export class KeyknoxClient {
         Authorization: KeyknoxClient.getAuthorizationHeader(token),
       },
     };
-    const response = await this.axios.post<GetKeysResponse>('/keyknox/v2/keys', data, requestConfig);
+    const response = await this.axios.post<GetKeysResponse>(
+      '/keyknox/v2/keys',
+      data,
+      requestConfig,
+    );
     return response.data;
   }
 

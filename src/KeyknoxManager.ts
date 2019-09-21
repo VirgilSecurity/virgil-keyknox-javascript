@@ -34,11 +34,7 @@ export class KeyknoxManager {
     publicKeys: IPublicKey | IPublicKey[],
     keyknoxHash?: string,
   ) {
-    const { metadata, encryptedData } = this.myKeyknoxCrypto.encrypt(
-      value,
-      privateKey,
-      publicKeys,
-    );
+    const { metadata, encryptedData } = this.myKeyknoxCrypto.encrypt(value, privateKey, publicKeys);
     const encryptedKeyknoxValue = await this.keyknoxClient.v1Push(
       metadata,
       encryptedData,
@@ -117,7 +113,7 @@ export class KeyknoxManager {
     identities?: string[];
     value: string;
     privateKey: IPrivateKey;
-    publicKeys: IPublicKey | IPublicKey[],
+    publicKeys: IPublicKey | IPublicKey[];
     keyknoxHash?: string;
   }) {
     const { value, privateKey, publicKeys, ...pushOptions } = options;
@@ -143,20 +139,11 @@ export class KeyknoxManager {
     return this.v2Decrypt(encryptedKeyknoxValue, privateKey, publicKeys);
   }
 
-  async v2GetKeys(options: {
-    root?: string;
-    path?: string;
-    identity?: string;
-  }) {
+  async v2GetKeys(options: { root?: string; path?: string; identity?: string }) {
     return this.keyknoxClient.v2GetKeys(options);
   }
 
-  async v2Reset(options: {
-    root?: string;
-    path?: string;
-    key?: string;
-    identity?: string;
-  }) {
+  async v2Reset(options: { root?: string; path?: string; key?: string; identity?: string }) {
     return this.keyknoxClient.v2Reset(options);
   }
 

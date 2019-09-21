@@ -1,5 +1,6 @@
 import { IPrivateKey, IPublicKey } from './types';
 
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface IKeyknoxCrypto {
   decrypt(
     metadata: string,

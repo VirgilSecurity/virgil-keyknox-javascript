@@ -29,11 +29,7 @@ export class KeyknoxCrypto implements IKeyknoxCrypto {
     return decrypted.toString('base64');
   }
 
-  encrypt(
-    data: string,
-    privateKey: IPrivateKey,
-    publicKeys: IPublicKey | IPublicKey[],
-  ) {
+  encrypt(data: string, privateKey: IPrivateKey, publicKeys: IPublicKey | IPublicKey[]) {
     const { metadata, encryptedData } = this.crypto.signThenEncryptDetached(
       { value: data, encoding: 'base64' },
       privateKey,
