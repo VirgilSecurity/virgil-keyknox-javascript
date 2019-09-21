@@ -61,12 +61,10 @@ describe('CloudKeyStorage', () => {
     accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
     keyPair = virgilCrypto.generateKeys();
     const keyknoxManager = new KeyknoxManager(
-      keyPair.privateKey,
-      keyPair.publicKey,
       new KeyknoxCrypto(virgilCrypto),
       new KeyknoxClient(accessTokenProvider, process.env.API_URL),
     );
-    cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
+    cloudKeyStorage = new CloudKeyStorage(keyknoxManager, keyPair.privateKey, keyPair.publicKey);
   });
 
   it('KTC-19', async () => {
@@ -284,13 +282,11 @@ describe('CloudKeyStorage', () => {
     const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, uuid());
     const keyPair = virgilCrypto.generateKeys();
     const keyknoxManager = new KeyknoxManager(
-      keyPair.privateKey,
-      keyPair.publicKey,
       new KeyknoxCrypto(virgilCrypto),
       new KeyknoxClient(accessTokenProvider, process.env.API_URL),
     );
-    cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
-    await keyknoxManager.v1Push(uuid());
+    cloudKeyStorage = new CloudKeyStorage(keyknoxManager, keyPair.privateKey, keyPair.publicKey);
+    await keyknoxManager.v1Push(uuid(), keyPair.privateKey, keyPair.publicKey);
     await cloudKeyStorage.deleteAllEntries();
     await cloudKeyStorage.retrieveCloudEntries();
     let entries = cloudKeyStorage.retrieveAllEntries();

@@ -30,6 +30,8 @@ interface KeyknoxDataV2 {
   version: string;
 }
 
+type GetKeysResponse = string[];
+
 export class KeyknoxClient {
   private static readonly API_URL = 'https://api.virgilsecurity.com';
   private static readonly AUTHORIZATION_PREFIX = 'Virgil';
@@ -171,7 +173,7 @@ export class KeyknoxClient {
         Authorization: KeyknoxClient.getAuthorizationHeader(token),
       },
     };
-    const response = await this.axios.post('/keyknox/v2/keys', data, requestConfig);
+    const response = await this.axios.post<GetKeysResponse>('/keyknox/v2/keys', data, requestConfig);
     return response.data;
   }
 

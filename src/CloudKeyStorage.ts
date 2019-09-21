@@ -20,12 +20,20 @@ import {
 export class CloudKeyStorage {
   private readonly keyknoxManager: KeyknoxManager;
 
+  private privateKey: IPrivateKey;
+  private publicKeys: IPublicKey | IPublicKey[];
   private decryptedKeyknoxValue?: DecryptedKeyknoxValueV1;
   private cache: Map<string, CloudEntry> = new Map();
   private syncWasCalled = false;
 
-  constructor(keyknoxManager: KeyknoxManager) {
+  constructor(
+    keyknoxManager: KeyknoxManager,
+    privateKey: IPrivateKey,
+    publicKeys: IPublicKey | IPublicKey[],
+  ) {
     this.keyknoxManager = keyknoxManager;
+    this.privateKey = privateKey;
+    this.publicKeys = publicKeys;
   }
 
   static create(options: {
@@ -34,13 +42,12 @@ export class CloudKeyStorage {
     publicKeys: IPublicKey | IPublicKey[];
     virgilCrypto: ICrypto;
   }): CloudKeyStorage {
+    const { accessTokenProvider, privateKey, publicKeys, virgilCrypto } = options;
     const keyknoxManager = KeyknoxManager.create(
-      options.accessTokenProvider,
-      options.privateKey,
-      options.publicKeys,
-      new KeyknoxCrypto(options.virgilCrypto),
+      accessTokenProvider,
+      new KeyknoxCrypto(virgilCrypto),
     );
-    return new CloudKeyStorage(keyknoxManager);
+    return new CloudKeyStorage(keyknoxManager, privateKey, publicKeys);
   }
 
   async storeEntries(keyEntries: KeyEntry[]): Promise<CloudEntry[]> {
@@ -116,12 +123,16 @@ export class CloudKeyStorage {
     this.decryptedKeyknoxValue = await this.keyknoxManager.v1UpdateRecipients({
       newPrivateKey,
       newPublicKeys,
+      privateKey: this.privateKey,
+      publicKeys: this.publicKeys,
     });
+    this.privateKey = newPrivateKey || this.privateKey;
+    this.publicKeys = newPublicKeys || this.publicKeys;
     this.cache = deserialize(this.decryptedKeyknoxValue.value);
   }
 
   async retrieveCloudEntries(): Promise<void> {
-    this.decryptedKeyknoxValue = await this.keyknoxManager.v1Pull();
+    this.decryptedKeyknoxValue = await this.keyknoxManager.v1Pull(this.privateKey, this.publicKeys);
     this.cache = deserialize(this.decryptedKeyknoxValue.value);
     this.syncWasCalled = true;
   }
@@ -148,6 +159,8 @@ export class CloudKeyStorage {
     const value = serialize(this.cache);
     this.decryptedKeyknoxValue = await this.keyknoxManager.v1Push(
       value,
+      this.privateKey,
+      this.publicKeys,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.decryptedKeyknoxValue!.keyknoxHash,
     );
