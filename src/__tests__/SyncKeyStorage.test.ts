@@ -3,7 +3,12 @@ import { join } from 'path';
 import { expect } from 'chai';
 import uuid from 'uuid/v4';
 
-import { initCrypto, VirgilCrypto, VirgilAccessTokenSigner } from 'virgil-crypto';
+import {
+  initCrypto,
+  hasFoundationModules,
+  VirgilCrypto,
+  VirgilAccessTokenSigner,
+} from 'virgil-crypto';
 import { KeyEntryStorage, JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
 
 import { KeyknoxClient } from '../KeyknoxClient';
@@ -34,7 +39,9 @@ describe('SyncKeyStorage', () => {
   let syncKeyStorage: SyncKeyStorage;
 
   before(async () => {
-    await initCrypto();
+    if (!hasFoundationModules()) {
+      await initCrypto();
+    }
   });
 
   beforeEach(() => {

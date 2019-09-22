@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { initCrypto, VirgilCrypto } from 'virgil-crypto';
+import { initCrypto, hasFoundationModules, VirgilCrypto } from 'virgil-crypto';
 
 import { KeyknoxCrypto } from '../KeyknoxCrypto';
 
@@ -9,7 +9,9 @@ describe('KeyknoxCrypto', () => {
   let virgilCrypto: VirgilCrypto;
 
   before(async () => {
-    await initCrypto();
+    if (!hasFoundationModules()) {
+      await initCrypto();
+    }
   });
 
   beforeEach(() => {

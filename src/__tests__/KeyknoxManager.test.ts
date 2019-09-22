@@ -1,7 +1,12 @@
 import { expect } from 'chai';
 import uuid from 'uuid/v4';
 
-import { initCrypto, VirgilCrypto, VirgilAccessTokenSigner } from 'virgil-crypto';
+import {
+  initCrypto,
+  hasFoundationModules,
+  VirgilCrypto,
+  VirgilAccessTokenSigner,
+} from 'virgil-crypto';
 import { JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
 
 import { KeyknoxCrypto } from '../KeyknoxCrypto';
@@ -46,7 +51,9 @@ describe('KeyknoxManager', () => {
   }
 
   before(async () => {
-    await initCrypto();
+    if (!hasFoundationModules()) {
+      await initCrypto();
+    }
   });
 
   beforeEach(() => {

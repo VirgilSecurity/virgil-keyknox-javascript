@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import uuid from 'uuid/v4';
 import {
   initCrypto,
+  hasFoundationModules,
   VirgilCrypto,
   VirgilPublicKey,
   VirgilPrivateKey,
@@ -42,7 +43,9 @@ describe('CloudKeyStorage', () => {
   };
 
   before(async () => {
-    await initCrypto();
+    if (!hasFoundationModules()) {
+      await initCrypto();
+    }
   });
 
   beforeEach(() => {
