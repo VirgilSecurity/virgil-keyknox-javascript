@@ -1,5 +1,5 @@
 import { IKeyknoxCrypto } from './IKeyknoxCrypto';
-import { ICrypto, IPrivateKey, IPublicKey } from './types';
+import { Data, ICrypto, IPrivateKey, IPublicKey } from './types';
 
 export class KeyknoxCrypto implements IKeyknoxCrypto {
   private readonly crypto: ICrypto;
@@ -39,5 +39,13 @@ export class KeyknoxCrypto implements IKeyknoxCrypto {
       metadata: metadata.toString('base64'),
       encryptedData: encryptedData.toString('base64'),
     };
+  }
+
+  importGroupSession(epochMessages: string[]) {
+    const base64Messages: Data[] = epochMessages.map(message => ({
+      value: message,
+      encoding: 'base64',
+    }));
+    return this.crypto.importGroupSession(base64Messages);
   }
 }

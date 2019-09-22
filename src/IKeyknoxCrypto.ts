@@ -1,4 +1,4 @@
-import { IPrivateKey, IPublicKey } from './types';
+import { IPrivateKey, IPublicKey, IGroupSession } from './types';
 
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface IKeyknoxCrypto {
@@ -17,4 +17,6 @@ export interface IKeyknoxCrypto {
     encryptedData: string;
     metadata: string;
   };
+
+  importGroupSession(epochMessages: string[]): IGroupSession;
 }
