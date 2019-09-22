@@ -11,6 +11,7 @@ export type IGroupSession = import('@virgilsecurity/crypto-types').IGroupSession
 
 export type IAccessTokenProvider = import('virgil-sdk').IAccessTokenProvider;
 export type IAccessToken = import('virgil-sdk').IAccessToken;
+export type ICard = import('virgil-sdk').ICard;
 export type IKeyEntry = import('virgil-sdk').IKeyEntry;
 export type IKeyEntryStorage = import('virgil-sdk').IKeyEntryStorage;
 export type ISaveKeyEntryParams = import('virgil-sdk').ISaveKeyEntryParams;
