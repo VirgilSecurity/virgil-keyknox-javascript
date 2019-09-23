@@ -10,12 +10,12 @@ import {
   IPrivateKey,
   IPublicKey,
   IGroupSessionMessageInfo,
-  IGroupSession,
   IAccessTokenProvider,
   ICard,
+  Ticket,
 } from './types';
 
-export class CloudGroupSessionStorage {
+export class CloudGroupTicketStorage {
   static readonly DEFAULT_ROOT = 'group-sessions';
 
   private readonly keyknoxManager: KeyknoxManager;
@@ -36,7 +36,7 @@ export class CloudGroupSessionStorage {
     this.identity = identity;
     this.privateKey = privateKey;
     this.publicKey = publicKey;
-    this.root = root || CloudGroupSessionStorage.DEFAULT_ROOT;
+    this.root = root || CloudGroupTicketStorage.DEFAULT_ROOT;
   }
 
   static create(options: {
@@ -52,7 +52,7 @@ export class CloudGroupSessionStorage {
       accessTokenProvider,
       new KeyknoxCrypto(virgilCrypto),
     );
-    return new CloudGroupSessionStorage({
+    return new CloudGroupTicketStorage({
       keyknoxManager,
       identity,
       privateKey,
@@ -92,12 +92,8 @@ export class CloudGroupSessionStorage {
     }
   }
 
-  async retrieve(sessionId: string): Promise<IGroupSession>;
-  async retrieve(
-    sessionId: string,
-    identity: string,
-    publicKey: IPublicKey,
-  ): Promise<IGroupSession>;
+  async retrieve(sessionId: string): Promise<Ticket[]>;
+  async retrieve(sessionId: string, identity: string, publicKey: IPublicKey): Promise<Ticket[]>;
   async retrieve(sessionId: string, identity?: string, publicKey?: IPublicKey) {
     let myIdentity = this.identity;
     let myPublicKey = this.publicKey;
@@ -127,8 +123,15 @@ export class CloudGroupSessionStorage {
       }),
     );
     const decryptedKeyknoxValues = await Promise.all(pullRequests);
-    const messages = decryptedKeyknoxValues.map(({ value }) => value);
-    return this.keyknoxManager.keyknoxCrypto.importGroupSession(messages);
+    const tickets: Ticket[] = decryptedKeyknoxValues.map(({ key, path, identities, value }) => ({
+      identities,
+      groupSessionMessageInfo: {
+        sessionId: path,
+        epochNumber: +key,
+        data: value,
+      },
+    }));
+    return tickets;
   }
 
   async addRecipients(sessionId: string, cards: ICard[]) {
@@ -188,7 +191,6 @@ export class CloudGroupSessionStorage {
     }
   }
 
-  async removeRecipient(sessionId: string, identity: string, epochNumber?: number): Promise<void>;
   async removeRecipient(sessionId: string, identity: string, epochNumber?: number) {
     await this.keyknoxManager.v2Reset({
       identity,

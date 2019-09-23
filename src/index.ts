@@ -5,7 +5,9 @@ export { KeyknoxCrypto } from './KeyknoxCrypto';
 
 export * from './errors';
 
-export { CloudGroupSessionStorage } from './CloudGroupSessionStorage';
+export { CloudGroupTicketStorage } from './CloudGroupTicketStorage';
 export { CloudKeyStorage } from './CloudKeyStorage';
 export { KeyknoxManager } from './KeyknoxManager';
 export { SyncKeyStorage } from './SyncKeyStorage';
+
+export { Ticket } from './types';

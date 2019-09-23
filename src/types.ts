@@ -7,7 +7,6 @@ export type ICrypto = import('@virgilsecurity/crypto-types').ICrypto;
 export type IPrivateKey = import('@virgilsecurity/crypto-types').IPrivateKey;
 export type IPublicKey = import('@virgilsecurity/crypto-types').IPublicKey;
 export type IGroupSessionMessageInfo = import('@virgilsecurity/crypto-types').IGroupSessionMessageInfo;
-export type IGroupSession = import('@virgilsecurity/crypto-types').IGroupSession;
 
 export type IAccessTokenProvider = import('virgil-sdk').IAccessTokenProvider;
 export type IAccessToken = import('virgil-sdk').IAccessToken;
@@ -49,6 +48,15 @@ export interface DecryptedKeyknoxValueV2 extends KeyknoxValueV2 {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EncryptedKeyknoxValueV2 extends KeyknoxValueV2 {}
+
+export interface Ticket {
+  groupSessionMessageInfo: {
+    sessionId: string;
+    epochNumber: number;
+    data: string;
+  };
+  identities: string[];
+}
 
 export interface CloudEntry {
   name: string;

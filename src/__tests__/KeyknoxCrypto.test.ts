@@ -44,16 +44,4 @@ describe('KeyknoxCrypto', () => {
     const decryptedValue = keyknoxCrypto.decrypt(metadata, encryptedData, privateKey, publicKey);
     expect(decryptedValue).to.equal(data);
   });
-
-  it('imports group session successfully', () => {
-    const groupSession = virgilCrypto.generateGroupSession({
-      value: 'group-session',
-      encoding: 'utf8',
-    });
-    groupSession.addNewEpoch();
-    const epochMessages = groupSession
-      .export()
-      .map(epochMessage => epochMessage.toString('base64'));
-    keyknoxCrypto.importGroupSession(epochMessages);
-  });
 });
