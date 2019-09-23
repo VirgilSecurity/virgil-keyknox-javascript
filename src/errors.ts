@@ -64,3 +64,17 @@ export class KeyEntryDoesntExistError extends KeyknoxError {
     this.keyEntryName = keyEntryName;
   }
 }
+
+export class GroupSessionMessageInfoAlreadyExistsError extends KeyknoxError {
+  constructor() {
+    super('GroupSessionMessageInfo already exist');
+    this.name = 'GroupSessionMessageInfoAlreadyExistsError';
+  }
+}
+
+export class GroupSessionDoesntExistError extends KeyknoxError {
+  constructor() {
+    super("Group session doesn't exist");
+    this.name = 'GroupSessionDoesntExistError';
+  }
+}

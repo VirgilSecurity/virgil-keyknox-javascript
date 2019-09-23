@@ -1,3 +1,4 @@
+import { GroupSessionMessageInfoAlreadyExistsError, GroupSessionDoesntExistError } from './errors';
 import { KeyknoxCrypto } from './KeyknoxCrypto';
 import { KeyknoxManager } from './KeyknoxManager';
 import {
@@ -57,24 +58,34 @@ export class CloudGroupSessionStorage {
   }
 
   async store(groupSessionMessageInfo: IGroupSessionMessageInfo): Promise<void>;
+  async store(groupSessionMessageInfo: IGroupSessionMessageInfo, card: ICard): Promise<void>;
   async store(groupSessionMessageInfo: IGroupSessionMessageInfo, cards: ICard[]): Promise<void>;
-  async store(groupSessionMessageInfo: IGroupSessionMessageInfo, cards?: ICard[]) {
+  async store(groupSessionMessageInfo: IGroupSessionMessageInfo, cards?: ICard | ICard[]) {
     const { epochNumber, sessionId, data } = groupSessionMessageInfo;
     let identities = [this.identity];
     let publicKeys = [this.publicKey];
     if (cards) {
-      identities = identities.concat(cards.map(card => card.identity));
-      publicKeys = publicKeys.concat(cards.map(card => card.publicKey));
+      const myCards = Array.isArray(cards) ? cards : [cards];
+      identities = identities.concat(myCards.map(card => card.identity));
+      publicKeys = publicKeys.concat(myCards.map(card => card.publicKey));
     }
-    await this.keyknoxManager.v2Push({
-      identities,
-      publicKeys,
-      privateKey: this.privateKey,
-      root: this.root,
-      path: sessionId,
-      key: epochNumber.toString(),
-      value: data.toString('base64'),
-    });
+    try {
+      await this.keyknoxManager.v2Push({
+        identities,
+        publicKeys,
+        privateKey: this.privateKey,
+        root: this.root,
+        path: sessionId,
+        key: epochNumber.toString(),
+        value: data.toString('base64'),
+      });
+    } catch (error) {
+      // 50010 - `Virgil-Keyknox-Previous-Hash` header is invalid.
+      if (error.response && error.response.data && error.response.data.code === 50010) {
+        throw new GroupSessionMessageInfoAlreadyExistsError();
+      }
+      throw error;
+    }
   }
 
   async retrieve(sessionId: string): Promise<IGroupSession>;
@@ -89,20 +100,24 @@ export class CloudGroupSessionStorage {
     if (identity && publicKey) {
       myIdentity = identity;
       myPublicKey = publicKey;
-    } else if (!publicKey) {
+      !identity;
+    } else if ((identity && !publicKey) || (!identity && publicKey)) {
       throw new Error("You need to provide both 'identity' and 'publicKey'");
     }
-    const epochs = await this.keyknoxManager.v2GetKeys({
+    const epochNumbers = await this.keyknoxManager.v2GetKeys({
       root: this.root,
       path: sessionId,
       identity: myIdentity,
     });
-    const pullRequests = epochs.map(epoch =>
+    if (!epochNumbers.length) {
+      throw new GroupSessionDoesntExistError();
+    }
+    const pullRequests = epochNumbers.map(epochNumber =>
       this.keyknoxManager.v2Pull({
-        identity,
         root: this.root,
         path: sessionId,
-        key: epoch,
+        key: epochNumber,
+        identity: myIdentity,
         privateKey: this.privateKey,
         publicKeys: myPublicKey,
       }),
@@ -113,66 +128,69 @@ export class CloudGroupSessionStorage {
   }
 
   async addRecipients(sessionId: string, cards: ICard[]) {
-    const identities = [this.identity, ...cards.map(card => card.identity)];
-    const publicKeys = [this.publicKey, ...cards.map(card => card.publicKey)];
-    const epochs = await this.keyknoxManager.v2GetKeys({
+    const epochNumbers = await this.keyknoxManager.v2GetKeys({
       root: this.root,
       path: sessionId,
       identity: this.identity,
     });
-    epochs.forEach(async epoch => {
+    for (const epochNumber of epochNumbers) {
       const decryptedKeyknoxValue = await this.keyknoxManager.v2Pull({
         root: this.root,
         path: sessionId,
-        key: epoch,
-        privateKey: this.privateKey,
-        publicKeys: publicKeys,
-      });
-      await this.keyknoxManager.v2Push({
-        ...decryptedKeyknoxValue,
-        identities,
-        publicKeys,
-        privateKey: this.privateKey,
-      });
-    });
-  }
-
-  async reAddRecipient(sessionId: string, card: ICard) {
-    const epochs = await this.keyknoxManager.v2GetKeys({
-      root: this.root,
-      path: sessionId,
-      identity: this.identity,
-    });
-    epochs.forEach(async epoch => {
-      const decryptedKeyknoxValue = await this.keyknoxManager.v2Pull({
-        root: this.root,
-        path: sessionId,
-        key: epoch,
+        key: epochNumber,
         identity: this.identity,
         privateKey: this.privateKey,
         publicKeys: this.publicKey,
       });
-      await this.removeRecipient(sessionId, card.identity, epoch);
+      await this.keyknoxManager.v2Push({
+        ...decryptedKeyknoxValue,
+        identities: cards.map(card => card.identity),
+        publicKeys: [this.publicKey, ...cards.map(card => card.publicKey)],
+        privateKey: this.privateKey,
+      });
+    }
+  }
+
+  async addRecipient(sessionId: string, card: ICard) {
+    return this.addRecipients(sessionId, [card]);
+  }
+
+  async reAddRecipient(sessionId: string, card: ICard) {
+    const epochNumbers = await this.keyknoxManager.v2GetKeys({
+      root: this.root,
+      path: sessionId,
+      identity: this.identity,
+    });
+    for (const epochNumber of epochNumbers) {
+      const decryptedKeyknoxValue = await this.keyknoxManager.v2Pull({
+        root: this.root,
+        path: sessionId,
+        key: epochNumber,
+        identity: this.identity,
+        privateKey: this.privateKey,
+        publicKeys: this.publicKey,
+      });
+      await this.removeRecipient(sessionId, card.identity, +epochNumber);
       await this.keyknoxManager.v2Push({
         root: this.root,
         path: sessionId,
-        key: epoch,
-        identities: [this.identity, card.identity],
+        key: epochNumber,
+        identities: [card.identity],
         value: decryptedKeyknoxValue.value,
         privateKey: this.privateKey,
         publicKeys: [this.publicKey, card.publicKey],
+        keyknoxHash: decryptedKeyknoxValue.keyknoxHash,
       });
-    });
+    }
   }
 
-  async removeRecipient(sessionId: string): Promise<void>;
-  async removeRecipient(sessionId: string, identity: string, epoch?: string): Promise<void>;
-  async removeRecipient(sessionId: string, identity?: string, epoch?: string) {
+  async removeRecipient(sessionId: string, identity: string, epochNumber?: number): Promise<void>;
+  async removeRecipient(sessionId: string, identity: string, epochNumber?: number) {
     await this.keyknoxManager.v2Reset({
+      identity,
       root: this.root,
       path: sessionId,
-      key: epoch,
-      identity: identity || this.identity,
+      key: typeof epochNumber === 'number' ? epochNumber.toString() : undefined,
     });
   }
 
