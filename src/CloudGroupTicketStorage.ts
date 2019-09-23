@@ -127,7 +127,7 @@ export class CloudGroupTicketStorage {
       identities,
       groupSessionMessageInfo: {
         sessionId: path,
-        epochNumber: +key,
+        epochNumber: Number(key),
         data: value,
       },
     }));
@@ -177,7 +177,7 @@ export class CloudGroupTicketStorage {
         privateKey: this.privateKey,
         publicKeys: this.publicKey,
       });
-      await this.removeRecipient(sessionId, card.identity, +epochNumber);
+      await this.removeRecipient(sessionId, card.identity, Number(epochNumber));
       await this.keyknoxManager.v2Push({
         root: this.root,
         path: sessionId,
