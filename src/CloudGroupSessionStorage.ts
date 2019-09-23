@@ -1,4 +1,8 @@
-import { GroupSessionMessageInfoAlreadyExistsError, GroupSessionDoesntExistError } from './errors';
+import {
+  KeyknoxClientError,
+  GroupSessionMessageInfoAlreadyExistsError,
+  GroupSessionDoesntExistError,
+} from './errors';
 import { KeyknoxCrypto } from './KeyknoxCrypto';
 import { KeyknoxManager } from './KeyknoxManager';
 import {
@@ -81,7 +85,7 @@ export class CloudGroupSessionStorage {
       });
     } catch (error) {
       // 50010 - `Virgil-Keyknox-Previous-Hash` header is invalid.
-      if (error.response && error.response.data && error.response.data.code === 50010) {
+      if (error instanceof KeyknoxClientError && error.code === 50010) {
         throw new GroupSessionMessageInfoAlreadyExistsError();
       }
       throw error;

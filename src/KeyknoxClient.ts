@@ -1,6 +1,8 @@
 import axios, { AxiosResponse } from 'axios';
 
+import { KeyknoxClientError } from './errors';
 import {
+  AxiosError,
   AxiosInstance,
   AxiosRequestConfig,
   IAccessTokenProvider,
@@ -47,6 +49,7 @@ export class KeyknoxClient {
   ) {
     this.accessTokenProvider = accessTokenProvider;
     this.axios = axiosInstance || axios.create({ baseURL: apiUrl || KeyknoxClient.API_URL });
+    this.axios.interceptors.response.use(undefined, KeyknoxClient.responseErrorHandler);
   }
 
   async v1Push(meta: string, value: string, keyknoxHash?: string) {
@@ -229,5 +232,17 @@ export class KeyknoxClient {
 
   private static getAuthorizationHeader(token: IAccessToken) {
     return `${KeyknoxClient.AUTHORIZATION_PREFIX} ${token.toString()}`;
+  }
+
+  private static responseErrorHandler(error: AxiosError) {
+    const { response } = error;
+    if (response) {
+      const { data } = response;
+      if (data && data.code && data.message) {
+        return Promise.reject(new KeyknoxClientError(data.message, response.status, data.code));
+      }
+      return Promise.reject(new KeyknoxClientError(error.message, response.status));
+    }
+    return Promise.reject(new KeyknoxClientError(error.message));
   }
 }
