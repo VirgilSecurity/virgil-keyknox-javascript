@@ -23,9 +23,9 @@ Virgil Keyknox Service allows users to store their sensitive data (such as Priva
 You can install this module from npm. Another option is to add it via `script` tag in browser.
 
 ### npm
-You will need to install `@virgilsecurity/keyknox`.
+You will need to install `@virgilsecurity/keyknox@next`.
 ```sh
-npm install @virgilsecurity/keyknox
+npm install @virgilsecurity/keyknox@next
 ```
 
 You will also need to install `virgil-crypto` and `virgil-sdk` from npm.
@@ -37,7 +37,7 @@ npm install virgil-crypto@next virgil-sdk@next
 ### In browser via `script` tag
 You will need to add `@virgilsecurity/keyknox` script.
 ```html
-<script src="https://unpkg.com/@virgilsecurity/keyknox/dist/keyknox.umd.js"></script>
+<script src="https://unpkg.com/@virgilsecurity/keyknox@next/dist/keyknox.umd.js"></script>
 ```
 
 You will also need to add `virgil-crypto` and `virgil-sdk` scripts.
