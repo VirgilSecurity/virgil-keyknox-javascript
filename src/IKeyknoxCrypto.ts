@@ -1,13 +1,13 @@
-import { DecryptedKeyknoxValue, EncryptedKeyknoxValue } from '../entities';
-import { IPrivateKey, IPublicKey } from '../types';
+import { IPrivateKey, IPublicKey } from './types';
 
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
-export default interface IKeyknoxCrypto {
+export interface IKeyknoxCrypto {
   decrypt(
-    encryptedKeyknoxValue: EncryptedKeyknoxValue,
+    metadata: string,
+    encryptedData: string,
     privateKey: IPrivateKey,
     publicKeys: IPublicKey | IPublicKey[],
-  ): DecryptedKeyknoxValue;
+  ): string;
 
   encrypt(
     data: string,

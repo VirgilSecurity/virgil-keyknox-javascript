@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { serialize, deserialize } from '../CloudEntrySerializer';
-import { CloudEntry } from '../entities';
+import { CloudEntry } from '../types';
 import cloudData from './Cloud.json';
 
 describe('CloudEntrySerializer', () => {

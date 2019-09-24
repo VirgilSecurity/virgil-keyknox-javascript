@@ -4,7 +4,7 @@ import { join } from 'path';
 import uuid from 'uuid/v4';
 import { KeyEntryStorage } from 'virgil-sdk';
 
-import KeyEntryStorageWrapper from '../KeyEntryStorageWrapper';
+import { KeyEntryStorageWrapper } from '../KeyEntryStorageWrapper';
 
 describe('KeyEntryStorageWrapper', () => {
   let keyEntryStorage: KeyEntryStorage;

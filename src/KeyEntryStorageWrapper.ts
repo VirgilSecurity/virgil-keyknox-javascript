@@ -1,6 +1,6 @@
 import { IKeyEntry, IKeyEntryStorage, ISaveKeyEntryParams, IUpdateKeyEntryParams } from './types';
 
-export default class KeyEntryStorageWrapper {
+export class KeyEntryStorageWrapper {
   private readonly prefix: string;
   private readonly prefixRegExp: RegExp;
   private readonly keyEntryStorage: IKeyEntryStorage;

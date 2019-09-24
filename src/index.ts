@@ -1,11 +1,13 @@
-export { default as IKeyknoxClient } from './clients/IKeyknoxClient';
-export { default as KeyknoxClient } from './clients/KeyknoxClient';
+export { KeyknoxClient } from './KeyknoxClient';
 
-export { default as IKeyknoxCrypto } from './cryptos/IKeyknoxCrypto';
-export { default as KeyknoxCrypto } from './cryptos/KeyknoxCrypto';
+export { IKeyknoxCrypto } from './IKeyknoxCrypto';
+export { KeyknoxCrypto } from './KeyknoxCrypto';
 
 export * from './errors';
 
-export { default as CloudKeyStorage } from './CloudKeyStorage';
-export { default as KeyknoxManager } from './KeyknoxManager';
-export { default as SyncKeyStorage } from './SyncKeyStorage';
+export { CloudGroupTicketStorage } from './CloudGroupTicketStorage';
+export { CloudKeyStorage } from './CloudKeyStorage';
+export { KeyknoxManager } from './KeyknoxManager';
+export { SyncKeyStorage } from './SyncKeyStorage';
+
+export { GroupTicket } from './types';

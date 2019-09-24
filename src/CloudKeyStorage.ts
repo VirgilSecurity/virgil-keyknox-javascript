@@ -1,23 +1,39 @@
-import KeyknoxCrypto from './cryptos/KeyknoxCrypto';
-import { CloudEntry, DecryptedKeyknoxValue, KeyEntry } from './entities';
+import { KeyknoxCrypto } from './KeyknoxCrypto';
 import {
   CloudKeyStorageOutOfSyncError,
   CloudEntryExistsError,
   CloudEntryDoesntExistError,
 } from './errors';
-import KeyknoxManager from './KeyknoxManager';
+import { KeyknoxManager } from './KeyknoxManager';
 import { serialize, deserialize } from './CloudEntrySerializer';
-import { Meta, ICrypto, IPrivateKey, IPublicKey, IAccessTokenProvider } from './types';
+import {
+  ICrypto,
+  IPrivateKey,
+  IPublicKey,
+  IAccessTokenProvider,
+  Meta,
+  DecryptedKeyknoxValueV1,
+  CloudEntry,
+  KeyEntry,
+} from './types';
 
-export default class CloudKeyStorage {
+export class CloudKeyStorage {
   private readonly keyknoxManager: KeyknoxManager;
 
-  private decryptedKeyknoxValue?: DecryptedKeyknoxValue;
+  private privateKey: IPrivateKey;
+  private publicKeys: IPublicKey | IPublicKey[];
+  private decryptedKeyknoxValue?: DecryptedKeyknoxValueV1;
   private cache: Map<string, CloudEntry> = new Map();
-  private syncWasCalled: boolean = false;
+  private syncWasCalled = false;
 
-  constructor(keyknoxManager: KeyknoxManager) {
+  constructor(
+    keyknoxManager: KeyknoxManager,
+    privateKey: IPrivateKey,
+    publicKeys: IPublicKey | IPublicKey[],
+  ) {
     this.keyknoxManager = keyknoxManager;
+    this.privateKey = privateKey;
+    this.publicKeys = publicKeys;
   }
 
   static create(options: {
@@ -26,13 +42,12 @@ export default class CloudKeyStorage {
     publicKeys: IPublicKey | IPublicKey[];
     virgilCrypto: ICrypto;
   }): CloudKeyStorage {
-    const keyknoxManager = new KeyknoxManager(
-      options.accessTokenProvider,
-      options.privateKey,
-      options.publicKeys,
-      new KeyknoxCrypto(options.virgilCrypto),
+    const { accessTokenProvider, privateKey, publicKeys, virgilCrypto } = options;
+    const keyknoxManager = KeyknoxManager.create(
+      accessTokenProvider,
+      new KeyknoxCrypto(virgilCrypto),
     );
-    return new CloudKeyStorage(keyknoxManager);
+    return new CloudKeyStorage(keyknoxManager, privateKey, publicKeys);
   }
 
   async storeEntries(keyEntries: KeyEntry[]): Promise<CloudEntry[]> {
@@ -96,7 +111,7 @@ export default class CloudKeyStorage {
 
   async deleteAllEntries(): Promise<void> {
     this.cache.clear();
-    this.decryptedKeyknoxValue = await this.keyknoxManager.resetValue();
+    this.decryptedKeyknoxValue = await this.keyknoxManager.v1Reset();
   }
 
   async updateRecipients(options: {
@@ -105,15 +120,19 @@ export default class CloudKeyStorage {
   }): Promise<void> {
     this.throwUnlessSyncWasCalled();
     const { newPrivateKey, newPublicKeys } = options;
-    this.decryptedKeyknoxValue = await this.keyknoxManager.updateRecipients({
+    this.decryptedKeyknoxValue = await this.keyknoxManager.v1UpdateRecipients({
       newPrivateKey,
       newPublicKeys,
+      privateKey: this.privateKey,
+      publicKeys: this.publicKeys,
     });
+    this.privateKey = newPrivateKey || this.privateKey;
+    this.publicKeys = newPublicKeys || this.publicKeys;
     this.cache = deserialize(this.decryptedKeyknoxValue.value);
   }
 
   async retrieveCloudEntries(): Promise<void> {
-    this.decryptedKeyknoxValue = await this.keyknoxManager.pullValue();
+    this.decryptedKeyknoxValue = await this.keyknoxManager.v1Pull(this.privateKey, this.publicKeys);
     this.cache = deserialize(this.decryptedKeyknoxValue.value);
     this.syncWasCalled = true;
   }
@@ -138,8 +157,10 @@ export default class CloudKeyStorage {
 
   private async pushCacheEntries(): Promise<void> {
     const value = serialize(this.cache);
-    this.decryptedKeyknoxValue = await this.keyknoxManager.pushValue(
+    this.decryptedKeyknoxValue = await this.keyknoxManager.v1Push(
       value,
+      this.privateKey,
+      this.publicKeys,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.decryptedKeyknoxValue!.keyknoxHash,
     );

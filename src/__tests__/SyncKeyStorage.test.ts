@@ -1,22 +1,28 @@
-import { expect } from 'chai';
-
 import { join } from 'path';
-import uuid from 'uuid/v4';
-import { initCrypto, VirgilCrypto, VirgilAccessTokenSigner } from 'virgil-crypto';
-import { IKeyEntry, KeyEntryStorage, JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
 
-import KeyknoxClient from '../clients/KeyknoxClient';
-import KeyknoxCrypto from '../cryptos/KeyknoxCrypto';
-import CloudKeyStorage from '../CloudKeyStorage';
-import { KeyEntry } from '../entities';
+import { expect } from 'chai';
+import uuid from 'uuid/v4';
+
+import {
+  initCrypto,
+  hasFoundationModules,
+  VirgilCrypto,
+  VirgilAccessTokenSigner,
+} from 'virgil-crypto';
+import { KeyEntryStorage, JwtGenerator, GeneratorJwtProvider } from 'virgil-sdk';
+
+import { KeyknoxClient } from '../KeyknoxClient';
+import { KeyknoxCrypto } from '../KeyknoxCrypto';
+import { CloudKeyStorage } from '../CloudKeyStorage';
 import {
   CloudKeyStorageOutOfSyncError,
   KeyEntryExistsError,
   KeyEntryDoesntExistError,
 } from '../errors';
-import KeyEntryStorageWrapper from '../KeyEntryStorageWrapper';
-import KeyknoxManager from '../KeyknoxManager';
-import SyncKeyStorage from '../SyncKeyStorage';
+import { KeyEntryStorageWrapper } from '../KeyEntryStorageWrapper';
+import { KeyknoxManager } from '../KeyknoxManager';
+import { SyncKeyStorage } from '../SyncKeyStorage';
+import { IKeyEntry, KeyEntry } from '../types';
 
 function generateKeyEntries(amount: number): KeyEntry[] {
   const keyEntries = [];
@@ -33,7 +39,9 @@ describe('SyncKeyStorage', () => {
   let syncKeyStorage: SyncKeyStorage;
 
   before(async () => {
-    await initCrypto();
+    if (!hasFoundationModules()) {
+      await initCrypto();
+    }
   });
 
   beforeEach(() => {
@@ -54,13 +62,10 @@ describe('SyncKeyStorage', () => {
     const keyPair = virgilCrypto.generateKeys();
     const keyEntryStorage = new KeyEntryStorage(join(process.env.KEY_ENTRIES_FOLDER!, identity));
     keyknoxManager = new KeyknoxManager(
-      accessTokenProvider,
-      keyPair.privateKey,
-      keyPair.publicKey,
       new KeyknoxCrypto(virgilCrypto),
-      new KeyknoxClient(process.env.API_URL),
+      new KeyknoxClient(accessTokenProvider, process.env.API_URL),
     );
-    cloudKeyStorage = new CloudKeyStorage(keyknoxManager);
+    cloudKeyStorage = new CloudKeyStorage(keyknoxManager, keyPair.privateKey, keyPair.publicKey);
     keyEntryStorageWrapper = new KeyEntryStorageWrapper(identity, keyEntryStorage);
     syncKeyStorage = new SyncKeyStorage(identity, cloudKeyStorage, keyEntryStorage);
   });
@@ -180,8 +185,6 @@ describe('SyncKeyStorage', () => {
     const virgilCrypto = new VirgilCrypto();
     const { privateKey: newPrivateKey, publicKey: newPublicKeys } = virgilCrypto.generateKeys();
     await syncKeyStorage.updateRecipients({ newPrivateKey, newPublicKeys });
-    expect(keyknoxManager.privateKey).to.eql(newPrivateKey);
-    expect(keyknoxManager.publicKeys).to.eql(newPublicKeys);
     await syncKeyStorage.sync();
     const entry = await syncKeyStorage.retrieveEntry(keyEntry.name);
     expect(entry).not.to.be.undefined;

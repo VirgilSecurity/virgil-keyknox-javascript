@@ -1,6 +1,6 @@
 {
   "name": "@virgilsecurity/keyknox",
-  "version": "0.3.0",
+  "version": "0.4.0-next.0",
   "description": "Keyknox SDK allows developers to communicate with Virgil Keyknox Service to upload, download, and synchronize encrypted sensitive data (private keys) between different devices.",
   "main": "./dist/keyknox.cjs.js",
   "module": "./dist/keyknox.es.js",
@@ -12,14 +12,15 @@
   "author": "Virgil Security Inc. <support@virgilsecurity.com>",
   "license": "BSD-3-Clause",
   "scripts": {
-    "lint": "eslint 'src/**/*.ts'",
+    "lint": "eslint '**/*.{js,ts}'",
     "test": "mocha -t 0 -r setup-mocha -r ts-node/register src/**/*.test.ts",
     "build": "rollup -c",
-    "clean": "rimraf .rpt2_cache .virgil_key_entries dist"
+    "clean": "rimraf .rpt2_cache .virgil_key_entries dist",
+    "prepare": "npm run clean && npm run build"
   },
   "dependencies": {
     "@types/base-64": "^0.1.3",
-    "@virgilsecurity/crypto-types": "^0.1.3",
+    "@virgilsecurity/crypto-types": "^0.1.4",
     "axios": "^0.19.0",
     "base-64": "^0.1.0"
   },
@@ -30,13 +31,16 @@
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.7",
     "@types/uuid": "^3.4.4",
-    "@typescript-eslint/eslint-plugin": "^1.11.0",
-    "@typescript-eslint/parser": "^1.11.0",
+    "@typescript-eslint/eslint-plugin": "^2.3.0",
+    "@typescript-eslint/parser": "^2.3.0",
+    "babel-eslint": "^10.0.3",
     "chai": "^4.2.0",
     "dotenv": "^8.0.0",
-    "eslint": "^5.3.0",
-    "eslint-config-prettier": "^6.0.0",
-    "eslint-plugin-prettier": "^3.1.0",
+    "eslint": "^6.4.0",
+    "eslint-config-prettier": "^6.3.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "husky": "^3.0.5",
+    "lint-staged": "^9.3.0",
     "mocha": "^6.2.0",
     "prettier": "^1.18.2",
     "rimraf": "^2.6.3",
@@ -46,7 +50,7 @@
     "rollup-plugin-terser": "^5.1.1",
     "rollup-plugin-typescript2": "^0.21.1",
     "ts-node": "^8.3.0",
-    "typescript": "^3.5.1",
+    "typescript": "^3.6.3",
     "uuid": "^3.3.2",
     "virgil-crypto": "next",
     "virgil-sdk": "next"
