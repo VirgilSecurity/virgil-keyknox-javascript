@@ -155,7 +155,7 @@ describe('CloudGroupTicketStorage', () => {
   });
 
   describe('retrieve', () => {
-    it('retrieves group session', async () => {
+    it.only('retrieves group session', async () => {
       const [groupSessionMessageInfo1, groupSessionMessageInfo2] = generateGroupSessionMessageInfo(
         2,
       );
@@ -164,22 +164,20 @@ describe('CloudGroupTicketStorage', () => {
       const [ticket1, ticket2] = await cloudGroupSessionStorage.retrieve(
         groupSessionMessageInfo1.sessionId,
       );
-      expect(ticket1.groupSessionMessageInfo.sessionId).to.equal(
-        groupSessionMessageInfo1.sessionId,
-      );
-      expect(ticket1.groupSessionMessageInfo.epochNumber).to.equal(
-        groupSessionMessageInfo1.epochNumber,
-      );
-      expect(ticket1.groupSessionMessageInfo.data).to.equal(
+      let myGroupSessionMessageInfo1 = ticket1.groupSessionMessageInfo;
+      let myGroupSessionMessageInfo2 = ticket2.groupSessionMessageInfo;
+      if (ticket2.groupSessionMessageInfo.epochNumber === groupSessionMessageInfo1.epochNumber) {
+        myGroupSessionMessageInfo1 = ticket2.groupSessionMessageInfo;
+        myGroupSessionMessageInfo2 = ticket1.groupSessionMessageInfo;
+      }
+      expect(myGroupSessionMessageInfo1.sessionId).to.equal(groupSessionMessageInfo1.sessionId);
+      expect(myGroupSessionMessageInfo1.epochNumber).to.equal(groupSessionMessageInfo1.epochNumber);
+      expect(myGroupSessionMessageInfo1.data).to.equal(
         groupSessionMessageInfo1.data.toString('base64'),
       );
-      expect(ticket2.groupSessionMessageInfo.sessionId).to.equal(
-        groupSessionMessageInfo2.sessionId,
-      );
-      expect(ticket2.groupSessionMessageInfo.epochNumber).to.equal(
-        groupSessionMessageInfo2.epochNumber,
-      );
-      expect(ticket2.groupSessionMessageInfo.data).to.equal(
+      expect(myGroupSessionMessageInfo2.sessionId).to.equal(groupSessionMessageInfo2.sessionId);
+      expect(myGroupSessionMessageInfo2.epochNumber).to.equal(groupSessionMessageInfo2.epochNumber);
+      expect(myGroupSessionMessageInfo2.data).to.equal(
         groupSessionMessageInfo2.data.toString('base64'),
       );
     });
