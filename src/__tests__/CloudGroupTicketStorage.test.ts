@@ -15,18 +15,27 @@ import { GroupTicketAlreadyExistsError, GroupTicketDoesntExistError } from '../e
 import { KeyknoxClient } from '../KeyknoxClient';
 import { KeyknoxCrypto } from '../KeyknoxCrypto';
 import { KeyknoxManager } from '../KeyknoxManager';
-import { IPrivateKey, IPublicKey, IGroupSessionMessageInfo } from '../types';
+import { IPrivateKey, IPublicKey, ICard, IGroupSessionMessageInfo } from '../types';
 
 describe('CloudGroupTicketStorage', () => {
-  let cloudGroupSessionStorage: CloudGroupTicketStorage;
   let jwtGenerator: JwtGenerator;
-  let keyknoxManager: KeyknoxManager;
   let virgilCrypto: VirgilCrypto;
+
   let identity: string;
   let keyPair: {
     privateKey: IPrivateKey;
     publicKey: IPublicKey;
   };
+  let keyknoxManager: KeyknoxManager;
+  let cloudGroupSessionStorage: CloudGroupTicketStorage;
+
+  let card: ICard;
+  let cardKeyPair: {
+    privateKey: IPrivateKey;
+    publicKey: IPublicKey;
+  };
+  let cardKeyknoxManager: KeyknoxManager;
+  let cardCloudGroupTicketStorage: CloudGroupTicketStorage;
 
   const generateCard = async () => {
     const cardIdentity = uuid();
@@ -77,21 +86,22 @@ describe('CloudGroupTicketStorage', () => {
     }
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     virgilCrypto = new VirgilCrypto();
     const virgilAccessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
     const apiKey = virgilCrypto.importPrivateKey({
       value: process.env.API_KEY!,
       encoding: 'base64',
     });
-    identity = uuid();
-    keyPair = virgilCrypto.generateKeys();
     jwtGenerator = new JwtGenerator({
       apiKey,
       appId: process.env.APP_ID!,
       apiKeyId: process.env.API_KEY_ID!,
       accessTokenSigner: virgilAccessTokenSigner,
     });
+
+    identity = uuid();
+    keyPair = virgilCrypto.generateKeys();
     const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, identity);
     keyknoxManager = new KeyknoxManager(
       new KeyknoxCrypto(virgilCrypto),
@@ -102,6 +112,25 @@ describe('CloudGroupTicketStorage', () => {
       identity,
       privateKey: keyPair.privateKey,
       publicKey: keyPair.publicKey,
+    });
+
+    const { card: myCard, keyPair: myCardKeyPair } = await generateCard();
+    card = myCard;
+    cardKeyPair = myCardKeyPair;
+    const cardAccessTokenProvider = new GeneratorJwtProvider(
+      jwtGenerator,
+      undefined,
+      card.identity,
+    );
+    cardKeyknoxManager = new KeyknoxManager(
+      new KeyknoxCrypto(virgilCrypto),
+      new KeyknoxClient(cardAccessTokenProvider, process.env.API_URL),
+    );
+    cardCloudGroupTicketStorage = new CloudGroupTicketStorage({
+      keyknoxManager: cardKeyknoxManager,
+      identity: card.identity,
+      privateKey: cardKeyPair.privateKey,
+      publicKey: cardKeyPair.publicKey,
     });
   });
 
@@ -122,25 +151,19 @@ describe('CloudGroupTicketStorage', () => {
 
     it('stores message info for card', async () => {
       const [groupSessionMessageInfo] = generateGroupSessionMessageInfo();
-      const { card, keyPair: cardKeyPair } = await generateCard();
       await cloudGroupSessionStorage.store(groupSessionMessageInfo, card);
-      const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, card.identity);
-      const cardKeyknoxManager = new KeyknoxManager(
-        new KeyknoxCrypto(virgilCrypto),
-        new KeyknoxClient(accessTokenProvider, process.env.API_URL),
-      );
-      const decryptedKeyknoxValue = await cardKeyknoxManager.v2Pull({
+      const [ticket] = await cardCloudGroupTicketStorage.retrieve(
+        groupSessionMessageInfo.sessionId,
         identity,
-        root: CloudGroupTicketStorage.DEFAULT_ROOT,
-        path: groupSessionMessageInfo.sessionId,
-        key: groupSessionMessageInfo.epochNumber.toString(),
-        privateKey: cardKeyPair.privateKey,
-        publicKeys: [keyPair.publicKey, cardKeyPair.publicKey],
-      });
-      const identities1 = new Set(decryptedKeyknoxValue.identities);
-      const identities2 = new Set([card.identity, identity]);
-      expect(identities1).to.eql(identities2);
-      expect(decryptedKeyknoxValue.value).to.equal(groupSessionMessageInfo.data.toString('base64'));
+        keyPair.publicKey,
+      );
+      expect(ticket.groupSessionMessageInfo.epochNumber).to.equal(
+        groupSessionMessageInfo.epochNumber,
+      );
+      expect(ticket.groupSessionMessageInfo.sessionId).to.equal(groupSessionMessageInfo.sessionId);
+      expect(ticket.groupSessionMessageInfo.data).to.equal(
+        groupSessionMessageInfo.data.toString('base64'),
+      );
     });
 
     it('throws if message info already exists', async () => {
@@ -155,7 +178,7 @@ describe('CloudGroupTicketStorage', () => {
   });
 
   describe('retrieve', () => {
-    it.only('retrieves group session', async () => {
+    it('retrieves group session', async () => {
       const [groupSessionMessageInfo1, groupSessionMessageInfo2] = generateGroupSessionMessageInfo(
         2,
       );
@@ -183,22 +206,6 @@ describe('CloudGroupTicketStorage', () => {
     });
 
     it('retrieves group session for identity', async () => {
-      const { card, keyPair: cardKeyPair } = await generateCard();
-      const cardAccessTokenProvider = new GeneratorJwtProvider(
-        jwtGenerator,
-        undefined,
-        card.identity,
-      );
-      const cardKeyknoxManager = new KeyknoxManager(
-        new KeyknoxCrypto(virgilCrypto),
-        new KeyknoxClient(cardAccessTokenProvider, process.env.API_URL),
-      );
-      const cardCloudGroupTicketStorage = new CloudGroupTicketStorage({
-        keyknoxManager: cardKeyknoxManager,
-        identity: card.identity,
-        privateKey: cardKeyPair.privateKey,
-        publicKey: cardKeyPair.publicKey,
-      });
       const [groupSessionMessageInfo] = generateGroupSessionMessageInfo();
       await cloudGroupSessionStorage.store(groupSessionMessageInfo, card);
       const [ticket] = await cardCloudGroupTicketStorage.retrieve(
@@ -231,32 +238,13 @@ describe('CloudGroupTicketStorage', () => {
       );
       await cloudGroupSessionStorage.store(groupSessionMessageInfo1);
       await cloudGroupSessionStorage.store(groupSessionMessageInfo2);
-      const { card: card1 } = await generateCard();
-      const { card: card2 } = await generateCard();
-      const cards = [card1, card2];
-      await cloudGroupSessionStorage.addRecipients(groupSessionMessageInfo1.sessionId, cards);
-      const epochNumbers = await keyknoxManager.v2GetKeys({
+      await cloudGroupSessionStorage.addRecipients(groupSessionMessageInfo1.sessionId, [card]);
+      const tickets = await cardCloudGroupTicketStorage.retrieve(
+        groupSessionMessageInfo1.sessionId,
         identity,
-        root: CloudGroupTicketStorage.DEFAULT_ROOT,
-        path: groupSessionMessageInfo1.sessionId,
-      });
-      const pullRequests = epochNumbers.map(epochNumber =>
-        keyknoxManager.v2Pull({
-          identity,
-          root: CloudGroupTicketStorage.DEFAULT_ROOT,
-          path: groupSessionMessageInfo1.sessionId,
-          key: epochNumber,
-          privateKey: keyPair.privateKey,
-          publicKeys: keyPair.publicKey,
-        }),
+        keyPair.publicKey,
       );
-      const decryptedKeyknoxValues = await Promise.all(pullRequests);
-      decryptedKeyknoxValues.forEach(decryptedKeyknoxValue => {
-        const identities = new Set(decryptedKeyknoxValue.identities);
-        cards.forEach(card => {
-          expect(identities.has(card.identity)).to.be.true;
-        });
-      });
+      expect(tickets).to.have.length(2);
     });
   });
 
@@ -267,29 +255,14 @@ describe('CloudGroupTicketStorage', () => {
       );
       await cloudGroupSessionStorage.store(groupSessionMessageInfo1);
       await cloudGroupSessionStorage.store(groupSessionMessageInfo2);
-      const { card } = await generateCard();
       await cloudGroupSessionStorage.addRecipient(groupSessionMessageInfo1.sessionId, card);
       await cloudGroupSessionStorage.reAddRecipient(groupSessionMessageInfo1.sessionId, card);
-      const epochNumbers = await keyknoxManager.v2GetKeys({
+      const tickets = await cardCloudGroupTicketStorage.retrieve(
+        groupSessionMessageInfo1.sessionId,
         identity,
-        root: CloudGroupTicketStorage.DEFAULT_ROOT,
-        path: groupSessionMessageInfo1.sessionId,
-      });
-      const pullRequests = epochNumbers.map(epochNumber =>
-        keyknoxManager.v2Pull({
-          identity,
-          root: CloudGroupTicketStorage.DEFAULT_ROOT,
-          path: groupSessionMessageInfo1.sessionId,
-          key: epochNumber,
-          privateKey: keyPair.privateKey,
-          publicKeys: keyPair.publicKey,
-        }),
+        keyPair.publicKey,
       );
-      const decryptedKeyknoxValues = await Promise.all(pullRequests);
-      decryptedKeyknoxValues.forEach(decryptedKeyknoxValue => {
-        const identities = new Set(decryptedKeyknoxValue.identities);
-        expect(identities.has(card.identity)).to.be.true;
-      });
+      expect(tickets).to.have.length(2);
     });
   });
 
@@ -300,32 +273,20 @@ describe('CloudGroupTicketStorage', () => {
       );
       await cloudGroupSessionStorage.store(groupSessionMessageInfo1);
       await cloudGroupSessionStorage.store(groupSessionMessageInfo2);
-      const { card } = await generateCard();
       await cloudGroupSessionStorage.addRecipient(groupSessionMessageInfo1.sessionId, card);
       await cloudGroupSessionStorage.removeRecipient(
         groupSessionMessageInfo1.sessionId,
         card.identity,
       );
-      const epochNumbers = await keyknoxManager.v2GetKeys({
-        identity,
-        root: CloudGroupTicketStorage.DEFAULT_ROOT,
-        path: groupSessionMessageInfo1.sessionId,
-      });
-      const pullRequests = epochNumbers.map(epochNumber =>
-        keyknoxManager.v2Pull({
+      try {
+        await cardCloudGroupTicketStorage.retrieve(
+          groupSessionMessageInfo1.sessionId,
           identity,
-          root: CloudGroupTicketStorage.DEFAULT_ROOT,
-          path: groupSessionMessageInfo1.sessionId,
-          key: epochNumber,
-          privateKey: keyPair.privateKey,
-          publicKeys: keyPair.publicKey,
-        }),
-      );
-      const decryptedKeyknoxValues = await Promise.all(pullRequests);
-      decryptedKeyknoxValues.forEach(decryptedKeyknoxValue => {
-        const identities = new Set(decryptedKeyknoxValue.identities);
-        expect(identities.has(card.identity)).to.be.false;
-      });
+          keyPair.publicKey,
+        );
+      } catch (error) {
+        expect(error).to.be.instanceOf(GroupTicketDoesntExistError);
+      }
     });
 
     it('removes recipient in message info based on `epochNumber`', async () => {
@@ -334,23 +295,20 @@ describe('CloudGroupTicketStorage', () => {
       );
       await cloudGroupSessionStorage.store(groupSessionMessageInfo1);
       await cloudGroupSessionStorage.store(groupSessionMessageInfo2);
-      const { card } = await generateCard();
       await cloudGroupSessionStorage.addRecipient(groupSessionMessageInfo1.sessionId, card);
       await cloudGroupSessionStorage.removeRecipient(
         groupSessionMessageInfo1.sessionId,
         card.identity,
         groupSessionMessageInfo2.epochNumber,
       );
-      const decryptedKeyknoxValue = await keyknoxManager.v2Pull({
+      const [ticket] = await cardCloudGroupTicketStorage.retrieve(
+        groupSessionMessageInfo1.sessionId,
         identity,
-        root: CloudGroupTicketStorage.DEFAULT_ROOT,
-        path: groupSessionMessageInfo1.sessionId,
-        key: groupSessionMessageInfo2.epochNumber.toString(),
-        privateKey: keyPair.privateKey,
-        publicKeys: keyPair.publicKey,
-      });
-      const identities = new Set(decryptedKeyknoxValue.identities);
-      expect(identities.has(card.identity)).to.be.false;
+        keyPair.publicKey,
+      );
+      expect(ticket.groupSessionMessageInfo.epochNumber).to.equal(
+        groupSessionMessageInfo1.epochNumber,
+      );
     });
   });
 
