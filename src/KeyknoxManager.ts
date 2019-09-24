@@ -88,7 +88,7 @@ export class KeyknoxManager {
   }) {
     const { privateKey, publicKeys, newPrivateKey, newPublicKeys } = options;
     const decryptedKeyknoxValue = await this.v1Pull(privateKey, publicKeys);
-    if (!decryptedKeyknoxValue.meta.length && !decryptedKeyknoxValue.value.length) {
+    if (!decryptedKeyknoxValue.meta && !decryptedKeyknoxValue.value) {
       return decryptedKeyknoxValue;
     }
     const myPrivateKey = newPrivateKey || privateKey;
@@ -110,7 +110,7 @@ export class KeyknoxManager {
     root: string;
     path: string;
     key: string;
-    identities?: string[];
+    identities: string[];
     value: string;
     privateKey: IPrivateKey;
     publicKeys: IPublicKey | IPublicKey[];

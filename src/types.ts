@@ -39,7 +39,6 @@ export interface KeyknoxValueV2 {
   identities: string[];
   meta: string;
   value: string;
-  version: string;
   keyknoxHash: string;
 }
 

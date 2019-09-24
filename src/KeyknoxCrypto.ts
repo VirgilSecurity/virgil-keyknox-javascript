@@ -14,8 +14,8 @@ export class KeyknoxCrypto implements IKeyknoxCrypto {
     privateKey: IPrivateKey,
     publicKeys: IPublicKey | IPublicKey[],
   ) {
-    if (!encryptedData.length || !metadata.length) {
-      if (encryptedData.length || metadata.length) {
+    if (!encryptedData || !metadata) {
+      if (encryptedData || metadata) {
         throw new TypeError("'metadata' or 'encryptedData' is empty");
       }
       return encryptedData;

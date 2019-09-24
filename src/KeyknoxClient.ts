@@ -109,9 +109,9 @@ export class KeyknoxClient {
     root: string;
     path: string;
     key: string;
-    identities?: string[];
-    meta?: string;
-    value?: string;
+    identities: string[];
+    meta: string;
+    value: string;
     keyknoxHash?: string;
   }) {
     const { root, path, key, identities, meta, value, keyknoxHash } = options;
@@ -169,7 +169,7 @@ export class KeyknoxClient {
     };
     const token = await this.accessTokenProvider.getToken({
       service: KeyknoxClient.SERVICE_NAME,
-      operation: 'put',
+      operation: 'get',
     });
     const requestConfig: AxiosRequestConfig = {
       headers: {
@@ -225,7 +225,6 @@ export class KeyknoxClient {
       identities: data.identities,
       meta: data.meta,
       value: data.value,
-      version: data.version,
       keyknoxHash: headers['virgil-keyknox-hash'],
     };
   }
