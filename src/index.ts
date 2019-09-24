@@ -10,4 +10,4 @@ export { CloudKeyStorage } from './CloudKeyStorage';
 export { KeyknoxManager } from './KeyknoxManager';
 export { SyncKeyStorage } from './SyncKeyStorage';
 
-export { Ticket } from './types';
+export { GroupTicket } from './types';

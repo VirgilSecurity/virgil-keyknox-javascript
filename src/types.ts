@@ -49,7 +49,7 @@ export interface DecryptedKeyknoxValueV2 extends KeyknoxValueV2 {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EncryptedKeyknoxValueV2 extends KeyknoxValueV2 {}
 
-export interface Ticket {
+export interface GroupTicket {
   groupSessionMessageInfo: {
     sessionId: string;
     epochNumber: number;

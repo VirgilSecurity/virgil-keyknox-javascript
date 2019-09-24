@@ -1,7 +1,8 @@
+import { ERROR_CODE_INVALID_PREVIOUS_HASH } from './constants';
 import {
   KeyknoxClientError,
-  GroupSessionMessageInfoAlreadyExistsError,
-  GroupSessionDoesntExistError,
+  GroupTicketMessageInfoAlreadyExistsError,
+  GroupTicketDoesntExistError,
 } from './errors';
 import { KeyknoxCrypto } from './KeyknoxCrypto';
 import { KeyknoxManager } from './KeyknoxManager';
@@ -12,7 +13,7 @@ import {
   IGroupSessionMessageInfo,
   IAccessTokenProvider,
   ICard,
-  Ticket,
+  GroupTicket,
 } from './types';
 
 export class CloudGroupTicketStorage {
@@ -84,24 +85,26 @@ export class CloudGroupTicketStorage {
         value: data.toString('base64'),
       });
     } catch (error) {
-      // 50010 - `Virgil-Keyknox-Previous-Hash` header is invalid.
-      if (error instanceof KeyknoxClientError && error.code === 50010) {
-        throw new GroupSessionMessageInfoAlreadyExistsError();
+      if (error instanceof KeyknoxClientError && error.code === ERROR_CODE_INVALID_PREVIOUS_HASH) {
+        throw new GroupTicketMessageInfoAlreadyExistsError();
       }
       throw error;
     }
   }
 
-  async retrieve(sessionId: string): Promise<Ticket[]>;
-  async retrieve(sessionId: string, identity: string, publicKey: IPublicKey): Promise<Ticket[]>;
+  async retrieve(sessionId: string): Promise<GroupTicket[]>;
+  async retrieve(
+    sessionId: string,
+    identity: string,
+    publicKey: IPublicKey,
+  ): Promise<GroupTicket[]>;
   async retrieve(sessionId: string, identity?: string, publicKey?: IPublicKey) {
     let myIdentity = this.identity;
     let myPublicKey = this.publicKey;
     if (identity && publicKey) {
       myIdentity = identity;
       myPublicKey = publicKey;
-      !identity;
-    } else if ((identity && !publicKey) || (!identity && publicKey)) {
+    } else if (Boolean(identity) !== Boolean(publicKey)) {
       throw new Error("You need to provide both 'identity' and 'publicKey'");
     }
     const epochNumbers = await this.keyknoxManager.v2GetKeys({
@@ -110,7 +113,7 @@ export class CloudGroupTicketStorage {
       identity: myIdentity,
     });
     if (!epochNumbers.length) {
-      throw new GroupSessionDoesntExistError();
+      throw new GroupTicketDoesntExistError();
     }
     const pullRequests = epochNumbers.map(epochNumber =>
       this.keyknoxManager.v2Pull({
@@ -123,14 +126,16 @@ export class CloudGroupTicketStorage {
       }),
     );
     const decryptedKeyknoxValues = await Promise.all(pullRequests);
-    const tickets: Ticket[] = decryptedKeyknoxValues.map(({ key, path, identities, value }) => ({
-      identities,
-      groupSessionMessageInfo: {
-        sessionId: path,
-        epochNumber: Number(key),
-        data: value,
-      },
-    }));
+    const tickets: GroupTicket[] = decryptedKeyknoxValues.map(
+      ({ key, path, identities, value }) => ({
+        identities,
+        groupSessionMessageInfo: {
+          sessionId: path,
+          epochNumber: Number(key),
+          data: value,
+        },
+      }),
+    );
     return tickets;
   }
 

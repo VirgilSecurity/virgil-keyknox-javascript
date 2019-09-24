@@ -71,18 +71,18 @@ export class KeyEntryDoesntExistError extends Error {
   }
 }
 
-export class GroupSessionMessageInfoAlreadyExistsError extends Error {
+export class GroupTicketMessageInfoAlreadyExistsError extends Error {
   constructor() {
     super('GroupSessionMessageInfo already exist');
     Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'GroupSessionMessageInfoAlreadyExistsError';
+    this.name = 'GroupTicketMessageInfoAlreadyExistsError';
   }
 }
 
-export class GroupSessionDoesntExistError extends Error {
+export class GroupTicketDoesntExistError extends Error {
   constructor() {
-    super("Group session doesn't exist");
+    super("Group ticket doesn't exist");
     Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'GroupSessionDoesntExistError';
+    this.name = 'GroupTicketDoesntExistError';
   }
 }
