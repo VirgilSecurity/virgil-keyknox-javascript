@@ -1,4 +1,4 @@
-> This README is for Keyknox v0.3.x. Check the [v0.2.x branch](https://github.com/VirgilSecurity/virgil-keyknox-javascript/tree/v0.2.x) for Keyknox v0.2.x docs.
+> This README is for Keyknox v0.4.x. Check the [v0.3.x branch](https://github.com/VirgilSecurity/virgil-keyknox-javascript/tree/v0.3.x) for Keyknox v0.3.x docs.
 
 # Virgil Keyknox JavaScript SDK
 

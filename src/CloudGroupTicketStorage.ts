@@ -1,7 +1,7 @@
 import { ERROR_CODE_INVALID_PREVIOUS_HASH } from './constants';
 import {
   KeyknoxClientError,
-  GroupTicketMessageInfoAlreadyExistsError,
+  GroupTicketAlreadyExistsError,
   GroupTicketDoesntExistError,
 } from './errors';
 import { KeyknoxCrypto } from './KeyknoxCrypto';
@@ -86,7 +86,7 @@ export class CloudGroupTicketStorage {
       });
     } catch (error) {
       if (error instanceof KeyknoxClientError && error.code === ERROR_CODE_INVALID_PREVIOUS_HASH) {
-        throw new GroupTicketMessageInfoAlreadyExistsError();
+        throw new GroupTicketAlreadyExistsError();
       }
       throw error;
     }

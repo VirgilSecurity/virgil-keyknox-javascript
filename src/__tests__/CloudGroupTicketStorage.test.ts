@@ -11,7 +11,7 @@ import {
 import { JwtGenerator, GeneratorJwtProvider, VirgilCardVerifier, CardManager } from 'virgil-sdk';
 
 import { CloudGroupTicketStorage } from '../CloudGroupTicketStorage';
-import { GroupTicketMessageInfoAlreadyExistsError, GroupTicketDoesntExistError } from '../errors';
+import { GroupTicketAlreadyExistsError, GroupTicketDoesntExistError } from '../errors';
 import { KeyknoxClient } from '../KeyknoxClient';
 import { KeyknoxCrypto } from '../KeyknoxCrypto';
 import { KeyknoxManager } from '../KeyknoxManager';
@@ -149,7 +149,7 @@ describe('CloudGroupTicketStorage', () => {
       try {
         await cloudGroupSessionStorage.store(groupSessionMessageInfo);
       } catch (error) {
-        expect(error).to.be.instanceOf(GroupTicketMessageInfoAlreadyExistsError);
+        expect(error).to.be.instanceOf(GroupTicketAlreadyExistsError);
       }
     });
   });

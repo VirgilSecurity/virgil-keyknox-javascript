@@ -71,11 +71,11 @@ export class KeyEntryDoesntExistError extends Error {
   }
 }
 
-export class GroupTicketMessageInfoAlreadyExistsError extends Error {
+export class GroupTicketAlreadyExistsError extends Error {
   constructor() {
     super('GroupSessionMessageInfo already exist');
     Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'GroupTicketMessageInfoAlreadyExistsError';
+    this.name = 'GroupTicketAlreadyExistsError';
   }
 }
 
