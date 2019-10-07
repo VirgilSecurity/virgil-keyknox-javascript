@@ -1,6 +1,7 @@
 const path = require('path');
 
 const commonjs = require('rollup-plugin-commonjs');
+const json = require('rollup-plugin-json');
 const nodeResolve = require('rollup-plugin-node-resolve');
 const { terser } = require('rollup-plugin-terser');
 const typescript = require('rollup-plugin-typescript2');
@@ -32,6 +33,7 @@ const createEntry = format => ({
     },
   },
   plugins: [
+    json({ compact: true }),
     format === FORMAT.UMD && nodeResolve({ browser: true, preferBuiltins: false }),
     format === FORMAT.UMD && commonjs(),
     typescript({
