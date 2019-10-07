@@ -28,7 +28,6 @@ const createEntry = format => ({
     file: path.join(outputPath, `keyknox.${format}.js`),
     name: 'Keyknox',
     globals: {
-      'virgil-crypto': 'VirgilCrypto',
       'virgil-sdk': 'Virgil',
     },
   },
