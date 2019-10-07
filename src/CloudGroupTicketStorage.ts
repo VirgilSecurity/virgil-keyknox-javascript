@@ -82,7 +82,7 @@ export class CloudGroupTicketStorage {
         root: this.root,
         path: sessionId,
         key: epochNumber.toString(),
-        value: data.toString('base64'),
+        value: data,
       });
     } catch (error) {
       if (error instanceof KeyknoxClientError && error.code === ERROR_CODE_INVALID_PREVIOUS_HASH) {
