@@ -146,7 +146,7 @@ describe('CloudGroupTicketStorage', () => {
         privateKey: keyPair.privateKey,
         publicKeys: keyPair.publicKey,
       });
-      expect(decryptedKeyknoxValue.value).to.equal(groupSessionMessageInfo.data.toString('base64'));
+      expect(decryptedKeyknoxValue.value).to.equal(groupSessionMessageInfo.data);
     });
 
     it('stores message info for card', async () => {
@@ -161,9 +161,7 @@ describe('CloudGroupTicketStorage', () => {
         groupSessionMessageInfo.epochNumber,
       );
       expect(ticket.groupSessionMessageInfo.sessionId).to.equal(groupSessionMessageInfo.sessionId);
-      expect(ticket.groupSessionMessageInfo.data).to.equal(
-        groupSessionMessageInfo.data.toString('base64'),
-      );
+      expect(ticket.groupSessionMessageInfo.data).to.equal(groupSessionMessageInfo.data);
     });
 
     it('throws if message info already exists', async () => {
@@ -195,14 +193,10 @@ describe('CloudGroupTicketStorage', () => {
       }
       expect(myGroupSessionMessageInfo1.sessionId).to.equal(groupSessionMessageInfo1.sessionId);
       expect(myGroupSessionMessageInfo1.epochNumber).to.equal(groupSessionMessageInfo1.epochNumber);
-      expect(myGroupSessionMessageInfo1.data).to.equal(
-        groupSessionMessageInfo1.data.toString('base64'),
-      );
+      expect(myGroupSessionMessageInfo1.data).to.equal(groupSessionMessageInfo1.data);
       expect(myGroupSessionMessageInfo2.sessionId).to.equal(groupSessionMessageInfo2.sessionId);
       expect(myGroupSessionMessageInfo2.epochNumber).to.equal(groupSessionMessageInfo2.epochNumber);
-      expect(myGroupSessionMessageInfo2.data).to.equal(
-        groupSessionMessageInfo2.data.toString('base64'),
-      );
+      expect(myGroupSessionMessageInfo2.data).to.equal(groupSessionMessageInfo2.data);
     });
 
     it('retrieves group session for identity', async () => {
@@ -217,9 +211,7 @@ describe('CloudGroupTicketStorage', () => {
       expect(ticket.groupSessionMessageInfo.epochNumber).to.equal(
         groupSessionMessageInfo.epochNumber,
       );
-      expect(ticket.groupSessionMessageInfo.data).to.equal(
-        groupSessionMessageInfo.data.toString('base64'),
-      );
+      expect(ticket.groupSessionMessageInfo.data).to.equal(groupSessionMessageInfo.data);
     });
 
     it('throws if we try to retrieve non-existent group session', async () => {
