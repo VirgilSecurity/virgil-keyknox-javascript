@@ -38,8 +38,7 @@ type GetKeysResponse = string[];
 
 export class KeyknoxClient {
   private static readonly API_URL = 'https://api.virgilsecurity.com';
-  private static readonly AUTHORIZATION_PREFIX = 'Virgil';
-  private static readonly SERVICE_NAME = 'keyknox';
+  private static readonly PRODUCT_NAME = 'keyknox';
 
   private readonly accessTokenProvider: IAccessTokenProvider;
   private readonly axios: AxiosInstance;
@@ -53,7 +52,7 @@ export class KeyknoxClient {
   ) {
     this.accessTokenProvider = accessTokenProvider;
     this.axios = axiosInstance || axios.create({ baseURL: apiUrl || KeyknoxClient.API_URL });
-    this.virgilAgent = virgilAgent || new VirgilAgent('keyknox', version);
+    this.virgilAgent = virgilAgent || new VirgilAgent(KeyknoxClient.PRODUCT_NAME, version);
     this.axios.interceptors.response.use(undefined, KeyknoxClient.responseErrorHandler);
   }
 
@@ -63,7 +62,7 @@ export class KeyknoxClient {
       value,
     };
     const accessToken = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.SERVICE_NAME,
+      service: KeyknoxClient.PRODUCT_NAME,
       operation: 'put',
     });
     const requestConfig: AxiosRequestConfig = {
@@ -79,7 +78,7 @@ export class KeyknoxClient {
 
   async v1Pull() {
     const accessToken = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.SERVICE_NAME,
+      service: KeyknoxClient.PRODUCT_NAME,
       operation: 'get',
     });
     const requestConfig = {
@@ -91,7 +90,7 @@ export class KeyknoxClient {
 
   async v1Reset() {
     const accessToken = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.SERVICE_NAME,
+      service: KeyknoxClient.PRODUCT_NAME,
       operation: 'delete',
     });
     const requestConfig = {
@@ -124,7 +123,7 @@ export class KeyknoxClient {
       value,
     };
     const accessToken = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.SERVICE_NAME,
+      service: KeyknoxClient.PRODUCT_NAME,
       operation: 'put',
     });
     const requestConfig: AxiosRequestConfig = {
@@ -147,7 +146,7 @@ export class KeyknoxClient {
       identity,
     };
     const accessToken = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.SERVICE_NAME,
+      service: KeyknoxClient.PRODUCT_NAME,
       operation: 'get',
     });
     const requestConfig: AxiosRequestConfig = {
@@ -165,7 +164,7 @@ export class KeyknoxClient {
       identity,
     };
     const accessToken = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.SERVICE_NAME,
+      service: KeyknoxClient.PRODUCT_NAME,
       operation: 'get',
     });
     const requestConfig: AxiosRequestConfig = {
@@ -188,7 +187,7 @@ export class KeyknoxClient {
       identity,
     };
     const accessToken = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.SERVICE_NAME,
+      service: KeyknoxClient.PRODUCT_NAME,
       operation: 'delete',
     });
     const requestConfig: AxiosRequestConfig = {
@@ -222,10 +221,6 @@ export class KeyknoxClient {
     };
   }
 
-  private static getAuthorizationHeader(accessToken: IAccessToken) {
-    return `${KeyknoxClient.AUTHORIZATION_PREFIX} ${accessToken.toString()}`;
-  }
-
   private static getHeaders(options: {
     virgilAgent: VirgilAgent;
     accessToken?: IAccessToken;
@@ -237,7 +232,7 @@ export class KeyknoxClient {
       'Virgil-Agent': virgilAgent.value,
     };
     if (accessToken) {
-      headers.Authorization = KeyknoxClient.getAuthorizationHeader(accessToken);
+      headers.Authorization = `Virgil ${accessToken.toString()}`;
     }
     if (keyknoxHash) {
       headers['Virgil-Keyknox-Previous-Hash'] = keyknoxHash;
