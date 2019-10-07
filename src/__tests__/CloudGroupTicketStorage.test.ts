@@ -73,7 +73,9 @@ describe('CloudGroupTicketStorage', () => {
     const sessionId = groupSession.getSessionId();
     const epochNumber = groupSession.getCurrentEpochNumber();
     const data = groupSession.export()[0];
-    const results: IGroupSessionMessageInfo[] = [{ sessionId, epochNumber, data }];
+    const results: IGroupSessionMessageInfo[] = [
+      { sessionId, epochNumber, data: data.toString('base64') },
+    ];
     for (let i = 0; i < myAmount - 1; i += 1) {
       results.push(groupSession.addNewEpoch());
     }
