@@ -25,7 +25,7 @@ You can install this module from npm. Another option is to add it via `script` t
 ### npm
 You will need to install `@virgilsecurity/keyknox`.
 ```sh
-npm install @virgilsecurity/keyknox@0.3.1
+npm install @virgilsecurity/keyknox@0.3.2
 ```
 
 You will also need to install `virgil-crypto` and `virgil-sdk` from npm.
@@ -36,7 +36,7 @@ npm install virgil-crypto@4.0.0-alpha.13 virgil-sdk@6.0.0-alpha.4
 ### In browser via `script` tag
 You will need to add `@virgilsecurity/keyknox` script.
 ```html
-<script src="https://unpkg.com/@virgilsecurity/keyknox@0.3.1/dist/keyknox.umd.js"></script>
+<script src="https://unpkg.com/@virgilsecurity/keyknox@0.3.2/dist/keyknox.umd.js"></script>
 ```
 
 You will also need to add `virgil-crypto` and `virgil-sdk` scripts.
