@@ -51,6 +51,7 @@ export class KeyknoxClient {
     this.accessTokenProvider = accessTokenProvider;
     this.axios = axiosInstance || axios.create({ baseURL: apiUrl || KeyknoxClient.API_URL });
     this.virgilAgent =
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       virgilAgent || new VirgilAgent(process.env.PRODUCT_NAME!, process.env.PRODUCT_VERSION!);
     this.axios.interceptors.response.use(undefined, KeyknoxClient.responseErrorHandler);
   }
@@ -61,6 +62,7 @@ export class KeyknoxClient {
       value,
     };
     const accessToken = await this.accessTokenProvider.getToken({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       service: process.env.PRODUCT_NAME!,
       operation: 'put',
     });
@@ -77,6 +79,7 @@ export class KeyknoxClient {
 
   async v1Pull() {
     const accessToken = await this.accessTokenProvider.getToken({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       service: process.env.PRODUCT_NAME!,
       operation: 'get',
     });
@@ -89,6 +92,7 @@ export class KeyknoxClient {
 
   async v1Reset() {
     const accessToken = await this.accessTokenProvider.getToken({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       service: process.env.PRODUCT_NAME!,
       operation: 'delete',
     });
@@ -122,6 +126,7 @@ export class KeyknoxClient {
       value,
     };
     const accessToken = await this.accessTokenProvider.getToken({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       service: process.env.PRODUCT_NAME!,
       operation: 'put',
     });
@@ -145,6 +150,7 @@ export class KeyknoxClient {
       identity,
     };
     const accessToken = await this.accessTokenProvider.getToken({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       service: process.env.PRODUCT_NAME!,
       operation: 'get',
     });
@@ -163,6 +169,7 @@ export class KeyknoxClient {
       identity,
     };
     const accessToken = await this.accessTokenProvider.getToken({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       service: process.env.PRODUCT_NAME!,
       operation: 'get',
     });
@@ -186,6 +193,7 @@ export class KeyknoxClient {
       identity,
     };
     const accessToken = await this.accessTokenProvider.getToken({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       service: process.env.PRODUCT_NAME!,
       operation: 'delete',
     });
