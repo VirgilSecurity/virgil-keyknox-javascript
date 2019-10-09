@@ -21,6 +21,7 @@ export default class KeyknoxClient implements IKeyknoxClient {
   constructor(apiUrl?: string, axiosInstance?: AxiosInstance, virgilAgent?: VirgilAgent) {
     this.axios = axiosInstance || axios.create({ baseURL: apiUrl || KeyknoxClient.API_URL });
     this.virgilAgent =
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       virgilAgent || new VirgilAgent(process.env.PRODUCT_NAME!, process.env.PRODUCT_VERSION!);
     this.axios.interceptors.response.use(undefined, KeyknoxClient.responseErrorHandler);
   }

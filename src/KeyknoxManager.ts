@@ -5,8 +5,6 @@ import { DecryptedKeyknoxValue } from './entities';
 import { IPrivateKey, IPublicKey, IAccessTokenProvider } from './types';
 
 export default class KeyknoxManager {
-  private readonly SERVICE_NAME = 'keyknox';
-
   private readonly accessTokenProvider: IAccessTokenProvider;
 
   private myPrivateKey: IPrivateKey;
@@ -39,7 +37,8 @@ export default class KeyknoxManager {
 
   async pushValue(value: string, previousHash?: string): Promise<DecryptedKeyknoxValue> {
     const token = await this.accessTokenProvider.getToken({
-      service: this.SERVICE_NAME,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      service: process.env.PRODUCT_NAME!,
       operation: 'put',
     });
     const { metadata, encryptedData } = this.keyknoxCrypto.encrypt(
@@ -58,7 +57,8 @@ export default class KeyknoxManager {
 
   async pullValue(): Promise<DecryptedKeyknoxValue> {
     const token = await this.accessTokenProvider.getToken({
-      service: this.SERVICE_NAME,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      service: process.env.PRODUCT_NAME!,
       operation: 'get',
     });
     const encryptedKeyknoxValue = await this.keyknoxClient.pullValue(token.toString());
@@ -67,7 +67,8 @@ export default class KeyknoxManager {
 
   async resetValue(): Promise<DecryptedKeyknoxValue> {
     const token = await this.accessTokenProvider.getToken({
-      service: this.SERVICE_NAME,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      service: process.env.PRODUCT_NAME!,
       operation: 'delete',
     });
     return this.keyknoxClient.resetValue(token.toString());
@@ -96,7 +97,8 @@ export default class KeyknoxManager {
       this.myPublicKeys,
     );
     const token = await this.accessTokenProvider.getToken({
-      service: this.SERVICE_NAME,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      service: process.env.PRODUCT_NAME!,
       operation: 'put',
     });
     const encryptedKeyknoxValue = await this.keyknoxClient.pushValue(
@@ -129,7 +131,8 @@ export default class KeyknoxManager {
       this.myPublicKeys,
     );
     const token = await this.accessTokenProvider.getToken({
-      service: this.SERVICE_NAME,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      service: process.env.PRODUCT_NAME!,
       operation: 'put',
     });
     const encryptedKeyknoxValue = await this.keyknoxClient.pushValue(
