@@ -25,25 +25,24 @@ You can install this module from npm. Another option is to add it via `script` t
 ### npm
 You will need to install `@virgilsecurity/keyknox`.
 ```sh
-npm install @virgilsecurity/keyknox
+npm install @virgilsecurity/keyknox@0.3.1
 ```
 
 You will also need to install `virgil-crypto` and `virgil-sdk` from npm.
 ```sh
-npm install virgil-crypto@next virgil-sdk@next
+npm install virgil-crypto@4.0.0-alpha.13 virgil-sdk@6.0.0-alpha.4
 ```
-> Note that minimum supported version of `virgil-crypto` is `4.0.0-alpha.0` and minimum supported version of `virgil-sdk` is `6.0.0-alpha.0`.
 
 ### In browser via `script` tag
 You will need to add `@virgilsecurity/keyknox` script.
 ```html
-<script src="https://unpkg.com/@virgilsecurity/keyknox/dist/keyknox.umd.js"></script>
+<script src="https://unpkg.com/@virgilsecurity/keyknox@0.3.1/dist/keyknox.umd.js"></script>
 ```
 
 You will also need to add `virgil-crypto` and `virgil-sdk` scripts.
 ```html
-<script src="https://unpkg.com/virgil-crypto@next/dist/browser.umd.js"></script>
-<script src="https://unpkg.com/virgil-sdk@next/dist/virgil-sdk.browser.umd.js"></script>
+<script src="https://unpkg.com/virgil-crypto@4.0.0-alpha.13/dist/browser.umd.js"></script>
+<script src="https://unpkg.com/virgil-sdk@6.0.0-alpha.4/dist/virgil-sdk.browser.umd.js"></script>
 ```
 
 Now you can use global variables `Keyknox`, `Virgil` and `VirgilCrypto` as namespace objects, containing all of `@virgilsecurity/keyknox`, `virgil-sdk` and `virgil-crypto` exports as properties.
