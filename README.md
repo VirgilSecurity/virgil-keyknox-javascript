@@ -32,7 +32,7 @@ You will also need to install `virgil-crypto` and `virgil-sdk` from npm.
 ```sh
 npm install virgil-crypto@next virgil-sdk@next
 ```
-> Note that minimum supported version of `virgil-crypto` is `4.0.0-alpha.0` and minimum supported version of `virgil-sdk` is `6.0.0-alpha.0`.
+> Note that minimum supported version of `virgil-crypto` is `4.0.0-alpha.13` and minimum supported version of `virgil-sdk` is `6.0.0-alpha.3`.
 
 ### In browser via `script` tag
 You will need to add `@virgilsecurity/keyknox` script.
