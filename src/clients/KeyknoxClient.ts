@@ -1,5 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
+import { VirgilAgent } from 'virgil-sdk';
 
+import { version } from '../../package.json';
 import { EncryptedKeyknoxValue, DecryptedKeyknoxValue, KeyknoxValue } from '../entities';
 import { KeyknoxClientError } from '../errors';
 import { AxiosInstance, AxiosError, AxiosRequestConfig } from '../types';
@@ -11,15 +13,16 @@ interface KeyknoxData {
   version: string;
 }
 
-const DEFAULT_BASE_URL = 'https://api.virgilsecurity.com';
-
 export default class KeyknoxClient implements IKeyknoxClient {
-  private static readonly AUTHORIZATION_PREFIX = 'Virgil';
+  private static readonly API_URL = 'https://api.virgilsecurity.com';
+  private static readonly PRODUCT_NAME = 'keyknox';
 
   private readonly axios: AxiosInstance;
+  private readonly virgilAgent: VirgilAgent;
 
-  constructor(apiUrl?: string, axiosInstance?: AxiosInstance) {
-    this.axios = axiosInstance || axios.create({ baseURL: apiUrl || DEFAULT_BASE_URL });
+  constructor(apiUrl?: string, axiosInstance?: AxiosInstance, virgilAgent?: VirgilAgent) {
+    this.axios = axiosInstance || axios.create({ baseURL: apiUrl || KeyknoxClient.API_URL });
+    this.virgilAgent = virgilAgent || new VirgilAgent(KeyknoxClient.PRODUCT_NAME, version);
     this.axios.interceptors.response.use(undefined, KeyknoxClient.responseErrorHandler);
   }
 
@@ -34,22 +37,22 @@ export default class KeyknoxClient implements IKeyknoxClient {
       value,
     };
     const config: AxiosRequestConfig = {
-      headers: {
-        Authorization: KeyknoxClient.getAuthorizationHeader(token),
-      },
+      headers: KeyknoxClient.getHeaders({
+        virgilAgent: this.virgilAgent,
+        accessToken: token,
+        keyknoxHash: previousHash,
+      }),
     };
-    if (previousHash) {
-      config.headers['Virgil-Keyknox-Previous-Hash'] = previousHash;
-    }
     const response = await this.axios.put<KeyknoxData>('/keyknox/v1', payload, config);
     return KeyknoxClient.getKeyknoxValue(response);
   }
 
   async pullValue(token: string): Promise<EncryptedKeyknoxValue> {
     const config = {
-      headers: {
-        Authorization: KeyknoxClient.getAuthorizationHeader(token),
-      },
+      headers: KeyknoxClient.getHeaders({
+        virgilAgent: this.virgilAgent,
+        accessToken: token,
+      }),
     };
     const response = await this.axios.get<KeyknoxData>('/keyknox/v1', config);
     return KeyknoxClient.getKeyknoxValue(response);
@@ -57,9 +60,10 @@ export default class KeyknoxClient implements IKeyknoxClient {
 
   async resetValue(token: string): Promise<DecryptedKeyknoxValue> {
     const config: AxiosRequestConfig = {
-      headers: {
-        Authorization: KeyknoxClient.getAuthorizationHeader(token),
-      },
+      headers: KeyknoxClient.getHeaders({
+        virgilAgent: this.virgilAgent,
+        accessToken: token,
+      }),
     };
     const response = await this.axios.post<KeyknoxData>('/keyknox/v1/reset', null, config);
     return KeyknoxClient.getKeyknoxValue(response);
@@ -75,8 +79,17 @@ export default class KeyknoxClient implements IKeyknoxClient {
     };
   }
 
-  private static getAuthorizationHeader(token: string) {
-    return `${KeyknoxClient.AUTHORIZATION_PREFIX} ${token}`;
+  private static getHeaders(options: {
+    virgilAgent: VirgilAgent;
+    accessToken?: string;
+    keyknoxHash?: string;
+  }) {
+    const { virgilAgent, accessToken, keyknoxHash } = options;
+    return Object.assign(
+      { 'Virgil-Agent': virgilAgent.value },
+      accessToken && { Authorization: `Virgil ${accessToken}` },
+      keyknoxHash && { 'Virgil-Keyknox-Previous-Hash': keyknoxHash },
+    );
   }
 
   private static responseErrorHandler(error: AxiosError) {
