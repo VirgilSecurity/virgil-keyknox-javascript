@@ -1,7 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { VirgilAgent } from 'virgil-sdk';
 
-import { version } from '../package.json';
 import { KeyknoxClientError } from './errors';
 import {
   AxiosError,
@@ -38,7 +37,6 @@ type GetKeysResponse = string[];
 
 export class KeyknoxClient {
   private static readonly API_URL = 'https://api.virgilsecurity.com';
-  private static readonly PRODUCT_NAME = 'keyknox';
 
   private readonly accessTokenProvider: IAccessTokenProvider;
   private readonly axios: AxiosInstance;
@@ -52,7 +50,8 @@ export class KeyknoxClient {
   ) {
     this.accessTokenProvider = accessTokenProvider;
     this.axios = axiosInstance || axios.create({ baseURL: apiUrl || KeyknoxClient.API_URL });
-    this.virgilAgent = virgilAgent || new VirgilAgent(KeyknoxClient.PRODUCT_NAME, version);
+    this.virgilAgent =
+      virgilAgent || new VirgilAgent(process.env.PRODUCT_NAME!, process.env.PRODUCT_VERSION!);
     this.axios.interceptors.response.use(undefined, KeyknoxClient.responseErrorHandler);
   }
 
@@ -62,7 +61,7 @@ export class KeyknoxClient {
       value,
     };
     const accessToken = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.PRODUCT_NAME,
+      service: process.env.PRODUCT_NAME!,
       operation: 'put',
     });
     const requestConfig: AxiosRequestConfig = {
@@ -78,7 +77,7 @@ export class KeyknoxClient {
 
   async v1Pull() {
     const accessToken = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.PRODUCT_NAME,
+      service: process.env.PRODUCT_NAME!,
       operation: 'get',
     });
     const requestConfig = {
@@ -90,7 +89,7 @@ export class KeyknoxClient {
 
   async v1Reset() {
     const accessToken = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.PRODUCT_NAME,
+      service: process.env.PRODUCT_NAME!,
       operation: 'delete',
     });
     const requestConfig = {
@@ -123,7 +122,7 @@ export class KeyknoxClient {
       value,
     };
     const accessToken = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.PRODUCT_NAME,
+      service: process.env.PRODUCT_NAME!,
       operation: 'put',
     });
     const requestConfig: AxiosRequestConfig = {
@@ -146,7 +145,7 @@ export class KeyknoxClient {
       identity,
     };
     const accessToken = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.PRODUCT_NAME,
+      service: process.env.PRODUCT_NAME!,
       operation: 'get',
     });
     const requestConfig: AxiosRequestConfig = {
@@ -164,7 +163,7 @@ export class KeyknoxClient {
       identity,
     };
     const accessToken = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.PRODUCT_NAME,
+      service: process.env.PRODUCT_NAME!,
       operation: 'get',
     });
     const requestConfig: AxiosRequestConfig = {
@@ -187,7 +186,7 @@ export class KeyknoxClient {
       identity,
     };
     const accessToken = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.PRODUCT_NAME,
+      service: process.env.PRODUCT_NAME!,
       operation: 'delete',
     });
     const requestConfig: AxiosRequestConfig = {
