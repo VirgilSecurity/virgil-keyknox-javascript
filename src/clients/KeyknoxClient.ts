@@ -1,7 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { VirgilAgent } from 'virgil-sdk';
 
-import { version } from '../../package.json';
 import { EncryptedKeyknoxValue, DecryptedKeyknoxValue, KeyknoxValue } from '../entities';
 import { KeyknoxClientError } from '../errors';
 import { AxiosInstance, AxiosError, AxiosRequestConfig } from '../types';
@@ -15,14 +14,15 @@ interface KeyknoxData {
 
 export default class KeyknoxClient implements IKeyknoxClient {
   private static readonly API_URL = 'https://api.virgilsecurity.com';
-  private static readonly PRODUCT_NAME = 'keyknox';
 
   private readonly axios: AxiosInstance;
   private readonly virgilAgent: VirgilAgent;
 
   constructor(apiUrl?: string, axiosInstance?: AxiosInstance, virgilAgent?: VirgilAgent) {
     this.axios = axiosInstance || axios.create({ baseURL: apiUrl || KeyknoxClient.API_URL });
-    this.virgilAgent = virgilAgent || new VirgilAgent(KeyknoxClient.PRODUCT_NAME, version);
+    this.virgilAgent =
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      virgilAgent || new VirgilAgent(process.env.PRODUCT_NAME!, process.env.PRODUCT_VERSION!);
     this.axios.interceptors.response.use(undefined, KeyknoxClient.responseErrorHandler);
   }
 
