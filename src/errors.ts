@@ -1,88 +1,92 @@
 export class KeyknoxError extends Error {
-  constructor(message: string) {
+  constructor(message: string, name = 'KeyknoxError', DerivedClass: any = KeyknoxError) {
     super(message);
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'KeyknoxError';
+    Object.setPrototypeOf(this, DerivedClass.prototype);
+    this.name = name;
   }
 }
 
-export class KeyknoxClientError extends Error {
+export class KeyknoxClientError extends KeyknoxError {
   status?: number;
   code?: number;
 
   constructor(message: string, status?: number, code?: number) {
-    super(message);
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'KeyknoxClientError';
+    super(message, 'KeyknoxClientError', KeyknoxClientError);
     this.status = status;
     this.code = code;
   }
 }
 
-export class CloudKeyStorageOutOfSyncError extends Error {
+export class CloudKeyStorageOutOfSyncError extends KeyknoxError {
   constructor() {
-    super('CloudKeyStorage is out of sync');
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'CloudKeyStorageOutOfSyncError';
+    super(
+      'CloudKeyStorage is out of sync',
+      'CloudKeyStorageOutOfSyncError',
+      CloudKeyStorageOutOfSyncError,
+    );
   }
 }
 
-export class CloudEntryExistsError extends Error {
+export class CloudEntryExistsError extends KeyknoxError {
   cloudEntryName: string;
 
   constructor(cloudEntryName: string) {
-    super(`Cloud entry '${cloudEntryName}' already exists`);
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'CloudEntryExistsError';
+    super(
+      `Cloud entry '${cloudEntryName}' already exists`,
+      'CloudEntryExistsError',
+      CloudEntryExistsError,
+    );
     this.cloudEntryName = cloudEntryName;
   }
 }
 
-export class CloudEntryDoesntExistError extends Error {
+export class CloudEntryDoesntExistError extends KeyknoxError {
   cloudEntryName: string;
 
   constructor(cloudEntryName: string) {
-    super(`Cloud entry '${cloudEntryName}' doesn't exist`);
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'CloudEntryDoesntExistError';
+    super(
+      `Cloud entry '${cloudEntryName}' doesn't exist`,
+      'CloudEntryDoesntExistError',
+      CloudEntryDoesntExistError,
+    );
     this.cloudEntryName = cloudEntryName;
   }
 }
 
-export class KeyEntryExistsError extends Error {
+export class KeyEntryExistsError extends KeyknoxError {
   keyEntryName: string;
 
   constructor(keyEntryName: string) {
-    super(`Key entry '${keyEntryName}' already exists`);
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'KeyEntryExistsError';
+    super(`Key entry '${keyEntryName}' already exists`, 'KeyEntryExistsError', KeyEntryExistsError);
     this.keyEntryName = keyEntryName;
   }
 }
 
-export class KeyEntryDoesntExistError extends Error {
+export class KeyEntryDoesntExistError extends KeyknoxError {
   keyEntryName: string;
 
   constructor(keyEntryName: string) {
-    super(`Key entry '${keyEntryName}' doesn't exist`);
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'KeyEntryDoesntExistError';
+    super(
+      `Key entry '${keyEntryName}' doesn't exist`,
+      'KeyEntryDoesntExistError',
+      KeyEntryDoesntExistError,
+    );
     this.keyEntryName = keyEntryName;
   }
 }
 
-export class GroupTicketAlreadyExistsError extends Error {
+export class GroupTicketAlreadyExistsError extends KeyknoxError {
   constructor() {
-    super('GroupSessionMessageInfo already exist');
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'GroupTicketAlreadyExistsError';
+    super(
+      'GroupSessionMessageInfo already exist',
+      'GroupTicketAlreadyExistsError',
+      GroupTicketAlreadyExistsError,
+    );
   }
 }
 
-export class GroupTicketDoesntExistError extends Error {
+export class GroupTicketDoesntExistError extends KeyknoxError {
   constructor() {
-    super("Group ticket doesn't exist");
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'GroupTicketDoesntExistError';
+    super("Group ticket doesn't exist", 'GroupTicketDoesntExistError', GroupTicketDoesntExistError);
   }
 }
