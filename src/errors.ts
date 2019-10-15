@@ -1,8 +1,9 @@
 export class KeyknoxError extends Error {
-  constructor(message: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(message: string, name = 'KeyknoxError', DerivedClass: any = KeyknoxError) {
     super(message);
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'KeyknoxError';
+    Object.setPrototypeOf(this, DerivedClass.prototype);
+    this.name = name;
   }
 }
 
@@ -11,8 +12,7 @@ export class KeyknoxClientError extends KeyknoxError {
   code?: number;
 
   constructor(message: string, status?: number, code?: number) {
-    super(message);
-    this.name = 'KeyknoxClientError';
+    super(message, 'KeyknoxClientError', KeyknoxClientError);
     this.status = status;
     this.code = code;
   }
@@ -20,8 +20,11 @@ export class KeyknoxClientError extends KeyknoxError {
 
 export class CloudKeyStorageOutOfSyncError extends KeyknoxError {
   constructor() {
-    super('CloudKeyStorage is out of sync');
-    this.name = 'CloudKeyStorageOutOfSyncError';
+    super(
+      'CloudKeyStorage is out of sync',
+      'CloudKeyStorageOutOfSyncError',
+      CloudKeyStorageOutOfSyncError,
+    );
   }
 }
 
@@ -29,8 +32,11 @@ export class CloudEntryExistsError extends KeyknoxError {
   cloudEntryName: string;
 
   constructor(cloudEntryName: string) {
-    super(`Cloud entry '${cloudEntryName}' already exists`);
-    this.name = 'CloudEntryExistsError';
+    super(
+      `Cloud entry '${cloudEntryName}' already exists`,
+      'CloudEntryExistsError',
+      CloudEntryExistsError,
+    );
     this.cloudEntryName = cloudEntryName;
   }
 }
@@ -39,8 +45,11 @@ export class CloudEntryDoesntExistError extends KeyknoxError {
   cloudEntryName: string;
 
   constructor(cloudEntryName: string) {
-    super(`Cloud entry '${cloudEntryName}' doesn't exist`);
-    this.name = 'CloudEntryDoesntExistError';
+    super(
+      `Cloud entry '${cloudEntryName}' doesn't exist`,
+      'CloudEntryDoesntExistError',
+      CloudEntryDoesntExistError,
+    );
     this.cloudEntryName = cloudEntryName;
   }
 }
@@ -49,8 +58,7 @@ export class KeyEntryExistsError extends KeyknoxError {
   keyEntryName: string;
 
   constructor(keyEntryName: string) {
-    super(`Key entry '${keyEntryName}' already exists`);
-    this.name = 'KeyEntryExistsError';
+    super(`Key entry '${keyEntryName}' already exists`, 'KeyEntryExistsError', KeyEntryExistsError);
     this.keyEntryName = keyEntryName;
   }
 }
@@ -59,8 +67,11 @@ export class KeyEntryDoesntExistError extends KeyknoxError {
   keyEntryName: string;
 
   constructor(keyEntryName: string) {
-    super(`Key entry '${keyEntryName}' doesn't exist`);
-    this.name = 'KeyEntryDoesntExistError';
+    super(
+      `Key entry '${keyEntryName}' doesn't exist`,
+      'KeyEntryDoesntExistError',
+      KeyEntryDoesntExistError,
+    );
     this.keyEntryName = keyEntryName;
   }
 }
