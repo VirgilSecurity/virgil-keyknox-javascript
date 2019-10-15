@@ -54,6 +54,7 @@ export class KeyEntryExistsError extends KeyknoxError {
 
   constructor(keyEntryName: string) {
     super(`Key entry '${keyEntryName}' already exists`);
+    Object.setPrototypeOf(this, KeyEntryExistsError.prototype);
     this.name = 'KeyEntryExistsError';
     this.keyEntryName = keyEntryName;
   }
