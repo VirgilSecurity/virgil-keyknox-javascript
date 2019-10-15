@@ -1,8 +1,8 @@
 export class KeyknoxError extends Error {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(message: string, name = 'KeyknoxError', ParentClass: any = KeyknoxError) {
+  constructor(message: string, name = 'KeyknoxError', DerivedClass: any = KeyknoxError) {
     super(message);
-    Object.setPrototypeOf(this, ParentClass.prototype);
+    Object.setPrototypeOf(this, DerivedClass.prototype);
     this.name = name;
   }
 }
