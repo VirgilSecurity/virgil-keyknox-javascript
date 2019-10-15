@@ -1,5 +1,6 @@
 export class KeyknoxError extends Error {
-  constructor(message: string, name: string = 'KeyknoxError', ParentClass: any = KeyknoxError) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(message: string, name = 'KeyknoxError', ParentClass: any = KeyknoxError) {
     super(message);
     Object.setPrototypeOf(this, ParentClass.prototype);
     this.name = name;
@@ -57,11 +58,7 @@ export class KeyEntryExistsError extends KeyknoxError {
   keyEntryName: string;
 
   constructor(keyEntryName: string) {
-    super(
-      `Key entry '${keyEntryName}' already exists`,
-      'KeyEntryExistsError',
-      KeyEntryExistsError,
-    );
+    super(`Key entry '${keyEntryName}' already exists`, 'KeyEntryExistsError', KeyEntryExistsError);
     this.keyEntryName = keyEntryName;
   }
 }
