@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
+import { VirgilAgent } from 'virgil-sdk';
 
 import { KeyknoxClientError } from './errors';
 import {
@@ -36,19 +37,22 @@ type GetKeysResponse = string[];
 
 export class KeyknoxClient {
   private static readonly API_URL = 'https://api.virgilsecurity.com';
-  private static readonly AUTHORIZATION_PREFIX = 'Virgil';
-  private static readonly SERVICE_NAME = 'keyknox';
 
   private readonly accessTokenProvider: IAccessTokenProvider;
   private readonly axios: AxiosInstance;
+  private readonly virgilAgent: VirgilAgent;
 
   constructor(
     accessTokenProvider: IAccessTokenProvider,
     apiUrl?: string,
     axiosInstance?: AxiosInstance,
+    virgilAgent?: VirgilAgent,
   ) {
     this.accessTokenProvider = accessTokenProvider;
     this.axios = axiosInstance || axios.create({ baseURL: apiUrl || KeyknoxClient.API_URL });
+    this.virgilAgent =
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      virgilAgent || new VirgilAgent(process.env.PRODUCT_NAME!, process.env.PRODUCT_VERSION!);
     this.axios.interceptors.response.use(undefined, KeyknoxClient.responseErrorHandler);
   }
 
@@ -57,45 +61,43 @@ export class KeyknoxClient {
       meta,
       value,
     };
-    const token = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.SERVICE_NAME,
+    const accessToken = await this.accessTokenProvider.getToken({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      service: process.env.PRODUCT_NAME!,
       operation: 'put',
     });
     const requestConfig: AxiosRequestConfig = {
-      headers: {
-        Authorization: KeyknoxClient.getAuthorizationHeader(token),
-      },
+      headers: KeyknoxClient.getHeaders({
+        accessToken,
+        keyknoxHash,
+        virgilAgent: this.virgilAgent,
+      }),
     };
-    if (keyknoxHash) {
-      requestConfig.headers['Virgil-Keyknox-Previous-Hash'] = keyknoxHash;
-    }
     const response = await this.axios.put<KeyknoxDataV1>('/keyknox/v1', data, requestConfig);
     return KeyknoxClient.getKeyknoxValueV1(response) as EncryptedKeyknoxValueV1;
   }
 
   async v1Pull() {
-    const token = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.SERVICE_NAME,
+    const accessToken = await this.accessTokenProvider.getToken({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      service: process.env.PRODUCT_NAME!,
       operation: 'get',
     });
     const requestConfig = {
-      headers: {
-        Authorization: KeyknoxClient.getAuthorizationHeader(token),
-      },
+      headers: KeyknoxClient.getHeaders({ accessToken, virgilAgent: this.virgilAgent }),
     };
     const response = await this.axios.get<KeyknoxDataV1>('/keyknox/v1', requestConfig);
     return KeyknoxClient.getKeyknoxValueV1(response) as EncryptedKeyknoxValueV1;
   }
 
   async v1Reset() {
-    const token = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.SERVICE_NAME,
+    const accessToken = await this.accessTokenProvider.getToken({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      service: process.env.PRODUCT_NAME!,
       operation: 'delete',
     });
     const requestConfig = {
-      headers: {
-        Authorization: KeyknoxClient.getAuthorizationHeader(token),
-      },
+      headers: KeyknoxClient.getHeaders({ accessToken, virgilAgent: this.virgilAgent }),
     };
     const response = await this.axios.post<KeyknoxDataV1>(
       '/keyknox/v1/reset',
@@ -123,18 +125,18 @@ export class KeyknoxClient {
       meta,
       value,
     };
-    const token = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.SERVICE_NAME,
+    const accessToken = await this.accessTokenProvider.getToken({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      service: process.env.PRODUCT_NAME!,
       operation: 'put',
     });
     const requestConfig: AxiosRequestConfig = {
-      headers: {
-        Authorization: KeyknoxClient.getAuthorizationHeader(token),
-      },
+      headers: KeyknoxClient.getHeaders({
+        accessToken,
+        keyknoxHash,
+        virgilAgent: this.virgilAgent,
+      }),
     };
-    if (keyknoxHash) {
-      requestConfig.headers['Virgil-Keyknox-Previous-Hash'] = keyknoxHash;
-    }
     const response = await this.axios.post('/keyknox/v2/push', data, requestConfig);
     return KeyknoxClient.getKeyknoxValueV2(response) as EncryptedKeyknoxValueV2;
   }
@@ -147,14 +149,13 @@ export class KeyknoxClient {
       key,
       identity,
     };
-    const token = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.SERVICE_NAME,
+    const accessToken = await this.accessTokenProvider.getToken({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      service: process.env.PRODUCT_NAME!,
       operation: 'get',
     });
     const requestConfig: AxiosRequestConfig = {
-      headers: {
-        Authorization: KeyknoxClient.getAuthorizationHeader(token),
-      },
+      headers: KeyknoxClient.getHeaders({ accessToken, virgilAgent: this.virgilAgent }),
     };
     const response = await this.axios.post('/keyknox/v2/pull', data, requestConfig);
     return KeyknoxClient.getKeyknoxValueV2(response) as EncryptedKeyknoxValueV2;
@@ -167,14 +168,13 @@ export class KeyknoxClient {
       path,
       identity,
     };
-    const token = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.SERVICE_NAME,
+    const accessToken = await this.accessTokenProvider.getToken({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      service: process.env.PRODUCT_NAME!,
       operation: 'get',
     });
     const requestConfig: AxiosRequestConfig = {
-      headers: {
-        Authorization: KeyknoxClient.getAuthorizationHeader(token),
-      },
+      headers: KeyknoxClient.getHeaders({ accessToken, virgilAgent: this.virgilAgent }),
     };
     const response = await this.axios.post<GetKeysResponse>(
       '/keyknox/v2/keys',
@@ -192,14 +192,13 @@ export class KeyknoxClient {
       key,
       identity,
     };
-    const token = await this.accessTokenProvider.getToken({
-      service: KeyknoxClient.SERVICE_NAME,
+    const accessToken = await this.accessTokenProvider.getToken({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      service: process.env.PRODUCT_NAME!,
       operation: 'delete',
     });
     const requestConfig: AxiosRequestConfig = {
-      headers: {
-        Authorization: KeyknoxClient.getAuthorizationHeader(token),
-      },
+      headers: KeyknoxClient.getHeaders({ accessToken, virgilAgent: this.virgilAgent }),
     };
     const response = await this.axios.post('/keyknox/v2/reset', data, requestConfig);
     return KeyknoxClient.getKeyknoxValueV2(response) as DecryptedKeyknoxValueV2;
@@ -229,8 +228,23 @@ export class KeyknoxClient {
     };
   }
 
-  private static getAuthorizationHeader(token: IAccessToken) {
-    return `${KeyknoxClient.AUTHORIZATION_PREFIX} ${token.toString()}`;
+  private static getHeaders(options: {
+    virgilAgent: VirgilAgent;
+    accessToken?: IAccessToken;
+    keyknoxHash?: string;
+  }) {
+    const { virgilAgent, accessToken, keyknoxHash } = options;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const headers: any = {
+      'Virgil-Agent': virgilAgent.value,
+    };
+    if (accessToken) {
+      headers.Authorization = `Virgil ${accessToken.toString()}`;
+    }
+    if (keyknoxHash) {
+      headers['Virgil-Keyknox-Previous-Hash'] = keyknoxHash;
+    }
+    return headers;
   }
 
   private static responseErrorHandler(error: AxiosError) {
