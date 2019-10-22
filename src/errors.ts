@@ -90,3 +90,13 @@ export class GroupTicketDoesntExistError extends KeyknoxError {
     super("Group ticket doesn't exist", 'GroupTicketDoesntExistError', GroupTicketDoesntExistError);
   }
 }
+
+export class GroupTicketNoAccessError extends KeyknoxError {
+  constructor() {
+    super(
+      'Recipient has no access to the group ticket',
+      'GroupTicketNoAccessError',
+      GroupTicketNoAccessError,
+    );
+  }
+}

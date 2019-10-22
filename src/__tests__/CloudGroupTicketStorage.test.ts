@@ -11,7 +11,11 @@ import {
 import { JwtGenerator, GeneratorJwtProvider, VirgilCardVerifier, CardManager } from 'virgil-sdk';
 
 import { CloudGroupTicketStorage } from '../CloudGroupTicketStorage';
-import { GroupTicketAlreadyExistsError, GroupTicketDoesntExistError } from '../errors';
+import {
+  GroupTicketAlreadyExistsError,
+  GroupTicketDoesntExistError,
+  GroupTicketNoAccessError,
+} from '../errors';
 import { KeyknoxClient } from '../KeyknoxClient';
 import { KeyknoxCrypto } from '../KeyknoxCrypto';
 import { KeyknoxManager } from '../KeyknoxManager';
@@ -33,15 +37,42 @@ describe('CloudGroupTicketStorage', () => {
       apiUrl: process.env.API_URL,
       retryOnUnauthorized: false,
     });
-    const cardKeyPair = virgilCrypto.generateKeys();
+    const keyPair = virgilCrypto.generateKeys();
     const card = await cardManager.publishCard({
-      privateKey: cardKeyPair.privateKey,
-      publicKey: cardKeyPair.publicKey,
+      privateKey: keyPair.privateKey,
+      publicKey: keyPair.publicKey,
       identity: cardIdentity,
     });
     return {
       card,
-      keyPair: cardKeyPair,
+      keyPair,
+    };
+  };
+
+  const rotatePrivateKey = async (previousCard: ICard) => {
+    const cardCrypto = new VirgilCardCrypto(virgilCrypto);
+    const cardVerifier = new VirgilCardVerifier(cardCrypto, { verifyVirgilSignature: false });
+    const accessTokenProvider = new GeneratorJwtProvider(
+      jwtGenerator,
+      undefined,
+      previousCard.identity,
+    );
+    const cardManager = new CardManager({
+      accessTokenProvider,
+      cardCrypto,
+      cardVerifier,
+      apiUrl: process.env.API_URL,
+      retryOnUnauthorized: false,
+    });
+    const keyPair = virgilCrypto.generateKeys();
+    const card = await cardManager.publishCard({
+      privateKey: keyPair.privateKey,
+      publicKey: keyPair.publicKey,
+      previousCardId: previousCard.id,
+    });
+    return {
+      card,
+      keyPair,
     };
   };
 
@@ -214,6 +245,30 @@ describe('CloudGroupTicketStorage', () => {
         expect(error).to.be.instanceOf(GroupTicketDoesntExistError);
       }
     });
+
+    it('throws if recipient has no access to the group ticket', async () => {
+      const { card: card1, keyPair: keyPair1 } = await generateCard();
+      const { card: card2 } = await generateCard();
+      const {
+        cloudGroupTicketStorage: cloudGroupTicketStorage1,
+      } = await createCloudGroupTicketStorage(card1, keyPair1);
+      const [groupSessionMessageInfo] = generateGroupSessionMessageInfo();
+      await cloudGroupTicketStorage1.store(groupSessionMessageInfo, card2);
+      const { card: card2Updated, keyPair: keyPair2Updated } = await rotatePrivateKey(card2);
+      const {
+        cloudGroupTicketStorage: cloudGroupTicketStorage2,
+      } = await createCloudGroupTicketStorage(card2Updated, keyPair2Updated);
+      try {
+        await cloudGroupTicketStorage2.retrieve(
+          groupSessionMessageInfo.sessionId,
+          card1.identity,
+          card1.publicKey,
+        );
+        expect.fail();
+      } catch (error) {
+        expect(error).to.be.instanceOf(GroupTicketNoAccessError);
+      }
+    });
   });
 
   describe('addRecipients', () => {
@@ -238,6 +293,26 @@ describe('CloudGroupTicketStorage', () => {
         card1.publicKey,
       );
       expect(tickets).to.have.length(2);
+    });
+
+    it('throws if recipient has no access to the group ticket', async () => {
+      const { card: card, keyPair: keyPair } = await generateCard();
+      const { card: card1 } = await generateCard();
+      const {
+        cloudGroupTicketStorage: cloudGroupTicketStorage1,
+      } = await createCloudGroupTicketStorage(card, keyPair);
+      const [groupSessionMessageInfo] = generateGroupSessionMessageInfo();
+      await cloudGroupTicketStorage1.store(groupSessionMessageInfo);
+      const { card: cardUpdated, keyPair: keyPairUpdated } = await rotatePrivateKey(card);
+      const {
+        cloudGroupTicketStorage: cloudGroupTicketStorage2,
+      } = await createCloudGroupTicketStorage(cardUpdated, keyPairUpdated);
+      try {
+        await cloudGroupTicketStorage2.addRecipient(groupSessionMessageInfo.sessionId, card1);
+        expect.fail();
+      } catch (error) {
+        expect(error).to.be.instanceOf(GroupTicketNoAccessError);
+      }
     });
   });
 
@@ -264,6 +339,27 @@ describe('CloudGroupTicketStorage', () => {
         card1.publicKey,
       );
       expect(tickets).to.have.length(2);
+    });
+
+    it('throws if recipient has no access to the group ticket', async () => {
+      const { card: card, keyPair: keyPair } = await generateCard();
+      const { card: card1 } = await generateCard();
+      const {
+        cloudGroupTicketStorage: cloudGroupTicketStorage1,
+      } = await createCloudGroupTicketStorage(card, keyPair);
+      const [groupSessionMessageInfo] = generateGroupSessionMessageInfo();
+      await cloudGroupTicketStorage1.store(groupSessionMessageInfo);
+      await cloudGroupTicketStorage1.addRecipient(groupSessionMessageInfo.sessionId, card1);
+      const { card: cardUpdated, keyPair: keyPairUpdated } = await rotatePrivateKey(card);
+      const {
+        cloudGroupTicketStorage: cloudGroupTicketStorage2,
+      } = await createCloudGroupTicketStorage(cardUpdated, keyPairUpdated);
+      try {
+        await cloudGroupTicketStorage2.reAddRecipient(groupSessionMessageInfo.sessionId, card1);
+        expect.fail();
+      } catch (error) {
+        expect(error).to.be.instanceOf(GroupTicketNoAccessError);
+      }
     });
   });
 
