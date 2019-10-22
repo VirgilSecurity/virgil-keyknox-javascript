@@ -116,6 +116,7 @@ describe('KeyknoxManager', () => {
     const keyknoxManager2 = createKeyknoxManager(identity);
     try {
       await keyknoxManager2.v1Pull(keyPairs[0].privateKey, publicKeys2);
+      expect.fail();
     } catch (error) {
       expect(error).not.to.be.undefined;
     }
@@ -139,6 +140,7 @@ describe('KeyknoxManager', () => {
     const keyknoxManager3 = createKeyknoxManager(identity);
     try {
       await keyknoxManager3.v1Pull(privateKey3, publicKeys);
+      expect.fail();
     } catch (error) {
       expect(error).not.to.be.undefined;
     }
@@ -172,12 +174,14 @@ describe('KeyknoxManager', () => {
     const keyknoxManager4 = createKeyknoxManager(identity);
     try {
       await keyknoxManager4.v1Pull(privateKey4, publicKeys2);
+      expect.fail();
     } catch (error) {
       expect(error).not.to.be.undefined;
     }
     const keyknoxManager5 = createKeyknoxManager(identity);
     try {
       await keyknoxManager5.v1Pull(privateKey5, publicKeys3);
+      expect.fail();
     } catch (error) {
       expect(error).not.to.be.undefined;
     }
@@ -214,12 +218,14 @@ describe('KeyknoxManager', () => {
     const keyknoxManager4 = createKeyknoxManager(identity);
     try {
       await keyknoxManager4.v1Pull(privateKey4, publicKeys2);
+      expect.fail();
     } catch (error) {
       expect(error).not.to.be.undefined;
     }
     const keyknoxManager5 = createKeyknoxManager(identity);
     try {
       await keyknoxManager5.v1Pull(privateKey5, publicKeys3);
+      expect.fail();
     } catch (error) {
       expect(error).not.to.be.undefined;
     }

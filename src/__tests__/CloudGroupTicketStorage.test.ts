@@ -15,27 +15,11 @@ import { GroupTicketAlreadyExistsError, GroupTicketDoesntExistError } from '../e
 import { KeyknoxClient } from '../KeyknoxClient';
 import { KeyknoxCrypto } from '../KeyknoxCrypto';
 import { KeyknoxManager } from '../KeyknoxManager';
-import { IPrivateKey, IPublicKey, ICard, IGroupSessionMessageInfo } from '../types';
+import { ICard, IKeyPair, IGroupSessionMessageInfo } from '../types';
 
 describe('CloudGroupTicketStorage', () => {
   let jwtGenerator: JwtGenerator;
   let virgilCrypto: VirgilCrypto;
-
-  let identity: string;
-  let keyPair: {
-    privateKey: IPrivateKey;
-    publicKey: IPublicKey;
-  };
-  let keyknoxManager: KeyknoxManager;
-  let cloudGroupSessionStorage: CloudGroupTicketStorage;
-
-  let card: ICard;
-  let cardKeyPair: {
-    privateKey: IPrivateKey;
-    publicKey: IPublicKey;
-  };
-  let cardKeyknoxManager: KeyknoxManager;
-  let cardCloudGroupTicketStorage: CloudGroupTicketStorage;
 
   const generateCard = async () => {
     const cardIdentity = uuid();
@@ -58,6 +42,25 @@ describe('CloudGroupTicketStorage', () => {
     return {
       card,
       keyPair: cardKeyPair,
+    };
+  };
+
+  const createCloudGroupTicketStorage = async (card: ICard, keyPair: IKeyPair) => {
+    const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, card.identity);
+    const keyknoxManager = new KeyknoxManager(
+      new KeyknoxCrypto(virgilCrypto),
+      new KeyknoxClient(accessTokenProvider, process.env.API_URL),
+    );
+    const cloudGroupTicketStorage = new CloudGroupTicketStorage({
+      keyknoxManager,
+      identity: card.identity,
+      privateKey: keyPair.privateKey,
+      publicKey: keyPair.publicKey,
+    });
+    return {
+      accessTokenProvider,
+      keyknoxManager,
+      cloudGroupTicketStorage,
     };
   };
 
@@ -90,61 +93,31 @@ describe('CloudGroupTicketStorage', () => {
 
   beforeEach(async () => {
     virgilCrypto = new VirgilCrypto();
-    const virgilAccessTokenSigner = new VirgilAccessTokenSigner(virgilCrypto);
-    const apiKey = virgilCrypto.importPrivateKey({
-      value: process.env.API_KEY!,
-      encoding: 'base64',
-    });
     jwtGenerator = new JwtGenerator({
-      apiKey,
+      apiKey: virgilCrypto.importPrivateKey({
+        value: process.env.API_KEY!,
+        encoding: 'base64',
+      }),
       appId: process.env.APP_ID!,
       apiKeyId: process.env.API_KEY_ID!,
-      accessTokenSigner: virgilAccessTokenSigner,
-    });
-
-    identity = uuid();
-    keyPair = virgilCrypto.generateKeys();
-    const accessTokenProvider = new GeneratorJwtProvider(jwtGenerator, undefined, identity);
-    keyknoxManager = new KeyknoxManager(
-      new KeyknoxCrypto(virgilCrypto),
-      new KeyknoxClient(accessTokenProvider, process.env.API_URL),
-    );
-    cloudGroupSessionStorage = new CloudGroupTicketStorage({
-      keyknoxManager,
-      identity,
-      privateKey: keyPair.privateKey,
-      publicKey: keyPair.publicKey,
-    });
-
-    const { card: myCard, keyPair: myCardKeyPair } = await generateCard();
-    card = myCard;
-    cardKeyPair = myCardKeyPair;
-    const cardAccessTokenProvider = new GeneratorJwtProvider(
-      jwtGenerator,
-      undefined,
-      card.identity,
-    );
-    cardKeyknoxManager = new KeyknoxManager(
-      new KeyknoxCrypto(virgilCrypto),
-      new KeyknoxClient(cardAccessTokenProvider, process.env.API_URL),
-    );
-    cardCloudGroupTicketStorage = new CloudGroupTicketStorage({
-      keyknoxManager: cardKeyknoxManager,
-      identity: card.identity,
-      privateKey: cardKeyPair.privateKey,
-      publicKey: cardKeyPair.publicKey,
+      accessTokenSigner: new VirgilAccessTokenSigner(virgilCrypto),
     });
   });
 
   describe('store', () => {
     it('stores message info', async () => {
+      const { card, keyPair } = await generateCard();
+      const { keyknoxManager, cloudGroupTicketStorage } = await createCloudGroupTicketStorage(
+        card,
+        keyPair,
+      );
       const [groupSessionMessageInfo] = generateGroupSessionMessageInfo();
-      await cloudGroupSessionStorage.store(groupSessionMessageInfo);
+      await cloudGroupTicketStorage.store(groupSessionMessageInfo);
       const decryptedKeyknoxValue = await keyknoxManager.v2Pull({
-        identity,
         root: CloudGroupTicketStorage.DEFAULT_ROOT,
         path: groupSessionMessageInfo.sessionId,
         key: groupSessionMessageInfo.epochNumber.toString(),
+        identity: card.identity,
         privateKey: keyPair.privateKey,
         publicKeys: keyPair.publicKey,
       });
@@ -152,11 +125,13 @@ describe('CloudGroupTicketStorage', () => {
     });
 
     it('stores message info for card', async () => {
+      const { card, keyPair } = await generateCard();
+      const { cloudGroupTicketStorage } = await createCloudGroupTicketStorage(card, keyPair);
       const [groupSessionMessageInfo] = generateGroupSessionMessageInfo();
-      await cloudGroupSessionStorage.store(groupSessionMessageInfo, card);
-      const [ticket] = await cardCloudGroupTicketStorage.retrieve(
+      await cloudGroupTicketStorage.store(groupSessionMessageInfo, card);
+      const [ticket] = await cloudGroupTicketStorage.retrieve(
         groupSessionMessageInfo.sessionId,
-        identity,
+        card.identity,
         keyPair.publicKey,
       );
       expect(ticket.groupSessionMessageInfo.epochNumber).to.equal(
@@ -167,10 +142,13 @@ describe('CloudGroupTicketStorage', () => {
     });
 
     it('throws if message info already exists', async () => {
+      const { card, keyPair } = await generateCard();
+      const { cloudGroupTicketStorage } = await createCloudGroupTicketStorage(card, keyPair);
       const [groupSessionMessageInfo] = generateGroupSessionMessageInfo();
-      await cloudGroupSessionStorage.store(groupSessionMessageInfo);
+      await cloudGroupTicketStorage.store(groupSessionMessageInfo);
       try {
-        await cloudGroupSessionStorage.store(groupSessionMessageInfo);
+        await cloudGroupTicketStorage.store(groupSessionMessageInfo);
+        expect.fail();
       } catch (error) {
         expect(error).to.be.instanceOf(GroupTicketAlreadyExistsError);
       }
@@ -182,9 +160,11 @@ describe('CloudGroupTicketStorage', () => {
       const [groupSessionMessageInfo1, groupSessionMessageInfo2] = generateGroupSessionMessageInfo(
         2,
       );
-      await cloudGroupSessionStorage.store(groupSessionMessageInfo1);
-      await cloudGroupSessionStorage.store(groupSessionMessageInfo2);
-      const [ticket1, ticket2] = await cloudGroupSessionStorage.retrieve(
+      const { card, keyPair } = await generateCard();
+      const { cloudGroupTicketStorage } = await createCloudGroupTicketStorage(card, keyPair);
+      await cloudGroupTicketStorage.store(groupSessionMessageInfo1);
+      await cloudGroupTicketStorage.store(groupSessionMessageInfo2);
+      const [ticket1, ticket2] = await cloudGroupTicketStorage.retrieve(
         groupSessionMessageInfo1.sessionId,
       );
       let myGroupSessionMessageInfo1 = ticket1.groupSessionMessageInfo;
@@ -202,12 +182,20 @@ describe('CloudGroupTicketStorage', () => {
     });
 
     it('retrieves group session for identity', async () => {
+      const { card: card1, keyPair: keyPair1 } = await generateCard();
+      const { card: card2, keyPair: keyPair2 } = await generateCard();
+      const {
+        cloudGroupTicketStorage: cloudGroupTicketStorage1,
+      } = await createCloudGroupTicketStorage(card1, keyPair1);
+      const {
+        cloudGroupTicketStorage: cloudGroupTicketStorage2,
+      } = await createCloudGroupTicketStorage(card2, keyPair2);
       const [groupSessionMessageInfo] = generateGroupSessionMessageInfo();
-      await cloudGroupSessionStorage.store(groupSessionMessageInfo, card);
-      const [ticket] = await cardCloudGroupTicketStorage.retrieve(
+      await cloudGroupTicketStorage1.store(groupSessionMessageInfo, card2);
+      const [ticket] = await cloudGroupTicketStorage2.retrieve(
         groupSessionMessageInfo.sessionId,
-        identity,
-        keyPair.publicKey,
+        card1.identity,
+        card1.publicKey,
       );
       expect(ticket.groupSessionMessageInfo.sessionId).to.equal(groupSessionMessageInfo.sessionId);
       expect(ticket.groupSessionMessageInfo.epochNumber).to.equal(
@@ -217,8 +205,11 @@ describe('CloudGroupTicketStorage', () => {
     });
 
     it('throws if we try to retrieve non-existent group session', async () => {
+      const { card, keyPair } = await generateCard();
+      const { cloudGroupTicketStorage } = await createCloudGroupTicketStorage(card, keyPair);
       try {
-        await cloudGroupSessionStorage.retrieve(uuid());
+        await cloudGroupTicketStorage.retrieve(uuid());
+        expect.fail();
       } catch (error) {
         expect(error).to.be.instanceOf(GroupTicketDoesntExistError);
       }
@@ -227,16 +218,24 @@ describe('CloudGroupTicketStorage', () => {
 
   describe('addRecipients', () => {
     it('adds recipients to all existing message infos', async () => {
+      const { card: card1, keyPair: keyPair1 } = await generateCard();
+      const { card: card2, keyPair: keyPair2 } = await generateCard();
+      const {
+        cloudGroupTicketStorage: cloudGroupTicketStorage1,
+      } = await createCloudGroupTicketStorage(card1, keyPair1);
+      const {
+        cloudGroupTicketStorage: cloudGroupTicketStorage2,
+      } = await createCloudGroupTicketStorage(card2, keyPair2);
       const [groupSessionMessageInfo1, groupSessionMessageInfo2] = generateGroupSessionMessageInfo(
         2,
       );
-      await cloudGroupSessionStorage.store(groupSessionMessageInfo1);
-      await cloudGroupSessionStorage.store(groupSessionMessageInfo2);
-      await cloudGroupSessionStorage.addRecipients(groupSessionMessageInfo1.sessionId, [card]);
-      const tickets = await cardCloudGroupTicketStorage.retrieve(
+      await cloudGroupTicketStorage1.store(groupSessionMessageInfo1);
+      await cloudGroupTicketStorage1.store(groupSessionMessageInfo2);
+      await cloudGroupTicketStorage1.addRecipients(groupSessionMessageInfo1.sessionId, [card2]);
+      const tickets = await cloudGroupTicketStorage2.retrieve(
         groupSessionMessageInfo1.sessionId,
-        identity,
-        keyPair.publicKey,
+        card1.identity,
+        card1.publicKey,
       );
       expect(tickets).to.have.length(2);
     });
@@ -244,17 +243,25 @@ describe('CloudGroupTicketStorage', () => {
 
   describe('reAddRecipient', () => {
     it('re-adds recipient to all existing message infos', async () => {
+      const { card: card1, keyPair: keyPair1 } = await generateCard();
+      const { card: card2, keyPair: keyPair2 } = await generateCard();
+      const {
+        cloudGroupTicketStorage: cloudGroupTicketStorage1,
+      } = await createCloudGroupTicketStorage(card1, keyPair1);
+      const {
+        cloudGroupTicketStorage: cloudGroupTicketStorage2,
+      } = await createCloudGroupTicketStorage(card2, keyPair2);
       const [groupSessionMessageInfo1, groupSessionMessageInfo2] = generateGroupSessionMessageInfo(
         2,
       );
-      await cloudGroupSessionStorage.store(groupSessionMessageInfo1);
-      await cloudGroupSessionStorage.store(groupSessionMessageInfo2);
-      await cloudGroupSessionStorage.addRecipient(groupSessionMessageInfo1.sessionId, card);
-      await cloudGroupSessionStorage.reAddRecipient(groupSessionMessageInfo1.sessionId, card);
-      const tickets = await cardCloudGroupTicketStorage.retrieve(
+      await cloudGroupTicketStorage1.store(groupSessionMessageInfo1);
+      await cloudGroupTicketStorage1.store(groupSessionMessageInfo2);
+      await cloudGroupTicketStorage1.addRecipient(groupSessionMessageInfo1.sessionId, card2);
+      await cloudGroupTicketStorage1.reAddRecipient(groupSessionMessageInfo1.sessionId, card2);
+      const tickets = await cloudGroupTicketStorage2.retrieve(
         groupSessionMessageInfo1.sessionId,
-        identity,
-        keyPair.publicKey,
+        card1.identity,
+        card1.publicKey,
       );
       expect(tickets).to.have.length(2);
     });
@@ -262,43 +269,60 @@ describe('CloudGroupTicketStorage', () => {
 
   describe('removeRecipient', async () => {
     it('removes recipient from all existing message infos', async () => {
+      const { card: card1, keyPair: keyPair1 } = await generateCard();
+      const { card: card2, keyPair: keyPair2 } = await generateCard();
+      const {
+        cloudGroupTicketStorage: cloudGroupTicketStorage1,
+      } = await createCloudGroupTicketStorage(card1, keyPair1);
+      const {
+        cloudGroupTicketStorage: cloudGroupTicketStorage2,
+      } = await createCloudGroupTicketStorage(card2, keyPair2);
       const [groupSessionMessageInfo1, groupSessionMessageInfo2] = generateGroupSessionMessageInfo(
         2,
       );
-      await cloudGroupSessionStorage.store(groupSessionMessageInfo1);
-      await cloudGroupSessionStorage.store(groupSessionMessageInfo2);
-      await cloudGroupSessionStorage.addRecipient(groupSessionMessageInfo1.sessionId, card);
-      await cloudGroupSessionStorage.removeRecipient(
+      await cloudGroupTicketStorage1.store(groupSessionMessageInfo1);
+      await cloudGroupTicketStorage1.store(groupSessionMessageInfo2);
+      await cloudGroupTicketStorage1.addRecipient(groupSessionMessageInfo1.sessionId, card2);
+      await cloudGroupTicketStorage1.removeRecipient(
         groupSessionMessageInfo1.sessionId,
-        card.identity,
+        card2.identity,
       );
       try {
-        await cardCloudGroupTicketStorage.retrieve(
+        await cloudGroupTicketStorage2.retrieve(
           groupSessionMessageInfo1.sessionId,
-          identity,
-          keyPair.publicKey,
+          card1.identity,
+          card1.publicKey,
         );
+        expect.fail();
       } catch (error) {
         expect(error).to.be.instanceOf(GroupTicketDoesntExistError);
       }
     });
 
     it('removes recipient in message info based on `epochNumber`', async () => {
+      const { card: card1, keyPair: keyPair1 } = await generateCard();
+      const { card: card2, keyPair: keyPair2 } = await generateCard();
+      const {
+        cloudGroupTicketStorage: cloudGroupTicketStorage1,
+      } = await createCloudGroupTicketStorage(card1, keyPair1);
+      const {
+        cloudGroupTicketStorage: cloudGroupTicketStorage2,
+      } = await createCloudGroupTicketStorage(card2, keyPair2);
       const [groupSessionMessageInfo1, groupSessionMessageInfo2] = generateGroupSessionMessageInfo(
         2,
       );
-      await cloudGroupSessionStorage.store(groupSessionMessageInfo1);
-      await cloudGroupSessionStorage.store(groupSessionMessageInfo2);
-      await cloudGroupSessionStorage.addRecipient(groupSessionMessageInfo1.sessionId, card);
-      await cloudGroupSessionStorage.removeRecipient(
+      await cloudGroupTicketStorage1.store(groupSessionMessageInfo1);
+      await cloudGroupTicketStorage1.store(groupSessionMessageInfo2);
+      await cloudGroupTicketStorage1.addRecipient(groupSessionMessageInfo1.sessionId, card2);
+      await cloudGroupTicketStorage1.removeRecipient(
         groupSessionMessageInfo1.sessionId,
-        card.identity,
+        card2.identity,
         groupSessionMessageInfo2.epochNumber,
       );
-      const [ticket] = await cardCloudGroupTicketStorage.retrieve(
+      const [ticket] = await cloudGroupTicketStorage2.retrieve(
         groupSessionMessageInfo1.sessionId,
-        identity,
-        keyPair.publicKey,
+        card1.identity,
+        card1.publicKey,
       );
       expect(ticket.groupSessionMessageInfo.epochNumber).to.equal(
         groupSessionMessageInfo1.epochNumber,
@@ -308,11 +332,14 @@ describe('CloudGroupTicketStorage', () => {
 
   describe('delete', () => {
     it('deletes group session', async () => {
+      const { card, keyPair } = await generateCard();
+      const { cloudGroupTicketStorage } = await createCloudGroupTicketStorage(card, keyPair);
       const [groupSessionMessageInfo] = generateGroupSessionMessageInfo();
-      await cloudGroupSessionStorage.store(groupSessionMessageInfo);
-      await cloudGroupSessionStorage.delete(groupSessionMessageInfo.sessionId);
+      await cloudGroupTicketStorage.store(groupSessionMessageInfo);
+      await cloudGroupTicketStorage.delete(groupSessionMessageInfo.sessionId);
       try {
-        await cloudGroupSessionStorage.retrieve(groupSessionMessageInfo.sessionId);
+        await cloudGroupTicketStorage.retrieve(groupSessionMessageInfo.sessionId);
+        expect.fail();
       } catch (error) {
         expect(error).to.be.instanceOf(GroupTicketDoesntExistError);
       }

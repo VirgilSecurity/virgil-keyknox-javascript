@@ -306,11 +306,13 @@ describe('SyncKeyStorage', () => {
     await keyEntryStorageWrapper.save(keyEntry);
     try {
       await syncKeyStorage.deleteEntry(keyEntry.name);
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
     }
     try {
       await syncKeyStorage.deleteEntries([keyEntry.name]);
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
     }
@@ -318,11 +320,13 @@ describe('SyncKeyStorage', () => {
     const [keyEntry1] = keyEntries;
     try {
       await syncKeyStorage.storeEntry(keyEntry1.name, keyEntry1.data);
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
     }
     try {
       await syncKeyStorage.storeEntries(keyEntries);
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
     }
@@ -334,6 +338,7 @@ describe('SyncKeyStorage', () => {
     expect(entry).not.to.be.undefined;
     try {
       await syncKeyStorage.updateEntry(keyEntry.name, 'bmV3RGF0YQ==');
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
     }
@@ -341,6 +346,7 @@ describe('SyncKeyStorage', () => {
     const { privateKey: newPrivateKey, publicKey: newPublicKeys } = virgilCrypto.generateKeys();
     try {
       await syncKeyStorage.updateRecipients({ newPrivateKey, newPublicKeys });
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
     }
@@ -353,11 +359,13 @@ describe('SyncKeyStorage', () => {
     await syncKeyStorage.storeEntry(keyEntry1.name, keyEntry1.data, keyEntry1.meta);
     try {
       await syncKeyStorage.storeEntry(keyEntry2.name, keyEntry2.data, keyEntry2.meta);
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(KeyEntryExistsError);
     }
     try {
       await syncKeyStorage.storeEntries([keyEntry2]);
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(KeyEntryExistsError);
     }
@@ -367,6 +375,7 @@ describe('SyncKeyStorage', () => {
     await syncKeyStorage.sync();
     try {
       await syncKeyStorage.retrieveEntry('123');
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(KeyEntryDoesntExistError);
     }
@@ -377,6 +386,7 @@ describe('SyncKeyStorage', () => {
     await syncKeyStorage.sync();
     try {
       await syncKeyStorage.updateEntry(keyEntry.name, keyEntry.data, keyEntry.meta);
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(KeyEntryDoesntExistError);
     }
