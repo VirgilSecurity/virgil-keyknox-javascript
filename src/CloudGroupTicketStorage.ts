@@ -145,7 +145,7 @@ export class CloudGroupTicketStorage {
       path: sessionId,
       identity: this.identity,
     });
-    for (const epochNumber of epochNumbers) {
+    const promises = epochNumbers.map(async epochNumber => {
       const decryptedKeyknoxValue = await this.keyknoxManager.v2Pull({
         root: this.root,
         path: sessionId,
@@ -160,7 +160,8 @@ export class CloudGroupTicketStorage {
         publicKeys: [this.publicKey, ...cards.map(card => card.publicKey)],
         privateKey: this.privateKey,
       });
-    }
+    });
+    await Promise.all(promises);
   }
 
   async addRecipient(sessionId: string, card: ICard) {
@@ -173,7 +174,7 @@ export class CloudGroupTicketStorage {
       path: sessionId,
       identity: this.identity,
     });
-    for (const epochNumber of epochNumbers) {
+    const promises = epochNumbers.map(async epochNumber => {
       const decryptedKeyknoxValue = await this.keyknoxManager.v2Pull({
         root: this.root,
         path: sessionId,
@@ -193,7 +194,8 @@ export class CloudGroupTicketStorage {
         publicKeys: [this.publicKey, card.publicKey],
         keyknoxHash: decryptedKeyknoxValue.keyknoxHash,
       });
-    }
+    });
+    await Promise.all(promises);
   }
 
   async removeRecipient(sessionId: string, identity: string, epochNumber?: number) {
