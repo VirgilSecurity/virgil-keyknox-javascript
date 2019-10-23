@@ -94,7 +94,7 @@ export class GroupTicketDoesntExistError extends KeyknoxError {
 export class GroupTicketNoAccessError extends KeyknoxError {
   constructor() {
     super(
-      'Recipient has no access to the group ticket',
+      'Current user has no access to the group ticket',
       'GroupTicketNoAccessError',
       GroupTicketNoAccessError,
     );
