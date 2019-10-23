@@ -3,6 +3,7 @@ import {
   KeyknoxClientError,
   GroupTicketAlreadyExistsError,
   GroupTicketDoesntExistError,
+  GroupTicketNoAccessError,
 } from './errors';
 import { KeyknoxCrypto } from './KeyknoxCrypto';
 import { KeyknoxManager } from './KeyknoxManager';
@@ -125,18 +126,23 @@ export class CloudGroupTicketStorage {
         publicKeys: myPublicKey,
       }),
     );
-    const decryptedKeyknoxValues = await Promise.all(pullRequests);
-    const tickets: GroupTicket[] = decryptedKeyknoxValues.map(
-      ({ key, path, identities, value }) => ({
-        identities,
-        groupSessionMessageInfo: {
-          sessionId: path,
-          epochNumber: Number(key),
-          data: value,
-        },
-      }),
-    );
-    return tickets;
+    try {
+      const decryptedKeyknoxValues = await Promise.all(pullRequests);
+      const tickets: GroupTicket[] = decryptedKeyknoxValues.map(
+        ({ key, path, identities, value }) => ({
+          identities,
+          groupSessionMessageInfo: {
+            sessionId: path,
+            epochNumber: Number(key),
+            data: value,
+          },
+        }),
+      );
+      return tickets;
+    } catch (error) {
+      CloudGroupTicketStorage.throwIfRecipientIsNotFound(error);
+      throw error;
+    }
   }
 
   async addRecipients(sessionId: string, cards: ICard[]) {
@@ -145,7 +151,7 @@ export class CloudGroupTicketStorage {
       path: sessionId,
       identity: this.identity,
     });
-    for (const epochNumber of epochNumbers) {
+    const promises = epochNumbers.map(async epochNumber => {
       const decryptedKeyknoxValue = await this.keyknoxManager.v2Pull({
         root: this.root,
         path: sessionId,
@@ -160,6 +166,12 @@ export class CloudGroupTicketStorage {
         publicKeys: [this.publicKey, ...cards.map(card => card.publicKey)],
         privateKey: this.privateKey,
       });
+    });
+    try {
+      await Promise.all(promises);
+    } catch (error) {
+      CloudGroupTicketStorage.throwIfRecipientIsNotFound(error);
+      throw error;
     }
   }
 
@@ -173,7 +185,7 @@ export class CloudGroupTicketStorage {
       path: sessionId,
       identity: this.identity,
     });
-    for (const epochNumber of epochNumbers) {
+    const promises = epochNumbers.map(async epochNumber => {
       const decryptedKeyknoxValue = await this.keyknoxManager.v2Pull({
         root: this.root,
         path: sessionId,
@@ -193,6 +205,12 @@ export class CloudGroupTicketStorage {
         publicKeys: [this.publicKey, card.publicKey],
         keyknoxHash: decryptedKeyknoxValue.keyknoxHash,
       });
+    });
+    try {
+      await Promise.all(promises);
+    } catch (error) {
+      CloudGroupTicketStorage.throwIfRecipientIsNotFound(error);
+      throw error;
     }
   }
 
@@ -207,5 +225,12 @@ export class CloudGroupTicketStorage {
 
   async delete(sessionId: string) {
     return this.keyknoxManager.v2Reset({ root: this.root, path: sessionId });
+  }
+
+  private static throwIfRecipientIsNotFound(error: Error) {
+    const errorMessage = /recipient defined with id is not found/gi;
+    if (error.name === 'FoundationError' && errorMessage.test(error.message)) {
+      throw new GroupTicketNoAccessError();
+    }
   }
 }

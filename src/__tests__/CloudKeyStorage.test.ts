@@ -236,26 +236,31 @@ describe('CloudKeyStorage', () => {
     expect(error3).to.throw(CloudKeyStorageOutOfSyncError);
     try {
       await cloudKeyStorage.storeEntry(keyEntry1.name, keyEntry1.data, keyEntry1.meta);
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
     }
     try {
       await cloudKeyStorage.storeEntries(keyEntries);
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
     }
     try {
       await cloudKeyStorage.updateEntry(keyEntry1.name, keyEntry1.data, keyEntry1.meta);
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
     }
     try {
       await cloudKeyStorage.deleteEntry(keyEntry1.name);
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
     }
     try {
       await cloudKeyStorage.deleteEntries([keyEntry1.name, keyEntry2.name]);
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
     }
@@ -264,6 +269,7 @@ describe('CloudKeyStorage', () => {
         newPrivateKey: privateKey,
         newPublicKeys: publicKey,
       });
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(CloudKeyStorageOutOfSyncError);
     }
@@ -307,11 +313,13 @@ describe('CloudKeyStorage', () => {
     await cloudKeyStorage.storeEntry(keyEntry1.name, keyEntry1.data, keyEntry1.meta);
     try {
       await cloudKeyStorage.storeEntries([keyEntry2]);
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(CloudEntryExistsError);
     }
     try {
       await cloudKeyStorage.storeEntry(keyEntry2.name, keyEntry2.data, keyEntry2.meta);
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(CloudEntryExistsError);
     }
@@ -327,11 +335,13 @@ describe('CloudKeyStorage', () => {
     await cloudKeyStorage.retrieveCloudEntries();
     try {
       await cloudKeyStorage.deleteEntry('123');
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(CloudEntryDoesntExistError);
     }
     try {
       await cloudKeyStorage.deleteEntries(['123', '456']);
+      expect.fail();
     } catch (error) {
       expect(error).to.be.instanceOf(CloudEntryDoesntExistError);
     }
