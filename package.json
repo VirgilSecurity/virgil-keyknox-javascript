@@ -25,7 +25,7 @@
     "base-64": "^0.1.0"
   },
   "peerDependencies": {
-    "virgil-sdk": "next"
+    "virgil-sdk": "6.0.0-alpha.6"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
@@ -53,7 +53,7 @@
     "ts-node": "^8.3.0",
     "typescript": "^3.6.3",
     "uuid": "^3.3.2",
-    "virgil-crypto": "next",
-    "virgil-sdk": "next"
+    "virgil-crypto": "4.0.0-alpha.18",
+    "virgil-sdk": "6.0.0-alpha.6"
   }
 }
