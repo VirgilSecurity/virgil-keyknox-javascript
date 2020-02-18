@@ -1,4 +1,4 @@
-> This README is for Keyknox v0.4.x. Check the [v0.3.x branch](https://github.com/VirgilSecurity/virgil-keyknox-javascript/tree/v0.3.x) for Keyknox v0.3.x docs.
+> This README is for Keyknox v1.0.0. Check the [v0.3.x branch](https://github.com/VirgilSecurity/virgil-keyknox-javascript/tree/v0.3.x) for Keyknox v0.3.x docs.
 
 # Virgil Keyknox JavaScript SDK
 
@@ -23,27 +23,27 @@ Virgil Keyknox Service allows users to store their sensitive data (such as Priva
 You can install this module from npm. Another option is to add it via `script` tag in browser.
 
 ### npm
-You will need to install `@virgilsecurity/keyknox@next`.
+You will need to install `@virgilsecurity/keyknox`.
 ```sh
-npm install @virgilsecurity/keyknox@next
+npm install @virgilsecurity/keyknox
 ```
 
 You will also need to install `virgil-crypto` and `virgil-sdk` from npm.
 ```sh
-npm install virgil-crypto@next virgil-sdk@next
+npm install virgil-crypto virgil-sdk
 ```
-> Note that minimum supported version of `virgil-crypto` is `4.0.0-alpha.0` and minimum supported version of `virgil-sdk` is `6.0.0-alpha.0`.
+> Note that minimum supported version of `virgil-crypto` is `4.0.0` and minimum supported version of `virgil-sdk` is `6.0.0`.
 
 ### In browser via `script` tag
 You will need to add `@virgilsecurity/keyknox` script.
 ```html
-<script src="https://unpkg.com/@virgilsecurity/keyknox@next/dist/keyknox.umd.js"></script>
+<script src="https://unpkg.com/@virgilsecurity/keyknox@^1.0.0/dist/keyknox.umd.js"></script>
 ```
 
 You will also need to add `virgil-crypto` and `virgil-sdk` scripts.
 ```html
-<script src="https://unpkg.com/virgil-crypto@next/dist/browser.umd.js"></script>
-<script src="https://unpkg.com/virgil-sdk@next/dist/virgil-sdk.browser.umd.js"></script>
+<script src="https://unpkg.com/virgil-crypto@^4.0.0/dist/browser.umd.js"></script>
+<script src="https://unpkg.com/virgil-sdk@^6.0.0/dist/virgil-sdk.browser.umd.js"></script>
 ```
 
 Now you can use global variables `Keyknox`, `Virgil` and `VirgilCrypto` as namespace objects, containing all of `@virgilsecurity/keyknox`, `virgil-sdk` and `virgil-crypto` exports as properties.
