@@ -61,9 +61,37 @@ export class CloudKeyStorage {
     return keyEntries.map(keyEntry => this.cache.get(keyEntry.name)!);
   }
 
-  async storeEntry(name: string, data: string, meta?: Meta): Promise<CloudEntry> {
-    const [cloudEntry] = await this.storeEntries([{ name, data, meta }]);
-    return cloudEntry;
+  async storeEntry(name: string, data: string, meta?: Meta): Promise<CloudEntry>;
+  async storeEntry(name: string, data: string, keyname?: string): Promise<CloudEntry>;
+  async storeEntry(name: string, data: string, metaOrKeyName?: Meta | string): Promise<CloudEntry> {
+    if (typeof metaOrKeyName === 'string') {
+      const keyName = metaOrKeyName;
+      const decryptedKeyknoxValue = await this.keyknoxManager.v2Pull({
+        root: 'e3kit',
+        path: 'backup',
+        key: keyName,
+        identity: name,
+        privateKey: this.privateKey,
+        publicKeys: this.publicKeys,
+      });
+      const cloudEntry = CloudKeyStorage.createCloudEntry({ name: keyName, data });
+      const decryptedKeyknoxPushedValue = await this.keyknoxManager.v2Push({
+        root: 'e3kit',
+        path: 'backup',
+        key: keyName,
+        identities: [name],
+        value: serialize(new Map([[keyName, cloudEntry]])),
+        privateKey: this.privateKey,
+        publicKeys: this.publicKeys,
+        keyknoxHash: decryptedKeyknoxValue.keyknoxHash,
+      });
+      return deserialize(decryptedKeyknoxPushedValue.value)
+        .values()
+        .next().value;
+    } else {
+      const [cloudEntry] = await this.storeEntries([{ name, data, meta: metaOrKeyName }]);
+      return cloudEntry;
+    }
   }
 
   async updateEntry(name: string, data: string, meta?: Meta): Promise<CloudEntry> {
@@ -84,6 +112,20 @@ export class CloudKeyStorage {
     this.throwUnlessCloudEntryExists(name);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this.cache.get(name)!;
+  }
+
+  async fetchEntryByKey(name: string, keyName: string): Promise<CloudEntry> {
+    const decryptedKeyknoxValue = await this.keyknoxManager.v2Pull({
+      root: 'e3kit',
+      path: 'backup',
+      key: keyName,
+      identity: name,
+      privateKey: this.privateKey,
+      publicKeys: this.publicKeys,
+    });
+    return deserialize(decryptedKeyknoxValue.value)
+      .values()
+      .next().value;
   }
 
   retrieveAllEntries(): CloudEntry[] {
