@@ -75,7 +75,7 @@ export class CloudKeyStorage {
         publicKeys: this.publicKeys,
       });
       const cloudEntry = CloudKeyStorage.createCloudEntry({ name: keyName, data });
-      await this.keyknoxManager.v2Push({
+      const decryptedKeyknoxPushedValue = await this.keyknoxManager.v2Push({
         root: 'e3kit',
         path: 'backup',
         key: keyName,
@@ -85,7 +85,7 @@ export class CloudKeyStorage {
         publicKeys: this.publicKeys,
         keyknoxHash: decryptedKeyknoxValue.keyknoxHash,
       });
-      return deserialize(decryptedKeyknoxValue.value)
+      return deserialize(decryptedKeyknoxPushedValue.value)
         .values()
         .next().value;
     } else {
